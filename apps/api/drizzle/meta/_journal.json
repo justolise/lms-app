@@ -1,0 +1,41 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1795023004728,
+      "tag": "0000_slice_1_tenant_member_identity",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1795025317646,
+      "tag": "0001_slice_2_auth_security",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795030770529,
+      "tag": "0002_slice_3_tenant_isolation",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795097731081,
+      "tag": "0003_slice_4_audit_logs",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1795104962319,
+      "tag": "0004_slice_5_identity_lookup",
+      "breakpoints": true
+    }
+  ]
+}
