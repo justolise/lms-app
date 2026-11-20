@@ -35,6 +35,15 @@ The script first backs up those three existing files under `.phase1-backups/<tim
 8. `DECISIONS.md` keeps the approved architecture and product decisions while clearly distinguishing implementation records from complete workflows.
 9. Requirement status is deliberately conservative: schema-only foundations are marked `doing`, not `done`, for functional requirements.
 
+## Follow-up verification — 2026-11-20
+
+The historical workflow-execution finding above was subsequently resolved:
+
+- GitHub Actions CI and Security workflows were both executed successfully and verified green on commit `82c9b1d`.
+- CI continues to exclude API E2E and database integration tests because the workflow does not provision their required PostgreSQL database and roles.
+- The Security workflow's successful execution does not establish comprehensive security coverage. Semgrep finding triage, remediation and ongoing dependency vulnerability review remain necessary.
+- Secret scanning and CodeQL remain unconfigured, as noted in the original review.
+
 ## Apply
 
 From the user's local repository:

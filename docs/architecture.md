@@ -65,7 +65,7 @@ Not yet implemented as complete workflows: login endpoint, SessionService, refre
 - `compose.yaml` starts Redis only.
 - PostgreSQL is provisioned separately.
 - `.env.example` defines runtime/migration database URLs, Redis URL, HMAC key and token secrets.
-- CI workflows are configured in `.github/workflows/ci.yml` and `.github/workflows/security.yml`; GitHub execution has not yet been verified.
+- CI workflows are configured in `.github/workflows/ci.yml` and `.github/workflows/security.yml`; GitHub execution was verified green for both CI and Security workflows on commit `82c9b1d`.
 - No deployment environment, production host, monitoring stack or backup automation was found in the inspected repository.
 
 ## Target architecture (not yet implemented)

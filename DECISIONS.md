@@ -48,7 +48,9 @@ This file records product-owner-approved decisions and material technical decisi
 - Normalize email before hashing; validate and normalize phone numbers to E.164, using Kenya (`KE`) as the default region.
 - Global identity lookup uses HMAC-SHA-256; raw email addresses and phone numbers are not stored in the global lookup table.
 - A dedicated NOLOGIN database role, `lms_identity_owner`, owns restricted identity functions. The runtime role uses approved functions rather than direct lookup-table access.
-- Persisted tenant roles are ADMIN, LIBRARIAN, TEACHER, MEMBER and PARENT. GUEST is anonymous and is not a persisted user role.
+- Persisted tenant roles are ADMIN, LIBRARIAN, TEACHER, MEMBER and PARENT.
+- GUEST is anonymous: it has no user account, authenticated session or JWT. Public catalogue search and availability do not require authentication.
+- Access tokens are issued and accepted only for the five persisted tenant roles.
 - Authentication users and member-specific data are separate.
 - `member_profiles` has a one-to-one relationship with `users`.
 - A member may have at most one identification document recorded.

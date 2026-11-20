@@ -36,8 +36,8 @@ A dedicated security contact and response SLA remain to be established before pu
 - Rate limiting and abuse controls.
 - Audit workflows for waivers, deletions, role changes and checkout overrides.
 - Security headers/CORS review for deployed environments.
-- Semgrep Community Edition static security scanning is configured; first GitHub execution and finding triage are pending.
-- Dependency vulnerability auditing is configured; GitHub execution has not yet been verified.
+- Semgrep Community Edition static security scanning is configured; the Security workflow was verified green on commit `82c9b1d`. Finding triage and remediation remain ongoing.
+- Dependency vulnerability auditing is configured; the Security workflow was verified green on commit `82c9b1d`. Ongoing dependency audits and vulnerability remediation remain required.
 - Secret scanning and first-commit review.
 - Backup encryption, restore testing, monitoring and incident response.
 - Privacy/consent, retention and data-subject request processes for pilot operations.

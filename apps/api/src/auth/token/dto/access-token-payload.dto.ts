@@ -1,5 +1,4 @@
-export type AuthRole =
-  'ADMIN' | 'LIBRARIAN' | 'TEACHER' | 'MEMBER' | 'PARENT' | 'GUEST';
+export type AuthRole = 'ADMIN' | 'LIBRARIAN' | 'TEACHER' | 'MEMBER' | 'PARENT';
 
 export interface AccessTokenPayload {
   userId: string;

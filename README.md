@@ -23,7 +23,7 @@ The release target includes authentication and roles; catalogue and copies; sear
 | Authentication foundation | Argon2id, JOSE JWT signing/verification, identity lookup                                                      |
 | Tests                     | Vitest; API E2E and database integration test suites                                                          |
 | Local supporting service  | Docker Compose (Redis only)                                                                                   |
-| CI                        | GitHub Actions; workflows configured, GitHub execution not yet verified                                       |
+| CI                        | GitHub Actions; CI and Security workflows verified green on commit `82c9b1d`                                  |
 
 The repository's actual package manifests are authoritative for dependency versions and available scripts.
 
@@ -68,12 +68,12 @@ The runtime role `lms_app` is distinct from the migration role. The restricted g
 - `PROGRESS.md` is the project status register.
 - `DECISIONS.md` records approved product and technical decisions.
 - `docs/requirements-traceability.md` maps requirements to implementation evidence and remaining work.
-- `docs/business-rules.md`, `docs/permissions.md` and `docs/acceptance-criteria.md` contain the approved working rules and test expectations, subject to the explicit decisions recorded in `DECISIONS.md`.
+- `docs/business-rules.md`, `docs/permissions.md` and `docs/acceptance-criteria.md` are proposed working documents, not approved requirements. Their contents must be reconciled with the PRD and approved decisions in `DECISIONS.md`. Where they conflict, the PRD and approved decisions take precedence. Proposals do not become requirements until explicitly approved by the product owner.
 
 Key scope decisions:
 
 - AUTH-4: manual/single-account creation only in v1.0; CSV bulk onboarding is deferred.
-- GUEST is anonymous, not a persisted account role.
+- GUEST is anonymous: it has no user account, authenticated session or JWT. Public catalogue search and availability do not require authentication.
 - Teacher/member borrowing history is self-only; parent access to a child's borrowing history is excluded from v1.0.
 - Teacher/member loan renewal is not permitted; librarian/admin renewal is permitted.
 - No offline checkout/return transaction workflow in v1.0; retain architectural readiness only.

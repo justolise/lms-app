@@ -7,7 +7,7 @@ Status reviewed: 20 November 2026. This document maps each requirement to eviden
 | ID     | Priority | Status | Current evidence                                       | Remaining work                                                                                  |
 | ------ | -------: | ------ | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
 | AUTH-1 |       P0 | doing  | Identity, password and token services; auth unit tests | Login/session endpoints, SessionService, refresh rotation, logout and end-to-end authentication |
-| AUTH-2 |       P0 | doing  | Persisted roles and role-bearing token types           | Server-side role guards and permission checks on protected endpoints                            |
+| AUTH-2 |       P0 | doing  | Five persisted roles; JWT role validation verified; GUEST is anonymous and excluded from JWTs | Server-side role guards and permission checks on protected endpoints |
 | AUTH-3 |       P0 | todo   | OTP database table                                     | Generate/hash/deliver/verify OTP; expiry, one-time use, attempt lockout and generic response    |
 | AUTH-4 |       P0 | todo   | User/member schema foundation                          | Staff-only manual single-add onboarding; no CSV in v1.0                                         |
 | AUTH-5 |       P1 | doing  | Session schema foundation; implementation tracked with AUTH-1 | SessionService, device logout, rate limiting and verification |
@@ -54,7 +54,7 @@ Status reviewed: 20 November 2026. This document maps each requirement to eviden
 | Identity         | HMAC identity lookup and restricted database functions             | Does not constitute login/session endpoints                                              |
 | Passwords/tokens | Argon2id and JOSE token services                                   | Does not constitute complete authentication                                              |
 | Redis            | Redis-only Compose service                                         | PostgreSQL is separate; BullMQ integration not evidenced                                 |
-| CI               | `.github/workflows/ci.yml` and `.github/workflows/security.yml`    | Workflows configured; GitHub execution not yet verified; database-dependent E2E excluded |
+| CI               | `.github/workflows/ci.yml` and `.github/workflows/security.yml` | Both workflows verified green on commit `82c9b1d`; database-dependent API E2E and integration tests remain excluded from CI |
 | Backups          | No automation or restore evidence                                  | Operational requirement outstanding                                                      |
 
 ## Verification evidence policy

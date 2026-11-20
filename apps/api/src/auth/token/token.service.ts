@@ -185,8 +185,7 @@ export class TokenService {
       value === 'LIBRARIAN' ||
       value === 'TEACHER' ||
       value === 'MEMBER' ||
-      value === 'PARENT' ||
-      value === 'GUEST'
+      value === 'PARENT'
     );
   }
 }

@@ -21,12 +21,12 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 | PostgreSQL development database          | doing  | Local PostgreSQL was used in earlier migration/test work; fresh availability and migration state must be verified when running locally. |
 | Redis development service                | done   | Redis-only `compose.yaml` exists.                                                                                                       |
 | Drizzle ORM and migration tooling        | done   | Five SQL migration files exist.                                                                                                         |
-| Git repository                           | doing  | Local `main` exists but has no commits yet.                                                                                             |
+| Git repository                           | done   | `main` contains commit `82c9b1d`; current reconciliation changes are uncommitted. |
 | Project documentation                    | doing  | Root docs exist; this reconciliation updates accuracy and traceability.                                                                 |
 | PostgreSQL RLS policies                  | done   | RLS ENABLE and FORCE recorded for seven tenant-owned tables in the five-slice implementation.                                           |
 | Tenant-aware database schema             | done   | Initial tenant/member identity schema and constraints exist.                                                                            |
-| GitHub Actions CI                        | doing  | `.github/workflows/ci.yml` and `security.yml` exist; local checks passed on 2026-11-20. GitHub execution and DB-dependent CI E2E remain unverified. |
-| Security automation / dependency updates | doing  | `.github/workflows/security.yml` and `.github/dependabot.yml` exist; GitHub execution remains unverified.                                  |
+| GitHub Actions CI                        | done   | CI and Security workflows verified green on commit `82c9b1d`; database-dependent API E2E and integration tests remain outside CI. |
+| Security automation / dependency updates | doing  | Security workflow verified green on commit `82c9b1d`; finding triage, remediation and ongoing dependency review remain. |
 
 ## Phase 1 — Tenant, member identity and authentication foundation
 
@@ -61,7 +61,7 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 | ID     | Priority | Status | Requirement / workstream                                  | Evidence and remaining work                                                                                                 |
 | ------ | -------: | ------ | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
 | AUTH-1 |       P0 | doing  | Email/phone and password authentication                   | Identity, Argon2id, credential verification and token services exist. Login/session endpoints and session lifecycle remain. |
-| AUTH-2 |       P0 | doing  | Admin, librarian, teacher, member, parent and guest roles | Persisted roles exist; GUEST is anonymous. Server-side authorization remains.                                               |
+| AUTH-2 |       P0 | doing  | Admin, librarian, teacher, member, parent and guest roles | Five persisted/authenticated roles exist; GUEST is anonymous and excluded from JWT authentication. JWT role validation verified; server-side authorization remains. |
 | AUTH-3 |       P0 | todo   | Password reset by email/SMS OTP                           | OTP table only; generation, delivery, verification and throttling remain.                                                   |
 | AUTH-4 |       P0 | todo   | Staff-provisioned member accounts                         | Manual/single-add only in v1.0; account creation workflow remains. CSV import deferred.                                     |
 | CAT-1  |       P0 | todo   | Bibliographic record create/edit/archive                  | Not implemented.                                                                                                            |
@@ -100,7 +100,7 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 | ID / area                                                  | Status | Notes                                                                                                                          |
 | ---------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
 | INFRA-1 — Monorepo scaffold                                | done   | Workspace and application scaffolds exist.                                                                                     |
-| INFRA-2 — CI                                               | doing  | CI and security workflows exist; local checks passed on 2026-11-20. GitHub execution and DB-dependent CI E2E remain unverified.   |
+| INFRA-2 — CI                                               | doing  | CI and Security workflows verified green on commit `82c9b1d`; database-dependent API E2E and integration tests remain outside CI. |
 | INFRA-3 — Local PostgreSQL + Redis Compose and env example | doing  | `.env.example` exists; Compose currently starts Redis only, not PostgreSQL.                                                    |
 | INFRA-4 — Database baseline                                | doing  | Five migrations and RLS/audit/identity foundations exist; complete product schema is not implemented.                          |
 | NFR-1 — Daily automated backups                            | todo   | No backup automation or restore evidence.                                                                                      |
