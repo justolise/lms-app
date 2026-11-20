@@ -43,4 +43,4 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Run Semgrep
-        run: semgrep scan --config auto --metrics=off
+        run: semgrep scan --config p/default --metrics=off
