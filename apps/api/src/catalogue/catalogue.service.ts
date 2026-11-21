@@ -4,13 +4,14 @@ import {
   NotFoundException,
   Optional,
 } from '@nestjs/common';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, ne, sql } from 'drizzle-orm';
 
 import { DatabaseService } from '../database/database.service.js';
 import { RedisService } from '../redis/redis.service.js';
 import { catalogueItems, auditLogs, copies } from '../database/schema.js';
 import {
   CreateCatalogueItemDto,
+  SearchCatalogueDto,
   UpdateCatalogueItemDto,
 } from './dto/catalogue-item.dto.js';
 
@@ -84,6 +85,114 @@ export class CatalogueService {
     }
 
     return rows;
+  }
+
+  async search(tenantId: string, params: SearchCatalogueDto) {
+    const limit = Math.min(Math.max(params.limit ?? 20, 1), 100);
+    const offset = Math.max(params.offset ?? 0, 0);
+
+    return this.database.withTenant(tenantId, async (tx) => {
+      const conditions = [
+        eq(catalogueItems.tenantId, tenantId),
+        ne(catalogueItems.status, 'ARCHIVED'),
+      ];
+
+      if (params.format) {
+        conditions.push(eq(catalogueItems.format, params.format));
+      }
+      if (params.categoryId) {
+        conditions.push(eq(catalogueItems.categoryId, params.categoryId));
+      }
+      if (params.language) {
+        conditions.push(eq(catalogueItems.language, params.language));
+      }
+      if (params.publishedYear) {
+        conditions.push(eq(catalogueItems.publishedYear, params.publishedYear));
+      }
+
+      const cleanQ = params.q?.trim();
+      if (cleanQ) {
+        conditions.push(
+          sql`(
+            "catalogue_items"."search_vector" @@ websearch_to_tsquery('english', ${cleanQ})
+            OR "catalogue_items"."isbn13" = ${cleanQ}
+            OR "catalogue_items"."isbn10" = ${cleanQ}
+            OR "catalogue_items"."authors"::text ILIKE ${`%${cleanQ}%`}
+            OR "catalogue_items"."subjects"::text ILIKE ${`%${cleanQ}%`}
+            OR "catalogue_items"."publisher" ILIKE ${`%${cleanQ}%`}
+            OR "catalogue_items"."call_number" ILIKE ${`%${cleanQ}%`}
+          )`,
+        );
+      }
+
+      if (params.availableOnly) {
+        conditions.push(
+          sql`(
+            SELECT COUNT(*)::int FROM copies c
+            WHERE c.tenant_id = ${tenantId}::uuid
+              AND c.catalogue_item_id = "catalogue_items"."id"
+              AND c.status = 'AVAILABLE'
+          ) > 0`,
+        );
+      }
+
+      const whereClause = and(...conditions);
+
+      const items = await tx
+        .select({
+          id: catalogueItems.id,
+          title: catalogueItems.title,
+          subtitle: catalogueItems.subtitle,
+          authors: catalogueItems.authors,
+          isbn13: catalogueItems.isbn13,
+          publisher: catalogueItems.publisher,
+          publishedYear: catalogueItems.publishedYear,
+          language: catalogueItems.language,
+          format: catalogueItems.format,
+          coverUrl: catalogueItems.coverUrl,
+          callNumber: catalogueItems.callNumber,
+          shelfLocation: catalogueItems.shelfLocation,
+          categoryId: catalogueItems.categoryId,
+          subjects: catalogueItems.subjects,
+          status: catalogueItems.status,
+          createdAt: catalogueItems.createdAt,
+          updatedAt: catalogueItems.updatedAt,
+          availableCopies: sql<number>`(
+            SELECT COUNT(*)::int FROM copies c
+            WHERE c.tenant_id = ${tenantId}::uuid
+              AND c.catalogue_item_id = "catalogue_items"."id"
+              AND c.status = 'AVAILABLE'
+          )`,
+          totalCopies: sql<number>`(
+            SELECT COUNT(*)::int FROM copies c
+            WHERE c.tenant_id = ${tenantId}::uuid
+              AND c.catalogue_item_id = "catalogue_items"."id"
+          )`,
+        })
+        .from(catalogueItems)
+        .where(whereClause)
+        .orderBy(
+          cleanQ
+            ? sql`ts_rank("catalogue_items"."search_vector", websearch_to_tsquery('english', ${cleanQ})) DESC, "catalogue_items"."title" ASC`
+            : catalogueItems.title,
+        )
+        .limit(limit)
+        .offset(offset);
+
+      const totalResult = await tx
+        .select({ count: sql<number>`count(*)::int` })
+        .from(catalogueItems)
+        .where(whereClause);
+
+      const total = totalResult[0]?.count ?? 0;
+
+      return {
+        items,
+        total,
+        limit,
+        offset,
+      };
+    });
   }
 
   async getById(tenantId: string, itemId: string) {

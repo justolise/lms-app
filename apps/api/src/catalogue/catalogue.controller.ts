@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -21,6 +22,7 @@ import {
   CatalogueItemIdParamDto,
   CreateCatalogueItemDto,
   IsbnLookupDto,
+  SearchCatalogueDto,
   UpdateCatalogueItemDto,
 } from './dto/catalogue-item.dto.js';
 import { CopyIdParamDto, CreateCopyDto, UpdateCopyDto } from './dto/copy.dto.js';
@@ -40,6 +42,15 @@ export class CatalogueController {
   @Roles('ADMIN', 'LIBRARIAN', 'TEACHER', 'MEMBER', 'PARENT')
   async list(@Req() req: AuthenticatedRequest) {
     return this.catalogueService.list(req.user.tenantId);
+  }
+
+  @Get('search')
+  @Roles('ADMIN', 'LIBRARIAN', 'TEACHER', 'MEMBER', 'PARENT')
+  async search(
+    @Query() query: SearchCatalogueDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.catalogueService.search(req.user.tenantId, query);
   }
 
   @Get(':itemId')
