@@ -6,6 +6,7 @@
 
 [![CI](https://github.com/justolise/lms-app/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/justolise/lms-app/actions/workflows/ci.yml)
 [![Security](https://github.com/justolise/lms-app/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/justolise/lms-app/actions/workflows/security.yml)
+[![Latest Release](https://img.shields.io/github/v/release/justolise/lms-app?include_prereleases&color=blue&label=release)](https://github.com/justolise/lms-app/releases)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
 ![Tests](https://img.shields.io/badge/tests-175%20passed-brightgreen?logo=vitest)
 ![PostgreSQL RLS](https://img.shields.io/badge/PostgreSQL-RLS%20enforced-336791?logo=postgresql&logoColor=white)
