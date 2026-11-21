@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.4.0](https://github.com/justolise/lms-app/compare/v0.3.0...v0.4.0) (2026-11-21)
+
+
+### Features
+
+* **catalogue:** integrate catalogue and categories in frontend and add search filters (SRC-1, SRC-2) ([#51](https://github.com/justolise/lms-app/issues/51)) ([31806a7](https://github.com/justolise/lms-app/commit/31806a76a2286e45dca2ff2bdcd00075c500c0d7))
+
+
+### Bug Fixes
+
+* **catalogue:** invalidate catalogue list cache when copies are added, updated, or withdrawn ([96279ac](https://github.com/justolise/lms-app/commit/96279ac7ca2e30d2e63e6f20b65380cd493c8fa8))
+* **catalogue:** qualify catalogue_items.id in copy count subqueries ([#50](https://github.com/justolise/lms-app/issues/50)) ([b7f9418](https://github.com/justolise/lms-app/commit/b7f94186381294357593806ce471f3482d5722d6))
+* **db:** add 0007 to migration journal and grant lms_app permissions on catalogue tables ([4382192](https://github.com/justolise/lms-app/commit/4382192f7fe0612ad8dc9041bea6a643ab656611))
+* **db:** sequence table creation, unique indexes, and foreign keys in 0007_catalogue.sql ([ccafb18](https://github.com/justolise/lms-app/commit/ccafb18254fe6d5da37593575142f0ba3a0b8412))
+
 ## [0.3.0](https://github.com/justolise/lms-app/compare/v0.2.0...v0.3.0) (2026-11-21)
 
 
