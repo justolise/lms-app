@@ -7,7 +7,7 @@
 [![CI](https://github.com/justolise/lms-app/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/justolise/lms-app/actions/workflows/ci.yml)
 [![Security](https://github.com/justolise/lms-app/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/justolise/lms-app/actions/workflows/security.yml)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-169%20passed-brightgreen?logo=vitest)
+![Tests](https://img.shields.io/badge/tests-175%20passed-brightgreen?logo=vitest)
 ![PostgreSQL RLS](https://img.shields.io/badge/PostgreSQL-RLS%20enforced-336791?logo=postgresql&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
 ![NestJS](https://img.shields.io/badge/NestJS-12-E0234E?logo=nestjs)
@@ -54,7 +54,7 @@ LMS is a **cloud-native, mobile-first library management system** designed from 
 
 | Metric                       | Value                                                                       |
 | ---------------------------- | --------------------------------------------------------------------------- |
-| Unit tests passing           | ✅ **169 / 169** (19 test files)                                            |
+| Unit tests passing           | ✅ **175 / 175** (20 test files)                                            |
 | Controller E2E tests passing | ✅ **27 / 27** (2 test files)                                               |
 | TypeScript errors            | ✅ **0** (strict mode)                                                      |
 | Production build             | ✅ API + Web both clean                                                     |
@@ -286,7 +286,7 @@ pnpm --filter @lms/api test:e2e
 ```
 ✓ pnpm typecheck    — 0 TypeScript errors
 ✓ pnpm lint         — 0 linting errors
-✓ pnpm test         — 169 unit tests passed (19 files)
+✓ pnpm test         — 175 unit tests passed (20 files)
 ✓ E2E tests         — 27 tests passed (2 files)
 ✓ pnpm build        — API + Web production build clean
 ```

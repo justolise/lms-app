@@ -19,6 +19,28 @@ export class IsbnLookupService {
   private readonly logger = new Logger(IsbnLookupService.name);
 
   /**
+   * Base URLs sourced from environment — never hardcoded.
+   * OPEN_LIBRARY_API_URL defaults to the public API if not set.
+   * GOOGLE_BOOKS_API_URL defaults to the public API if not set.
+   */
+  private get openLibraryBaseUrl(): string {
+    return (
+      process.env.OPEN_LIBRARY_API_URL ?? 'https://openlibrary.org'
+    ).replace(/\/$/, '');
+  }
+
+  private get googleBooksBaseUrl(): string {
+    return (
+      process.env.GOOGLE_BOOKS_API_URL ?? 'https://www.googleapis.com/books/v1'
+    ).replace(/\/$/, '');
+  }
+
+  private get googleBooksApiKey(): string | undefined {
+    const key = process.env.GOOGLE_BOOKS_API_KEY;
+    return key && key.trim().length > 0 ? key.trim() : undefined;
+  }
+
+  /**
    * Normalize a raw ISBN string to its 13-digit form.
    * Strips hyphens and spaces.
    * Returns null for unrecognized inputs.
@@ -80,7 +102,7 @@ export class IsbnLookupService {
   }
 
   private async lookupOpenLibrary(isbn13: string): Promise<Partial<IsbnMetadata> | null> {
-    const url = `https://openlibrary.org/api/books?bibkeys=ISBN:${isbn13}&format=json&jscmd=data`;
+    const url = `${this.openLibraryBaseUrl}/api/books?bibkeys=ISBN:${isbn13}&format=json&jscmd=data`;
     const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
     if (!res.ok) return null;
 
@@ -110,9 +132,9 @@ export class IsbnLookupService {
   }
 
   private async lookupGoogleBooks(isbn13: string): Promise<Partial<IsbnMetadata> | null> {
-    const apiKey = process.env.GOOGLE_BOOKS_API_KEY;
+    const apiKey = this.googleBooksApiKey;
     const keyParam = apiKey ? `&key=${apiKey}` : '';
-    const url = `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn13}${keyParam}`;
+    const url = `${this.googleBooksBaseUrl}/volumes?q=isbn:${isbn13}${keyParam}`;
     const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
     if (!res.ok) return null;
 
