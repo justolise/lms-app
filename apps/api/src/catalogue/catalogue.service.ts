@@ -65,13 +65,13 @@ export class CatalogueService {
           availableCopies: sql<number>`(
             SELECT COUNT(*)::int FROM copies c
             WHERE c.tenant_id = ${tenantId}::uuid
-              AND c.catalogue_item_id = ${catalogueItems.id}
+              AND c.catalogue_item_id = "catalogue_items"."id"
               AND c.status = 'AVAILABLE'
           )`,
           totalCopies: sql<number>`(
             SELECT COUNT(*)::int FROM copies c
             WHERE c.tenant_id = ${tenantId}::uuid
-              AND c.catalogue_item_id = ${catalogueItems.id}
+              AND c.catalogue_item_id = "catalogue_items"."id"
           )`,
         })
         .from(catalogueItems)
