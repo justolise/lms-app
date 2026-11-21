@@ -50,6 +50,13 @@
       "when": 1795290000000,
       "tag": "0006_mem2_member_type_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795300000000,
+      "tag": "0007_catalogue",
+      "breakpoints": true
     }
   ]
 }

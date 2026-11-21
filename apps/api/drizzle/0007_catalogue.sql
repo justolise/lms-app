@@ -143,3 +143,15 @@ ALTER TABLE copies FORCE ROW LEVEL SECURITY;
 
 CREATE POLICY copies_tenant_isolation ON copies
   USING (tenant_id = (current_setting('app.tenant_id', true))::uuid);
+
+-- ─── Grants for application runtime role (lms_app) ───────────────────────────
+
+GRANT USAGE ON TYPE public.item_format TO lms_app;
+GRANT USAGE ON TYPE public.catalogue_status TO lms_app;
+GRANT USAGE ON TYPE public.copy_status TO lms_app;
+GRANT USAGE ON TYPE public.copy_condition TO lms_app;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.categories TO lms_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.catalogue_items TO lms_app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.copies TO lms_app;
+
