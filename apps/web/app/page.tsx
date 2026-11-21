@@ -15,6 +15,12 @@ export default function Home() {
           </div>
           <div className="flex items-center gap-3">
             <Link
+              href="/catalogue"
+              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100 transition-colors"
+            >
+              Browse Catalogue
+            </Link>
+            <Link
               href="/login"
               className="text-sm font-medium px-4 py-2 rounded-md bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 transition-colors"
             >

@@ -287,6 +287,24 @@ export default function MemberTypesPage() {
               ← Back to Profile
             </Link>
             <h1 className="text-lg font-bold">Member Types &amp; Policies</h1>
+            <Link
+              href="/catalogue"
+              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            >
+              Catalogue
+            </Link>
+            <Link
+              href="/categories"
+              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            >
+              Categories
+            </Link>
+            <Link
+              href="/users"
+              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            >
+              Staff Directory
+            </Link>
           </div>
           <button
             onClick={() => {

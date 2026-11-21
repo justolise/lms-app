@@ -167,6 +167,18 @@ export default function UsersDirectoryPage() {
             </Link>
             <h1 className="text-lg font-bold">Staff User Directory</h1>
             <Link
+              href="/catalogue"
+              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            >
+              Catalogue
+            </Link>
+            <Link
+              href="/categories"
+              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            >
+              Categories
+            </Link>
+            <Link
               href="/member-types"
               className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
             >

@@ -14,12 +14,20 @@ const mockDatabase = {
 };
 
 function selectChain(result: unknown[]) {
-  return {
-    from: vi.fn().mockReturnThis(),
-    where: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockResolvedValue(result),
-    orderBy: vi.fn().mockResolvedValue(result),
+  const chain: any = {
+    from: vi.fn(),
+    where: vi.fn(),
+    limit: vi.fn(),
+    offset: vi.fn(),
+    orderBy: vi.fn(),
   };
+  chain.from.mockReturnValue(chain);
+  chain.where.mockReturnValue(chain);
+  chain.limit.mockReturnValue(chain);
+  chain.offset.mockReturnValue(chain);
+  chain.orderBy.mockReturnValue(chain);
+  chain.then = (resolve: (v: unknown) => unknown) => Promise.resolve(resolve(result));
+  return chain;
 }
 
 function insertChain(result: unknown) {
@@ -165,6 +173,44 @@ describe('CatalogueService', () => {
       await expect(
         service.archive(tenantId, actorId, itemId),
       ).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('search', () => {
+    it('searches with full-text keyword and filters (SRC-1, SRC-2)', async () => {
+      const items = [{ id: itemId, title: 'Clean Code', availableCopies: 2, totalCopies: 2 }];
+      mockTx.select
+        .mockReturnValueOnce(selectChain(items))
+        .mockReturnValueOnce(selectChain([{ count: 1 }]));
+
+      const result = await service.search(tenantId, {
+        q: 'Clean Code',
+        format: 'BOOK',
+        categoryId: 'cccccccc-0000-0000-0000-000000000001',
+        language: 'en',
+        publishedYear: 2008,
+        availableOnly: true,
+        limit: 10,
+        offset: 0,
+      });
+
+      expect(result.items).toEqual(items);
+      expect(result.total).toBe(1);
+      expect(result.limit).toBe(10);
+      expect(result.offset).toBe(0);
+    });
+
+    it('searches without filters and returns default pagination', async () => {
+      const items = [{ id: itemId, title: 'Clean Architecture' }];
+      mockTx.select
+        .mockReturnValueOnce(selectChain(items))
+        .mockReturnValueOnce(selectChain([{ count: 1 }]));
+
+      const result = await service.search(tenantId, {});
+      expect(result.items).toEqual(items);
+      expect(result.total).toBe(1);
+      expect(result.limit).toBe(20);
+      expect(result.offset).toBe(0);
     });
   });
 });

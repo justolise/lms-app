@@ -158,6 +158,18 @@ export default function ProfilePage() {
         <div className="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <h1 className="text-lg font-bold">LMS Portal</h1>
+            <Link
+              href="/catalogue"
+              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            >
+              Catalogue
+            </Link>
+            <Link
+              href="/categories"
+              className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+            >
+              Categories
+            </Link>
             {profile &&
               (profile.role === "ADMIN" || profile.role === "LIBRARIAN") && (
                 <Link

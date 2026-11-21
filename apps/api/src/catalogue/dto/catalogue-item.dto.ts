@@ -1,5 +1,7 @@
+import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsEnum,
   IsInt,
   IsOptional,
@@ -190,4 +192,45 @@ export class IsbnLookupDto {
 export class CatalogueItemIdParamDto {
   @IsUUID()
   itemId!: string;
+}
+
+export class SearchCatalogueDto {
+  @IsOptional()
+  @IsString()
+  q?: string;
+
+  @IsOptional()
+  @IsEnum(ITEM_FORMATS)
+  format?: ItemFormat;
+
+  @IsOptional()
+  @IsUUID()
+  categoryId?: string;
+
+  @IsOptional()
+  @IsString()
+  language?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  publishedYear?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true || value === 1 || value === '1')
+  @IsBoolean()
+  availableOnly?: boolean;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number = 20;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  offset?: number = 0;
 }
