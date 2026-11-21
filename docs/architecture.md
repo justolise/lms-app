@@ -35,9 +35,12 @@ The `apps/api/src` tree contains:
 - `Guards`: `AccessTokenGuard` (with mandatory first-login password change check), `RolesGuard`
 - `UsersModule`: `UsersController`, `ProfileController`, `UsersService`
 - `MembersModule`: `MembersController`, `MembersService`, `MemberIdentifierService`
-- `RedisModule`: `RedisService` (distributed rate-limiting)
+- `MemberTypesModule`: `MemberTypesController`, `MemberTypesService` (loan policy matrix)
+- `RedisModule`: `RedisService` (distributed rate-limiting, typed cache API)
+- `CategoriesModule`: `CategoriesController`, `CategoriesService` (CAT-5)
+- `CatalogueModule`: `CatalogueController`, `CatalogueService`, `CopiesService`, `IsbnLookupService` (CAT-1–CAT-4)
 
-Feature modules pending implementation: Catalogue, search, circulation, holds, fines, notifications, dashboard and admin settings.
+Feature modules pending implementation: Search, Circulation, Holds, Fines, Notifications, Dashboard and Admin settings.
 
 ## Database foundation
 

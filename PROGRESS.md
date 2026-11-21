@@ -59,7 +59,21 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 | Password reset OTP generation, delivery and verification | done   | `OtpService` with 6-digit random code, Argon2id hashing, 15m expiry, 5 attempt lockout, and session purge on reset.     |
 | Server-side application RBAC                             | done   | `RolesGuard` and `AccessTokenGuard` enforce 6-role RBAC (`ADMIN`, `LIBRARIAN`, `TEACHER`, `MEMBER`, `PARENT`, `GUEST`). |
 
-## Requirement status — v1.0
+## Phase 2 — Catalogue
+
+| Task                                        | Status | Notes                                                                                                                                                              |
+| ------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `categories` schema table                   | done   | Hierarchical categories with optional `parent_id`; unique name per tenant; RLS enforced.                                                                           |
+| `catalogue_items` schema table              | done   | Bibliographic records: title, authors, ISBN-13/10, publisher, year, language, format, description, cover, call number, shelf, category, subjects, status, metadata. |
+| `copies` schema table                       | done   | Physical copies linked to catalogue items; tenant-scoped unique barcode; 7-status lifecycle; condition tracking.                                                   |
+| Migration `0007_catalogue.sql`              | done   | Enums, tables, RLS policies, all indexes including GIN tsvector for SRC-1 (search-ready).                                                                          |
+| `CategoriesModule`                          | done   | CRUD at `/api/categories`; Admin/Librarian write; all roles read; self-reference guard; audit log; 10 unit tests.                                                  |
+| `CatalogueModule` — `CatalogueService`      | done   | List (Redis cached, 120s TTL), getById (with copies), create, update, archive; audit log; 11 unit tests.                                                           |
+| `CatalogueModule` — `CopiesService`         | done   | Add, update, withdraw, transition; 7-status machine with 409 on invalid transitions; audit log; 9 unit tests.                                                      |
+| `CatalogueModule` — `IsbnLookupService`     | done   | Open Library → Google Books fallback; ISBN-10→13 conversion; 5 s timeout; returns metadata for staff confirmation only.                                            |
+| `CatalogueController`                       | done   | REST endpoints for catalogue items and copies; permission matrix enforced by `RolesGuard`.                                                                         |
+
+
 
 | ID     | Priority | Status | Requirement / workstream                                  | Evidence and remaining work                                                                                                |
 | ------ | -------: | :----: | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
@@ -72,11 +86,11 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 | PO-2   |       P0 |  done  | Self-Service Profile                                      | `GET /api/profile` and `PATCH /api/profile` for viewing and updating own profile; whitelisted fields only; role unchanged. |
 | PO-3   |       P0 |  done  | Soft Account Deactivation                                 | `DELETE /api/profile` sets status to SUSPENDED, revokes sessions; transaction-locked last-admin and last-librarian checks. |
 | PO-4   |       P0 |  done  | Role Promotion                                            | `POST /api/users/:userId/promote` allows Admin to promote Librarian to Admin; self-promotion rejected; audit logged.       |
-| CAT-1  |       P0 |  todo  | Bibliographic record create/edit/archive                  | Not implemented.                                                                                                           |
-| CAT-2  |       P0 |  todo  | ISBN metadata lookup                                      | Not implemented.                                                                                                           |
-| CAT-3  |       P0 |  todo  | Multiple physical copies and unique barcodes              | Not implemented.                                                                                                           |
-| CAT-4  |       P0 |  todo  | Copy statuses and transitions                             | Not implemented.                                                                                                           |
-| CAT-5  |       P0 |  todo  | Categories, subjects, shelf locations and call numbers    | Not implemented.                                                                                                           |
+| CAT-1  |       P0 |  done  | Bibliographic record create/edit/archive                  | `POST /api/catalogue`, `PATCH /api/catalogue/:id`, `DELETE /api/catalogue/:id` (soft archive); RLS; audit log; 11 unit tests. |
+| CAT-2  |       P0 |  done  | ISBN metadata lookup                                      | `POST /api/catalogue/isbn-lookup`; Open Library → Google Books fallback; ISBN-13 checksum conversion; returns metadata for staff confirmation only. |
+| CAT-3  |       P0 |  done  | Multiple physical copies and unique barcodes              | `POST /api/catalogue/:id/copies`; tenant-scoped unique barcode enforced at DB index and service layer; 9 unit tests.       |
+| CAT-4  |       P0 |  done  | Copy statuses and transitions                             | 7-status machine (AVAILABLE/ON_LOAN/RESERVED/IN_TRANSIT/LOST/DAMAGED/WITHDRAWN); transition matrix enforced with 409 on invalid move; `CopiesService.transition()` for circulation use. |
+| CAT-5  |       P0 |  done  | Categories, subjects, shelf locations and call numbers    | `categories` table with parent hierarchy; `call_number`, `shelf_location`, `subjects[]` on `catalogue_items`; `CategoriesModule` CRUD; 10 unit tests. |
 | SRC-1  |       P0 |  todo  | Full-text catalogue search                                | Not implemented.                                                                                                           |
 | SRC-2  |       P0 |  todo  | Catalogue filters                                         | Not implemented.                                                                                                           |
 | CIR-1  |       P0 |  todo  | Checkout                                                  | Not implemented.                                                                                                           |
@@ -117,11 +131,12 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 Current verification run completed on **21 November 2026**:
 
 - **pnpm typecheck**: Passed across all workspace projects (0 TypeScript errors).
-- **pnpm test (Unit Tests)**: 16 test files, 139 tests passed, 0 failed.
+- **pnpm test (Unit Tests)**: 19 test files, 169 tests passed, 0 failed.
 - **Controller E2E Tests**: 2 test files, 27 tests passed, 0 failed (`test/auth.controller.e2e-spec.ts`, `test/users.controller.e2e-spec.ts`).
 - **Live Database Interactive Verification**: Full end-to-end walkthrough verified against local PostgreSQL & Redis (login, profile, staff provisioning, first-login password change gate, frictionless first-time password change without temporary password requirement, min 8 char validation rejection & acceptance, subsequent password change requiring current password, promotion, OTP forgot/reset password, sessions listing, soft account deactivation protection, device logout, member types & borrowing policies matrix, and cross-tenant RLS isolation).
-- **Security Hardening & Cleanup**: Helmet security headers (CSP, HSTS preload, frameguard: deny, noSniff, xssFilter) active; global `Cache-Control: no-store` on API responses; Redis caching with tenant key isolation and mutation invalidation (`MemberTypesService`); rate-limiting decoupled from `src/redis/` into `src/common/guards/` and `src/common/decorators/`; proxy-aware client IP extraction (`x-forwarded-for`); 1MB payload limits; CORS configured.
-- **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 11 prerendered static routes including `/member-types`).
+- **Security Hardening & Cleanup**: Helmet security headers (CSP, HSTS preload, frameguard: deny, noSniff, xssFilter) active; global `Cache-Control: no-store` on API responses; Redis caching with tenant key isolation and mutation invalidation (`MemberTypesService`, `CatalogueService`); rate-limiting decoupled from `src/redis/` into `src/common/guards/` and `src/common/decorators/`; proxy-aware client IP extraction (`x-forwarded-for`); 1MB payload limits; CORS configured.
+- **Phase 2 Catalogue**: `CategoriesModule` and `CatalogueModule` (catalogue items + copies + ISBN lookup) added; 30 new unit tests (10 categories, 11 catalogue, 9 copies); `0007_catalogue.sql` migration with RLS, indexes, and GIN tsvector for search.
+- **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 11 prerendered static routes).
 
 Verification commands:
 

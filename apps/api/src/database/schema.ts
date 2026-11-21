@@ -12,6 +12,7 @@ import {
   varchar,
   jsonb,
   boolean,
+  date,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
@@ -607,6 +608,42 @@ export const otpCodes = pgTable(
   ],
 );
 
+// ─── CAT-1, CAT-5: Item format ───────────────────────────────
+export const itemFormatEnum = pgEnum('item_format', [
+  'BOOK',
+  'PERIODICAL',
+  'REFERENCE',
+  'AUDIO',
+  'VIDEO',
+  'OTHER',
+]);
+
+// CAT-1: Catalogue record lifecycle
+export const catalogueStatusEnum = pgEnum('catalogue_status', [
+  'ACTIVE',
+  'ARCHIVED',
+]);
+
+// CAT-4: Physical copy lifecycle
+export const copyStatusEnum = pgEnum('copy_status', [
+  'AVAILABLE',
+  'ON_LOAN',
+  'RESERVED',
+  'IN_TRANSIT',
+  'LOST',
+  'DAMAGED',
+  'WITHDRAWN',
+]);
+
+// CAT-3: Physical condition of a copy
+export const copyConditionEnum = pgEnum('copy_condition', [
+  'NEW',
+  'GOOD',
+  'FAIR',
+  'POOR',
+  'DAMAGED',
+]);
+
 // AUTH-2, FIN-2: Security and business-action audit trail.
 // Audit records are append-only for the application role.
 export const auditLogs = pgTable(
@@ -652,5 +689,217 @@ export const auditLogs = pgTable(
       columns: [table.tenantId, table.actorId],
       foreignColumns: [users.tenantId, users.id],
     }),
+  ],
+);
+
+// CAT-5: Hierarchical categories owned per tenant.
+export const categories = pgTable(
+  'categories',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'restrict' }),
+
+    name: varchar('name', { length: 100 }).notNull(),
+
+    description: text('description'),
+
+    // Optional parent for subcategory nesting.
+    parentId: uuid('parent_id'),
+
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('categories_tenant_id_id_unique').on(table.tenantId, table.id),
+
+    uniqueIndex('categories_tenant_name_unique').on(table.tenantId, table.name),
+
+    // A sub-category's parent must belong to the same library.
+    foreignKey({
+      name: 'categories_tenant_parent_fk',
+      columns: [table.tenantId, table.parentId],
+      foreignColumns: [table.tenantId, table.id],
+    }),
+  ],
+);
+
+// CAT-1, CAT-2, CAT-5: Bibliographic catalogue records.
+export const catalogueItems = pgTable(
+  'catalogue_items',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'restrict' }),
+
+    title: varchar('title', { length: 500 }).notNull(),
+
+    subtitle: varchar('subtitle', { length: 500 }),
+
+    // Stored as a JSON array of author name strings.
+    authors: jsonb('authors').notNull().default(sql`'[]'::jsonb`),
+
+    isbn13: varchar('isbn13', { length: 13 }),
+
+    isbn10: varchar('isbn10', { length: 10 }),
+
+    publisher: varchar('publisher', { length: 300 }),
+
+    publishedYear: integer('published_year'),
+
+    // ISO 639-1 language code, e.g. 'en', 'sw'.
+    language: varchar('language', { length: 10 }).notNull().default('en'),
+
+    format: itemFormatEnum('format').notNull().default('BOOK'),
+
+    description: text('description'),
+
+    coverUrl: text('cover_url'),
+
+    // CAT-5: Dewey decimal or local call number.
+    callNumber: varchar('call_number', { length: 100 }),
+
+    // CAT-5: Physical shelf location code.
+    shelfLocation: varchar('shelf_location', { length: 100 }),
+
+    // CAT-5: Primary category.
+    categoryId: uuid('category_id'),
+
+    // CAT-5: Subject tags stored as a JSON array.
+    subjects: jsonb('subjects').notNull().default(sql`'[]'::jsonb`),
+
+    status: catalogueStatusEnum('status').notNull().default('ACTIVE'),
+
+    // Raw payload from ISBN lookup provider.
+    isbnMetadata: jsonb('isbn_metadata'),
+
+    createdBy: uuid('created_by').notNull(),
+
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('catalogue_items_tenant_id_id_unique').on(
+      table.tenantId,
+      table.id,
+    ),
+
+    // ISBN-13 must be unique within a tenant's catalogue.
+    uniqueIndex('catalogue_items_tenant_isbn13_unique')
+      .on(table.tenantId, table.isbn13)
+      .where(sql`${table.isbn13} IS NOT NULL`),
+
+    index('catalogue_items_tenant_status_idx').on(table.tenantId, table.status),
+
+    index('catalogue_items_tenant_format_idx').on(table.tenantId, table.format),
+
+    index('catalogue_items_tenant_category_idx').on(
+      table.tenantId,
+      table.categoryId,
+    ),
+
+    // The category must belong to the same library.
+    foreignKey({
+      name: 'catalogue_items_tenant_category_fk',
+      columns: [table.tenantId, table.categoryId],
+      foreignColumns: [categories.tenantId, categories.id],
+    }),
+
+    // The creator must belong to the same library.
+    foreignKey({
+      name: 'catalogue_items_tenant_created_by_fk',
+      columns: [table.tenantId, table.createdBy],
+      foreignColumns: [users.tenantId, users.id],
+    }),
+
+    check(
+      'catalogue_items_published_year_range_check',
+      sql`${table.publishedYear} IS NULL OR (${table.publishedYear} BETWEEN 1 AND 9999)`,
+    ),
+  ],
+);
+
+// CAT-3, CAT-4: Individual physical copies of a catalogue item.
+export const copies = pgTable(
+  'copies',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'restrict' }),
+
+    catalogueItemId: uuid('catalogue_item_id').notNull(),
+
+    // Unique barcode within the library. Never null after creation.
+    barcode: varchar('barcode', { length: 100 }).notNull(),
+
+    condition: copyConditionEnum('condition').notNull().default('GOOD'),
+
+    status: copyStatusEnum('status').notNull().default('AVAILABLE'),
+
+    // Overrides the item-level shelf location when set.
+    shelfLocation: varchar('shelf_location', { length: 100 }),
+
+    acquiredAt: date('acquired_at'),
+
+    notes: text('notes'),
+
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('copies_tenant_id_id_unique').on(table.tenantId, table.id),
+
+    // Barcode must be unique within a tenant.
+    uniqueIndex('copies_tenant_barcode_unique').on(
+      table.tenantId,
+      table.barcode,
+    ),
+
+    index('copies_tenant_status_idx').on(table.tenantId, table.status),
+
+    index('copies_tenant_catalogue_item_idx').on(
+      table.tenantId,
+      table.catalogueItemId,
+    ),
+
+    // The parent catalogue item must belong to the same library.
+    foreignKey({
+      name: 'copies_tenant_catalogue_item_fk',
+      columns: [table.tenantId, table.catalogueItemId],
+      foreignColumns: [catalogueItems.tenantId, catalogueItems.id],
+    }).onDelete('restrict'),
   ],
 );

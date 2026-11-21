@@ -15,11 +15,11 @@ Status reviewed: 21 November 2026. This document maps each requirement to eviden
 | PO-2   |       P0 |  done  | Self-Service Profile (`GET /api/profile`, `PATCH /api/profile`); whitelisted editable fields; role/tenant immutability | None |
 | PO-3   |       P0 |  done  | Soft Account Deactivation (`DELETE /api/profile`); sets status SUSPENDED, revokes sessions; transaction-locked last-admin and last-librarian checks | None |
 | PO-4   |       P0 |  done  | Role Promotion (`POST /api/users/:userId/promote`); Admin promotes Librarian to Admin; self-promotion rejected; audit logged | None |
-| CAT-1  |       P0 | todo   | No catalogue module found                              | Bibliographic CRUD/archive and audit/permission tests                                           |
-| CAT-2  |       P0 | todo   | No ISBN integration found                              | Open Library lookup, Google Books fallback, manual entry                                        |
-| CAT-3  |       P0 | todo   | No copy schema/module found                            | Physical copies, unique tenant barcode, location, condition                                     |
-| CAT-4  |       P0 | todo   | No copy status workflow found                          | Seven statuses and allowed transition rules                                                     |
-| CAT-5  |       P0 | todo   | No category/shelf module found                         | Categories, subjects, shelf locations and call numbers                                          |
+| CAT-1  |       P0 |  done  | `CatalogueService.create/update/archive`; `POST /api/catalogue`, `PATCH /api/catalogue/:id`, `DELETE /api/catalogue/:id` (soft archive to ARCHIVED status); RLS on `catalogue_items`; audit log; 11 unit tests. | None |
+| CAT-2  |       P0 |  done  | `IsbnLookupService` with Open Library → Google Books fallback; ISBN-10→ISBN-13 conversion; server-side only (no API keys in browser); returns metadata for staff confirmation. | None |
+| CAT-3  |       P0 |  done  | `copies` table with tenant-scoped unique barcode; `CopiesService.addCopy`; `POST /api/catalogue/:id/copies`; barcode uniqueness enforced at DB index and service layer; 9 unit tests. | None |
+| CAT-4  |       P0 |  done  | 7-status machine (AVAILABLE/ON_LOAN/RESERVED/IN_TRANSIT/LOST/DAMAGED/WITHDRAWN); `ALLOWED_TRANSITIONS` matrix enforced in `CopiesService`; 409 on invalid transition; `transition()` exported for Circulation use. | Circulation runtime enforcement at CIR-1/CIR-2 |
+| CAT-5  |       P0 |  done  | `categories` table with optional `parent_id` hierarchy; `call_number`, `shelf_location`, `subjects[]`, `category_id` on `catalogue_items`; `CategoriesModule` CRUD; 10 unit tests. | None |
 | SRC-1  |       P0 | todo   | No search module found                                 | PostgreSQL full-text search and p95 benchmark                                                   |
 | SRC-2  |       P0 | todo   | No catalogue filter implementation found               | Availability/category/language/format/year filters                                              |
 | CIR-1  |       P0 | todo   | No circulation module found                            | Barcode/member checkout, due date, idempotency and latency test                                 |

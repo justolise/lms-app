@@ -7,7 +7,7 @@
 [![CI](https://github.com/justolise/lms-app/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/justolise/lms-app/actions/workflows/ci.yml)
 [![Security](https://github.com/justolise/lms-app/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/justolise/lms-app/actions/workflows/security.yml)
 ![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-166%20passed-brightgreen?logo=vitest)
+![Tests](https://img.shields.io/badge/tests-169%20passed-brightgreen?logo=vitest)
 ![PostgreSQL RLS](https://img.shields.io/badge/PostgreSQL-RLS%20enforced-336791?logo=postgresql&logoColor=white)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
 ![NestJS](https://img.shields.io/badge/NestJS-12-E0234E?logo=nestjs)
@@ -36,14 +36,14 @@ LMS is a **cloud-native, mobile-first library management system** designed from 
 
 ### Key differentiators
 
-| Differentiator | Detail |
-|---|---|
-| **Multi-tenant isolation** | Each library is a fully isolated tenant with PostgreSQL Row-Level Security — zero cross-tenant data leakage by design |
-| **Mobile-first & 3G-ready** | Checkout target < 1 second on 3G; progressive-enhancement UI for low-end Android |
-| **Zero-trust security** | Argon2id password hashing · Helmet HTTP security headers · Redis-backed rate limiting · Append-only audit log · CSRF and CSP hardened |
-| **Offline-ready architecture** | Schema and architecture designed for future offline sync without rewrites |
-| **Kenya Data Protection Act** | Privacy-by-default data model, especially for minors' borrowing records |
-| **Open REST API** | Versioned JSON API ready for integrations with government NEMIS, school SMS gateways, and third-party apps |
+| Differentiator                 | Detail                                                                                                                                |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Multi-tenant isolation**     | Each library is a fully isolated tenant with PostgreSQL Row-Level Security — zero cross-tenant data leakage by design                 |
+| **Mobile-first & 3G-ready**    | Checkout target < 1 second on 3G; progressive-enhancement UI for low-end Android                                                      |
+| **Zero-trust security**        | Argon2id password hashing · Helmet HTTP security headers · Redis-backed rate limiting · Append-only audit log · CSRF and CSP hardened |
+| **Offline-ready architecture** | Schema and architecture designed for future offline sync without rewrites                                                             |
+| **Kenya Data Protection Act**  | Privacy-by-default data model, especially for minors' borrowing records                                                               |
+| **Open REST API**              | Versioned JSON API ready for integrations with government NEMIS, school SMS gateways, and third-party apps                            |
 
 ---
 
@@ -52,17 +52,17 @@ LMS is a **cloud-native, mobile-first library management system** designed from 
 > **Phase complete: Authentication & Access Control (AUTH-1 → AUTH-5 + People Operations)**
 > Circulation, Catalogue, Search, Holds, Fines, Notifications, and Dashboard are in the [v1.0 backlog](https://github.com/users/justolise/projects/5).
 
-| Metric | Value |
-|---|---|
-| Unit tests passing | ✅ **139 / 139** (16 test files) |
-| Controller E2E tests passing | ✅ **27 / 27** (2 test files) |
-| TypeScript errors | ✅ **0** (strict mode) |
-| Production build | ✅ API + Web both clean |
-| CI pipeline | ✅ Green on `main` |
-| Security workflow | ✅ Green on `main` |
-| Database migrations applied | ✅ 6 Drizzle SQL migrations |
-| Completed v1.0 requirements | ✅ **9 / 29 P0 requirements done** |
-| MVP requirements remaining | 🔵 20 (Catalogue · Circulation · Holds · Fines · Notifications · Dashboard) |
+| Metric                       | Value                                                                       |
+| ---------------------------- | --------------------------------------------------------------------------- |
+| Unit tests passing           | ✅ **169 / 169** (19 test files)                                            |
+| Controller E2E tests passing | ✅ **27 / 27** (2 test files)                                               |
+| TypeScript errors            | ✅ **0** (strict mode)                                                      |
+| Production build             | ✅ API + Web both clean                                                     |
+| CI pipeline                  | ✅ Green on `main`                                                          |
+| Security workflow            | ✅ Green on `main`                                                          |
+| Database migrations applied  | ✅ 6 Drizzle SQL migrations                                                 |
+| Completed v1.0 requirements  | ✅ **14 / 29 P0 requirements done**                                         |
+| MVP requirements remaining   | 🔵 20 (Catalogue · Circulation · Holds · Fines · Notifications · Dashboard) |
 
 Full traceability: [`PROGRESS.md`](PROGRESS.md) · [`docs/requirements-traceability.md`](docs/requirements-traceability.md)
 
@@ -110,54 +110,87 @@ Full traceability: [`PROGRESS.md`](PROGRESS.md) · [`docs/requirements-traceabil
 
 ## Technology Stack
 
-| Area | Technology |
-|---|---|
-| **Monorepo** | pnpm workspaces |
-| **Web** | Next.js 16 App Router · React 19 · Tailwind CSS 4 |
-| **API** | NestJS 12 · TypeScript (strict) · REST |
-| **Database** | PostgreSQL · Drizzle ORM · SQL migrations |
-| **Tenant isolation** | PostgreSQL Row-Level Security (RLS) |
-| **Cache** | Redis · `RedisService` with typed `get/set/del/delByPattern` |
-| **Auth** | Argon2id · JOSE JWT (HS256) · Server-side RBAC |
-| **Security** | Helmet · CORS env-driven · Rate limiting · AES-256-GCM |
-| **Tests** | Vitest · Unit + Controller E2E |
-| **CI/CD** | GitHub Actions (CI + Security workflows) |
-| **Dev services** | Docker Compose (Redis) |
+| Area                 | Technology                                                   |
+| -------------------- | ------------------------------------------------------------ |
+| **Monorepo**         | pnpm workspaces                                              |
+| **Web**              | Next.js 16 App Router · React 19 · Tailwind CSS 4            |
+| **API**              | NestJS 12 · TypeScript (strict) · REST                       |
+| **Database**         | PostgreSQL · Drizzle ORM · SQL migrations                    |
+| **Tenant isolation** | PostgreSQL Row-Level Security (RLS)                          |
+| **Cache**            | Redis · `RedisService` with typed `get/set/del/delByPattern` |
+| **Auth**             | Argon2id · JOSE JWT (HS256) · Server-side RBAC               |
+| **Security**         | Helmet · CORS env-driven · Rate limiting · AES-256-GCM       |
+| **Tests**            | Vitest · Unit + Controller E2E                               |
+| **CI/CD**            | GitHub Actions (CI + Security workflows)                     |
+| **Dev services**     | Docker Compose (Redis)                                       |
 
 ---
 
 ## Completed Requirements (AUTH & People Operations)
 
-| ID | Priority | Requirement | Evidence |
-|---|---|---|---|
-| **AUTH-1** | P0 ✅ | Email & Kenyan phone login | E.164 normalization · Argon2id · multi-library selection · first-login password change gate |
-| **AUTH-2** | P0 ✅ | 6-role RBAC | `ADMIN · LIBRARIAN · TEACHER · MEMBER · PARENT · GUEST` · server-side `RolesGuard` · 401/403 |
-| **AUTH-3** | P0 ✅ | Password reset by OTP | 6-digit OTP · Argon2id hash · 15 min expiry · 5-attempt lockout · session purge |
-| **AUTH-4** | P0 ✅ | Staff-provisioned accounts | `POST /api/members` · server-generated temp password · `mustChangePassword` gate |
-| **AUTH-5** | P1 ✅ | Sessions & rate limiting | Token rotation · replay detection · Redis rate limiting · per-device logout |
-| **PO-1** | P0 ✅ | Staff user directory | `GET /api/users` · `GET /api/users/:id` · Admin/Librarian only · safe projections |
-| **PO-2** | P0 ✅ | Self-service profile | `GET /api/profile` · `PATCH /api/profile` · whitelisted fields · role immutable |
-| **PO-3** | P0 ✅ | Soft account deactivation | `DELETE /api/profile` → `SUSPENDED` · session revoke · last-admin guard |
-| **PO-4** | P0 ✅ | Role promotion | `POST /api/users/:id/promote` · Admin-only · self-promotion rejected · audit logged |
-| **MEM-2** | P0 ✅ | Member types & borrowing rules | Loan policy matrix · `MemberTypesService` · full UI at `/member-types` |
-| **ADM-2** | P0 ✅ | Loan/fine/hold settings | Per-type loan duration · concurrent loan limits · grace periods · daily/max fines |
+| ID         | Priority | Requirement                    | Evidence                                                                                     |
+| ---------- | -------- | ------------------------------ | -------------------------------------------------------------------------------------------- |
+| **AUTH-1** | P0 ✅    | Email & Kenyan phone login     | E.164 normalization · Argon2id · multi-library selection · first-login password change gate  |
+| **AUTH-2** | P0 ✅    | 6-role RBAC                    | `ADMIN · LIBRARIAN · TEACHER · MEMBER · PARENT · GUEST` · server-side `RolesGuard` · 401/403 |
+| **AUTH-3** | P0 ✅    | Password reset by OTP          | 6-digit OTP · Argon2id hash · 15 min expiry · 5-attempt lockout · session purge              |
+| **AUTH-4** | P0 ✅    | Staff-provisioned accounts     | `POST /api/members` · server-generated temp password · `mustChangePassword` gate             |
+| **AUTH-5** | P1 ✅    | Sessions & rate limiting       | Token rotation · replay detection · Redis rate limiting · per-device logout                  |
+| **PO-1**   | P0 ✅    | Staff user directory           | `GET /api/users` · `GET /api/users/:id` · Admin/Librarian only · safe projections            |
+| **PO-2**   | P0 ✅    | Self-service profile           | `GET /api/profile` · `PATCH /api/profile` · whitelisted fields · role immutable              |
+| **PO-3**   | P0 ✅    | Soft account deactivation      | `DELETE /api/profile` → `SUSPENDED` · session revoke · last-admin guard                      |
+| **PO-4**   | P0 ✅    | Role promotion                 | `POST /api/users/:id/promote` · Admin-only · self-promotion rejected · audit logged          |
+| **MEM-2**  | P0 ✅    | Member types & borrowing rules | Loan policy matrix · `MemberTypesService` · full UI at `/member-types`                       |
+| **ADM-2**  | P0 ✅    | Loan/fine/hold settings        | Per-type loan duration · concurrent loan limits · grace periods · daily/max fines            |
+| **CAT-1**  | P0 ✅    | Bibliographic records          | `POST/PATCH/DELETE /api/catalogue` · soft archive · RLS · audit log · 11 unit tests          |
+| **CAT-2**  | P0 ✅    | ISBN metadata lookup           | `POST /api/catalogue/isbn-lookup` · Open Library → Google Books · server-side only           |
+| **CAT-3**  | P0 ✅    | Physical copies & barcodes     | `POST /api/catalogue/:id/copies` · tenant-scoped unique barcode · 9 unit tests               |
+| **CAT-4**  | P0 ✅    | Copy status lifecycle          | 7-status machine · transition matrix enforced · 409 on invalid move                          |
+| **CAT-5**  | P0 ✅    | Categories, shelf & call numbers | `categories` hierarchy · `call_number` · `shelf_location` · `subjects[]` · 10 unit tests   |
 
 ---
 
 ## v1.0 Remaining Backlog
 
-| Workstream | Requirements |
-|---|---|
-| Catalogue | CAT-1 · CAT-2 · CAT-3 · CAT-4 · CAT-5 |
-| Search | SRC-1 · SRC-2 |
-| Circulation | CIR-1 · CIR-2 · CIR-3 · CIR-4 · CIR-5 · CIR-6 · CIR-9 |
-| Holds | HLD-1 · HLD-2 · HLD-3 |
-| Fines | FIN-1 · FIN-2 · FIN-3 |
-| Members | MEM-1 · MEM-4 |
-| Notifications | NOT-1 · NOT-2 |
-| Inventory | INV-2 |
-| Dashboard | RPT-1 |
-| Admin | ADM-1 |
+| Workstream    | Requirements                                          |
+| ------------- | ----------------------------------------------------- |
+| Search        | SRC-1 · SRC-2                                         |
+| Circulation   | CIR-1 · CIR-2 · CIR-3 · CIR-4 · CIR-5 · CIR-6 · CIR-9 |
+| Holds         | HLD-1 · HLD-2 · HLD-3                                 |
+| Fines         | FIN-1 · FIN-2 · FIN-3                                 |
+| Members       | MEM-1 · MEM-4                                         |
+| Notifications | NOT-1 · NOT-2                                         |
+| Inventory     | INV-2                                                 |
+| Dashboard     | RPT-1                                                 |
+| Admin         | ADM-1                                                 |
+
+Track progress on the [LMS v1.0 GitHub Project board](https://github.com/users/justolise/projects/5).
+
+---
+
+## Quick Start
+
+### Prerequisites
+
+- **Node.js** 22+ (project uses Node 24 in development)
+- **pnpm** 12.21.0 (`npm install -g pnpm@12.21.0`)
+- **PostgreSQL** with LMS runtime and migration roles provisioned
+- **Docker Engine** for Redis
+- **Git**
+
+### 1. Clone & install
+
+| Workstream    | Requirements                                          |
+| ------------- | ----------------------------------------------------- |
+| Catalogue     | CAT-1 · CAT-2 · CAT-3 · CAT-4 · CAT-5                 |
+| Search        | SRC-1 · SRC-2                                         |
+| Circulation   | CIR-1 · CIR-2 · CIR-3 · CIR-4 · CIR-5 · CIR-6 · CIR-9 |
+| Holds         | HLD-1 · HLD-2 · HLD-3                                 |
+| Fines         | FIN-1 · FIN-2 · FIN-3                                 |
+| Members       | MEM-1 · MEM-4                                         |
+| Notifications | NOT-1 · NOT-2                                         |
+| Inventory     | INV-2                                                 |
+| Dashboard     | RPT-1                                                 |
+| Admin         | ADM-1                                                 |
 
 Track progress on the [LMS v1.0 GitHub Project board](https://github.com/users/justolise/projects/5).
 
@@ -189,15 +222,15 @@ cp .env.example .env
 
 Edit `.env` and set:
 
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | PostgreSQL connection string (runtime role) |
-| `MIGRATION_DATABASE_URL` | PostgreSQL connection string (migration role) |
-| `REDIS_URL` | Redis connection string (`redis://localhost:6379`) |
-| `ACCESS_TOKEN_SECRET` | ≥32-char random secret for JWT access tokens |
-| `LIBRARY_SELECTION_TOKEN_SECRET` | ≥32-char random secret for library-selection tokens |
-| `IDENTITY_LOOKUP_HMAC_KEY` | ≥32-char secret for global identity HMAC |
-| `FRONTEND_URL` | Web app origin for CORS (e.g. `http://localhost:3001`) |
+| Variable                         | Description                                            |
+| -------------------------------- | ------------------------------------------------------ |
+| `DATABASE_URL`                   | PostgreSQL connection string (runtime role)            |
+| `MIGRATION_DATABASE_URL`         | PostgreSQL connection string (migration role)          |
+| `REDIS_URL`                      | Redis connection string (`redis://localhost:6379`)     |
+| `ACCESS_TOKEN_SECRET`            | ≥32-char random secret for JWT access tokens           |
+| `LIBRARY_SELECTION_TOKEN_SECRET` | ≥32-char random secret for library-selection tokens    |
+| `IDENTITY_LOOKUP_HMAC_KEY`       | ≥32-char secret for global identity HMAC               |
+| `FRONTEND_URL`                   | Web app origin for CORS (e.g. `http://localhost:3001`) |
 
 > ⚠️ **Never commit `.env`.** It is git-ignored. Verify with `git status` before every commit.
 
@@ -253,7 +286,7 @@ pnpm --filter @lms/api test:e2e
 ```
 ✓ pnpm typecheck    — 0 TypeScript errors
 ✓ pnpm lint         — 0 linting errors
-✓ pnpm test         — 139 unit tests passed (16 files)
+✓ pnpm test         — 169 unit tests passed (19 files)
 ✓ E2E tests         — 27 tests passed (2 files)
 ✓ pnpm build        — API + Web production build clean
 ```
@@ -308,14 +341,14 @@ lms-app/
 
 ## Decisions & Deferred Scope
 
-| Decision | Detail |
-|---|---|
-| AUTH-4: manual provisioning only | CSV bulk import deferred to v1.5 |
-| No public self-registration | All accounts provisioned by authorized staff |
-| GUEST is anonymous | No JWT or session required for public catalogue search |
-| Teacher/member renewal | Librarian/admin renewal only in v1.0 |
-| No offline checkout in v1.0 | Architecture is offline-ready; feature deferred |
-| CIR-9 and FIN-3 | Remain P1 unless product owner escalates |
+| Decision                         | Detail                                                 |
+| -------------------------------- | ------------------------------------------------------ |
+| AUTH-4: manual provisioning only | CSV bulk import deferred to v1.5                       |
+| No public self-registration      | All accounts provisioned by authorized staff           |
+| GUEST is anonymous               | No JWT or session required for public catalogue search |
+| Teacher/member renewal           | Librarian/admin renewal only in v1.0                   |
+| No offline checkout in v1.0      | Architecture is offline-ready; feature deferred        |
+| CIR-9 and FIN-3                  | Remain P1 unless product owner escalates               |
 
 Full decision log: [`DECISIONS.md`](DECISIONS.md)
 

@@ -6,9 +6,19 @@ import { RedisModule } from './redis/redis.module.js';
 import { MembersModule } from './members/members.module.js';
 import { MemberTypesModule } from './member-types/member-types.module.js';
 import { UsersModule } from './users/users.module.js';
+import { CatalogueModule } from './catalogue/catalogue.module.js';
+import { CategoriesModule } from './categories/categories.module.js';
 
 @Module({
-  imports: [AuthModule, RedisModule, MembersModule, MemberTypesModule, UsersModule],
+  imports: [
+    AuthModule,
+    RedisModule,
+    MembersModule,
+    MemberTypesModule,
+    UsersModule,
+    CatalogueModule,
+    CategoriesModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
