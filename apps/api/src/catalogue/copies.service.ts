@@ -2,10 +2,12 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { and, eq } from 'drizzle-orm';
 
 import { DatabaseService } from '../database/database.service.js';
+import { RedisService } from '../redis/redis.service.js';
 import { copies, catalogueItems, auditLogs } from '../database/schema.js';
 import { CreateCopyDto, UpdateCopyDto } from './dto/copy.dto.js';
 
@@ -23,7 +25,20 @@ const ALLOWED_TRANSITIONS: Record<string, Set<string>> = {
 
 @Injectable()
 export class CopiesService {
-  constructor(private readonly database: DatabaseService) {}
+  constructor(
+    private readonly database: DatabaseService,
+    @Optional() private readonly redis?: RedisService,
+  ) {}
+
+  private async invalidateCache(tenantId: string): Promise<void> {
+    if (this.redis) {
+      try {
+        await this.redis.del(`cache:catalogue:${tenantId}`);
+      } catch {
+        // Non-blocking
+      }
+    }
+  }
 
   async listForItem(tenantId: string, itemId: string) {
     // Verify parent item exists
@@ -62,7 +77,7 @@ export class CopiesService {
     itemId: string,
     dto: CreateCopyDto,
   ) {
-    return this.database.withTenant(tenantId, async (tx) => {
+    const result = await this.database.withTenant(tenantId, async (tx) => {
       // Verify parent exists
       const item = await tx
         .select({ id: catalogueItems.id })
@@ -116,6 +131,9 @@ export class CopiesService {
 
       return row;
     });
+
+    await this.invalidateCache(tenantId);
+    return result;
   }
 
   async updateCopy(
@@ -125,7 +143,7 @@ export class CopiesService {
     copyId: string,
     dto: UpdateCopyDto,
   ) {
-    return this.database.withTenant(tenantId, async (tx) => {
+    const result = await this.database.withTenant(tenantId, async (tx) => {
       const existing = await tx
         .select()
         .from(copies)
@@ -171,6 +189,9 @@ export class CopiesService {
 
       return row;
     });
+
+    await this.invalidateCache(tenantId);
+    return result;
   }
 
   async withdraw(
@@ -179,7 +200,7 @@ export class CopiesService {
     itemId: string,
     copyId: string,
   ) {
-    return this.database.withTenant(tenantId, async (tx) => {
+    const result = await this.database.withTenant(tenantId, async (tx) => {
       const existing = await tx
         .select()
         .from(copies)
@@ -225,6 +246,9 @@ export class CopiesService {
 
       return row;
     });
+
+    await this.invalidateCache(tenantId);
+    return result;
   }
 
   /**
@@ -238,7 +262,7 @@ export class CopiesService {
     toStatus: string,
     reason?: string,
   ) {
-    return this.database.withTenant(tenantId, async (tx) => {
+    const result = await this.database.withTenant(tenantId, async (tx) => {
       const existing = await tx
         .select()
         .from(copies)
@@ -273,5 +297,8 @@ export class CopiesService {
 
       return row;
     });
+
+    await this.invalidateCache(tenantId);
+    return result;
   }
 }
