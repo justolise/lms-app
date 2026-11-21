@@ -4,6 +4,11 @@ const redisMocks = vi.hoisted(() => ({
   connect: vi.fn(),
   ping: vi.fn(),
   eval: vi.fn(),
+  get: vi.fn(),
+  set: vi.fn(),
+  del: vi.fn(),
+  scan: vi.fn(),
+  exists: vi.fn(),
   on: vi.fn(),
   quit: vi.fn(),
   disconnect: vi.fn(),
@@ -118,6 +123,81 @@ describe('RedisService', () => {
       await expect(
         service.incrementRateLimit('auth:login:test', 1000.5),
       ).rejects.toThrow('Rate limit window must be a positive integer');
+    });
+  });
+
+  describe('caching operations', () => {
+    beforeEach(() => {
+      service = new RedisService();
+    });
+
+    it('gets and parses JSON values', async () => {
+      redisMocks.get.mockResolvedValue(JSON.stringify({ foo: 'bar' }));
+
+      const result = await service.get<{ foo: string }>('test:key');
+
+      expect(redisMocks.get).toHaveBeenCalledWith('test:key');
+      expect(result).toEqual({ foo: 'bar' });
+    });
+
+    it('returns null when key does not exist', async () => {
+      redisMocks.get.mockResolvedValue(null);
+
+      const result = await service.get('test:missing');
+
+      expect(result).toBeNull();
+    });
+
+    it('returns raw string when value is not JSON', async () => {
+      redisMocks.get.mockResolvedValue('raw-string');
+
+      const result = await service.get<string>('test:raw');
+
+      expect(result).toBe('raw-string');
+    });
+
+    it('sets value with TTL', async () => {
+      await service.set('test:key', { bar: 123 }, 300);
+
+      expect(redisMocks.set).toHaveBeenCalledWith(
+        'test:key',
+        JSON.stringify({ bar: 123 }),
+        'EX',
+        300,
+      );
+    });
+
+    it('sets value without TTL', async () => {
+      await service.set('test:key', 'plain-text');
+
+      expect(redisMocks.set).toHaveBeenCalledWith('test:key', 'plain-text');
+    });
+
+    it('deletes a key', async () => {
+      await service.del('test:key');
+
+      expect(redisMocks.del).toHaveBeenCalledWith('test:key');
+    });
+
+    it('deletes keys matching a pattern using scan', async () => {
+      redisMocks.scan
+        .mockResolvedValueOnce(['10', ['test:1', 'test:2']])
+        .mockResolvedValueOnce(['0', ['test:3']]);
+
+      await service.delByPattern('test:*');
+
+      expect(redisMocks.scan).toHaveBeenCalledTimes(2);
+      expect(redisMocks.del).toHaveBeenCalledWith('test:1', 'test:2');
+      expect(redisMocks.del).toHaveBeenCalledWith('test:3');
+    });
+
+    it('checks key existence', async () => {
+      redisMocks.exists.mockResolvedValue(1);
+
+      const exists = await service.has('test:key');
+
+      expect(exists).toBe(true);
+      expect(redisMocks.exists).toHaveBeenCalledWith('test:key');
     });
   });
 

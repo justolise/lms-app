@@ -217,6 +217,15 @@ The following records describe completed foundation work, not completed function
 - **Audit Logging**: All policy creation, updates, and deletions are recorded in `audit_logs` immutably.
 - **Existing Loans Protection**: Loan terms will be captured at checkout (CIR-1) ensuring existing loans preserve the terms under which they were issued even when policies change.
 
+#### 11. Security Hardening, Helmet, Rate Limiting Decoupling, and Redis Caching
+
+- **Helmet & HTTP Security Headers**: Applied `helmet` middleware in `main.ts` with Content-Security-Policy (CSP), Strict-Transport-Security (HSTS preload, 1 year), `frameguard: { action: 'deny' }`, `noSniff: true`, `referrerPolicy: strict-origin-when-cross-origin`, and `hidePoweredBy`. Mirrored security headers in `apps/web/next.config.ts`.
+- **Sensitive API Cache Suppression**: Enforced `Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate`, `Pragma: no-cache`, `Expires: 0` headers on all API responses to ensure patron credentials, tokens, and records are never stored in browser history or intermediary caches.
+- **Architectural Decoupling of Rate Limiting**: Cleaned up `apps/api/src/redis/`. Moved `rate-limit.guard.spec.ts` to `src/common/guards/rate-limit.guard.spec.ts` alongside `rate-limit.guard.ts`. Deleted backward-compatibility shim files (`src/redis/rate-limit.guard.ts`, `src/redis/rate-limit.decorator.ts`, `src/auth/auth-rate-limit.constants.ts`). `src/redis/` now exclusively houses Redis connectivity, health, and caching services.
+- **Reverse Proxy and IP Resolution**: Configured Express `trust proxy` and updated `RateLimitGuard` to inspect `x-forwarded-for` proxy headers before falling back to `req.ip` or socket address, ensuring accurate per-client rate limiting behind Next.js, nginx, or Cloudflare.
+- **Payload Denial-of-Service Defense**: Restricted Express body parser payloads to 1MB (`express.json({ limit: '1mb' })` and `express.urlencoded({ limit: '1mb' })`).
+- **Redis Caching Architecture**: Implemented typed caching primitives (`get<T>`, `set`, `del`, `delByPattern`, `has`) in `RedisService`. Applied tenant-scoped caching (`cache:member-types:${tenantId}`) with automatic cache invalidation on member type and policy mutations. Non-blocking error handling ensures database fallbacks if Redis cache operations fail.
+
 ## Open decisions / operational confirmations
 
 1. Confirm production hosting, PostgreSQL version, backup/restore arrangements and cross-border data-transfer implications before production use with real member data.

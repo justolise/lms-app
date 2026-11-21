@@ -83,7 +83,9 @@ describe('MemberIdentifierService', () => {
     const encrypted = service.encrypt('ID-12345678');
     const parts = encrypted.split('.');
 
-    parts[2] = parts[2]!.replace(/^./, 'A');
+    parts[2] = parts[2]!.startsWith('A')
+      ? `B${parts[2]!.slice(1)}`
+      : `A${parts[2]!.slice(1)}`;
 
     expect(() => service.decrypt(parts.join('.'))).toThrow(BadRequestException);
   });

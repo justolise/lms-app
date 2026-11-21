@@ -19,11 +19,13 @@ describe('RateLimitGuard', () => {
 
   const request: {
     ip?: string;
+    headers?: Record<string, string | string[] | undefined>;
     socket: {
       remoteAddress?: string;
     };
   } = {
     ip: '127.0.0.1',
+    headers: {},
     socket: {
       remoteAddress: '127.0.0.1',
     },
@@ -126,5 +128,15 @@ describe('RateLimitGuard', () => {
     const secondKey = redisService.incrementRateLimit.mock.calls[1][0];
 
     expect(firstKey).not.toBe(secondKey);
+  });
+
+  it('extracts client IP from x-forwarded-for header when behind a proxy', async () => {
+    request.ip = '127.0.0.1';
+    request.headers = { 'x-forwarded-for': '203.0.113.195, 70.41.3.18' };
+
+    await guard.canActivate(context as never);
+
+    const key = redisService.incrementRateLimit.mock.calls[0][0];
+    expect(key).toContain('rate-limit:auth-login:');
   });
 });

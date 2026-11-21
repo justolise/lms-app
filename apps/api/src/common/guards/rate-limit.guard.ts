@@ -15,6 +15,7 @@ import type { RateLimitOptions } from '../interfaces/rate-limit-options.interfac
 
 interface HttpRequest {
   ip?: string;
+  headers?: Record<string, string | string[] | undefined>;
   socket?: {
     remoteAddress?: string;
   };
@@ -50,7 +51,14 @@ export class RateLimitGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<HttpRequest>();
     const response = context.switchToHttp().getResponse<HttpResponse>();
 
-    const ip = request.ip ?? request.socket?.remoteAddress;
+    const rawForwarded = request.headers?.['x-forwarded-for'];
+    const forwardedIp = Array.isArray(rawForwarded)
+      ? rawForwarded[0]
+      : typeof rawForwarded === 'string'
+        ? rawForwarded.split(',')[0]?.trim()
+        : undefined;
+
+    const ip = forwardedIp || request.ip || request.socket?.remoteAddress;
 
     if (!ip) {
       throw new ServiceUnavailableException(

@@ -10,6 +10,7 @@ import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
 import { OtpService } from './otp/otp.service.js';
 import { AccessTokenGuard } from '../common/guards/access-token.guard.js';
+import { RateLimitGuard } from '../common/guards/rate-limit.guard.js';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { AccessTokenGuard } from '../common/guards/access-token.guard.js';
     SessionModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, OtpService, AccessTokenGuard],
-  exports: [AuthService, OtpService, AccessTokenGuard],
+  providers: [AuthService, OtpService, AccessTokenGuard, RateLimitGuard],
+  exports: [AuthService, OtpService, AccessTokenGuard, RateLimitGuard],
 })
 export class AuthModule {}

@@ -33,14 +33,19 @@ A dedicated security contact and response SLA remain to be established before pu
 - PostgreSQL RLS ENABLE and FORCE on seven tenant-owned tables (`users`, `groups`, `member_types`, `member_profiles`, `sessions`, `otp_codes`, `audit_logs`).
 - Transaction-local tenant context (`DatabaseService.withTenant()`) with fail-closed policy design.
 - Append-only runtime permissions for audit records (`audit_logs`).
-- Redis-backed distributed rate limiting for login, OTP, and password operations.
+- Redis-backed distributed sliding-window rate limiting for login, OTP, and password operations (`RateLimitGuard`), with proxy-aware IP extraction (`x-forwarded-for`) and SHA-256 key blinding.
+- Clean architectural decoupling: rate limiting guards and decorators housed under `src/common/guards/` and `src/common/decorators/`; `src/redis/` restricted strictly to Redis connectivity and caching services.
+- Redis caching with tenant key isolation (`cache:<entity>:<tenantId>`), TTL support, and automated cache invalidation on entity mutations.
+- HTTP security headers applied via Helmet (Content-Security-Policy, HSTS preload, frameguard action: deny, noSniff, referrerPolicy, ieNoOpen, dnsPrefetchControl, hidePoweredBy) across API and Next.js web application.
+- Sensitive API cache suppression: Global `Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate`, `Pragma: no-cache`, `Expires: 0` headers on all `/api/*` endpoints to eliminate credential and patron data caching in intermediate proxies or browsers.
+- Express body parser size limits (1MB) to protect against payload denial-of-service (DoS).
+- CORS configuration with explicit origins, methods, headers, and credentials handling.
 - `.env` is ignored by `.gitignore`.
 
 ## Known outstanding security work
 
 - Audit workflows for fine waivers, copy deletions, and checkout overrides (in circulation/fines modules).
-- Security headers/CORS review for deployed production environments.
-- Semgrep Community Edition static security scanning is configured; the Security workflow was verified green on commit `82c9b1d`. Finding triage and remediation remain ongoing.
+- Semgrep Community Edition static security scanning is configured; the Security workflow was verified green on commit `df40249`. Finding triage and remediation remain ongoing.
 - Dependency vulnerability auditing is configured; the Security workflow was verified green on commit `82c9b1d`. Ongoing dependency audits and vulnerability remediation remain required.
 - Secret scanning and first-commit review.
 - Backup encryption, restore testing, monitoring and incident response.

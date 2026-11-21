@@ -14,8 +14,8 @@ import { AuthService } from '../src/auth/auth.service.js';
 import { SessionService } from '../src/auth/session/session.service.js';
 import { TokenService } from '../src/auth/token/token.service.js';
 import { OtpService } from '../src/auth/otp/otp.service.js';
-import { RateLimitGuard } from '../src/redis/rate-limit.guard.js';
-import { AccessTokenGuard } from '../src/auth/guards/access-token.guard.js';
+import { RateLimitGuard } from '../src/common/guards/rate-limit.guard.js';
+import { AccessTokenGuard } from '../src/common/guards/access-token.guard.js';
 
 describe('AuthController (e2e) — AUTH-1 / AUTH-5', () => {
   let app: INestApplication<App>;

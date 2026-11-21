@@ -3,16 +3,13 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { and, eq, sql } from 'drizzle-orm';
 
 import { DatabaseService } from '../database/database.service.js';
-import {
-  auditLogs,
-  loanPolicies,
-  memberProfiles,
-  memberTypes,
-} from '../database/schema.js';
+import { RedisService } from '../redis/redis.service.js';
+import { auditLogs, loanPolicies, memberTypes } from '../database/schema.js';
 import {
   CreateLoanPolicyDto,
   CreateMemberTypeDto,
@@ -22,22 +19,32 @@ import {
 
 @Injectable()
 export class MemberTypesService {
-  constructor(private readonly database: DatabaseService) {}
+  constructor(
+    private readonly database: DatabaseService,
+    @Optional() private readonly redis?: RedisService,
+  ) {}
+
+  private async invalidateCache(tenantId: string): Promise<void> {
+    if (this.redis) {
+      try {
+        await this.redis.del(`cache:member-types:${tenantId}`);
+      } catch {
+        // Non-blocking cache invalidation error
+      }
+    }
+  }
 
   // ─── Member Type CRUD ───────────────────────────────────────
 
   async create(tenantId: string, actorId: string, dto: CreateMemberTypeDto) {
     const name = dto.name.trim();
 
-    return this.database.withTenant(tenantId, async (tx) => {
+    const result = await this.database.withTenant(tenantId, async (tx) => {
       const existing = await tx
         .select({ id: memberTypes.id })
         .from(memberTypes)
         .where(
-          and(
-            eq(memberTypes.tenantId, tenantId),
-            eq(memberTypes.name, name),
-          ),
+          and(eq(memberTypes.tenantId, tenantId), eq(memberTypes.name, name)),
         )
         .limit(1);
 
@@ -75,10 +82,33 @@ export class MemberTypesService {
 
       return memberType;
     });
+
+    await this.invalidateCache(tenantId);
+    return result;
   }
 
   async list(tenantId: string) {
-    return this.database.withTenant(tenantId, async (tx) => {
+    const cacheKey = `cache:member-types:${tenantId}`;
+    if (this.redis) {
+      try {
+        const cached = await this.redis.get<
+          Array<{
+            id: string;
+            name: string;
+            description: string | null;
+            isActive: boolean;
+            createdAt: Date;
+          }>
+        >(cacheKey);
+        if (cached) {
+          return cached;
+        }
+      } catch {
+        // Fall back to database on cache error
+      }
+    }
+
+    const rows = await this.database.withTenant(tenantId, async (tx) => {
       return tx
         .select({
           id: memberTypes.id,
@@ -91,6 +121,16 @@ export class MemberTypesService {
         .where(eq(memberTypes.tenantId, tenantId))
         .orderBy(memberTypes.name);
     });
+
+    if (this.redis) {
+      try {
+        await this.redis.set(cacheKey, rows, 300); // 5 minutes TTL
+      } catch {
+        // Non-blocking cache write failure
+      }
+    }
+
+    return rows;
   }
 
   async getById(tenantId: string, memberTypeId: string) {
@@ -147,7 +187,7 @@ export class MemberTypesService {
     memberTypeId: string,
     dto: UpdateMemberTypeDto,
   ) {
-    return this.database.withTenant(tenantId, async (tx) => {
+    const result = await this.database.withTenant(tenantId, async (tx) => {
       const existing = await tx
         .select({ id: memberTypes.id, name: memberTypes.name })
         .from(memberTypes)
@@ -237,6 +277,9 @@ export class MemberTypesService {
 
       return rows[0];
     });
+
+    await this.invalidateCache(tenantId);
+    return result;
   }
 
   // ─── Loan Policy CRUD ───────────────────────────────────────
@@ -249,7 +292,7 @@ export class MemberTypesService {
   ) {
     const itemFormat = dto.itemFormat.trim().toUpperCase();
 
-    return this.database.withTenant(tenantId, async (tx) => {
+    const result = await this.database.withTenant(tenantId, async (tx) => {
       // Verify member type exists in this tenant.
       const typeRows = await tx
         .select({ id: memberTypes.id })
@@ -326,6 +369,9 @@ export class MemberTypesService {
 
       return rows[0];
     });
+
+    await this.invalidateCache(tenantId);
+    return result;
   }
 
   async updatePolicy(
@@ -335,7 +381,7 @@ export class MemberTypesService {
     policyId: string,
     dto: UpdateLoanPolicyDto,
   ) {
-    return this.database.withTenant(tenantId, async (tx) => {
+    const result = await this.database.withTenant(tenantId, async (tx) => {
       const existing = await tx
         .select({ id: loanPolicies.id })
         .from(loanPolicies)
@@ -408,6 +454,9 @@ export class MemberTypesService {
 
       return rows[0];
     });
+
+    await this.invalidateCache(tenantId);
+    return result;
   }
 
   async deletePolicy(
@@ -416,7 +465,7 @@ export class MemberTypesService {
     memberTypeId: string,
     policyId: string,
   ) {
-    return this.database.withTenant(tenantId, async (tx) => {
+    const result = await this.database.withTenant(tenantId, async (tx) => {
       const existing = await tx
         .select({
           id: loanPolicies.id,
@@ -459,5 +508,8 @@ export class MemberTypesService {
 
       return { deleted: true };
     });
+
+    await this.invalidateCache(tenantId);
+    return result;
   }
 }

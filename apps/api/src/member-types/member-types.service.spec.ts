@@ -299,4 +299,61 @@ describe('MemberTypesService (MEM-2, ADM-2)', () => {
       expect(result).toEqual({ deleted: true });
     });
   });
+
+  describe('caching with Redis', () => {
+    const redis = {
+      get: vi.fn(),
+      set: vi.fn(),
+      del: vi.fn(),
+    };
+
+    let cachedService: MemberTypesService;
+
+    beforeEach(() => {
+      redis.get.mockReset();
+      redis.set.mockReset();
+      redis.del.mockReset();
+      cachedService = new MemberTypesService(
+        database as unknown as DatabaseService,
+        redis as any,
+      );
+    });
+
+    it('returns cached member types when available in redis', async () => {
+      const cachedData = [
+        { id: '1', name: 'Cached Type', description: null, isActive: true, createdAt: new Date() },
+      ];
+      redis.get.mockResolvedValue(cachedData);
+
+      const result = await cachedService.list(tenantId);
+
+      expect(redis.get).toHaveBeenCalledWith(`cache:member-types:${tenantId}`);
+      expect(result).toEqual(cachedData);
+      expect(database.withTenant).not.toHaveBeenCalled();
+    });
+
+    it('fetches from DB and sets cache on miss', async () => {
+      redis.get.mockResolvedValue(null);
+      const dbData = [
+        { id: '2', name: 'DB Type', description: null, isActive: true, createdAt: new Date() },
+      ];
+      selectQueue.push(dbData);
+
+      const result = await cachedService.list(tenantId);
+
+      expect(redis.get).toHaveBeenCalledWith(`cache:member-types:${tenantId}`);
+      expect(result).toEqual(dbData);
+      expect(redis.set).toHaveBeenCalledWith(`cache:member-types:${tenantId}`, dbData, 300);
+    });
+
+    it('invalidates cache on member type creation', async () => {
+      selectQueue.push([]); // no duplicate
+      insertQueue.push([{ id: memberTypeId, name: 'New Type', description: null, isActive: true, createdAt: new Date() }]);
+      insertQueue.push([]); // audit log
+
+      await cachedService.create(tenantId, actorId, { name: 'New Type' });
+
+      expect(redis.del).toHaveBeenCalledWith(`cache:member-types:${tenantId}`);
+    });
+  });
 });

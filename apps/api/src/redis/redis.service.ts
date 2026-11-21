@@ -99,4 +99,55 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       ttlMs: Math.max(0, Number(result[1])),
     };
   }
+
+  // ─── Generic Caching API ────────────────────────────────────
+
+  async get<T>(key: string): Promise<T | null> {
+    const raw = await this.client.get(key);
+    if (!raw) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      return raw as unknown as T;
+    }
+  }
+
+  async set(key: string, value: unknown, ttlSeconds?: number): Promise<void> {
+    const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+
+    if (ttlSeconds && ttlSeconds > 0) {
+      await this.client.set(key, serialized, 'EX', ttlSeconds);
+    } else {
+      await this.client.set(key, serialized);
+    }
+  }
+
+  async del(key: string): Promise<void> {
+    await this.client.del(key);
+  }
+
+  async delByPattern(pattern: string): Promise<void> {
+    let cursor = '0';
+    do {
+      const [nextCursor, keys] = await this.client.scan(
+        cursor,
+        'MATCH',
+        pattern,
+        'COUNT',
+        100,
+      );
+      cursor = nextCursor;
+      if (keys.length > 0) {
+        await this.client.del(...keys);
+      }
+    } while (cursor !== '0');
+  }
+
+  async has(key: string): Promise<boolean> {
+    const exists = await this.client.exists(key);
+    return exists === 1;
+  }
 }

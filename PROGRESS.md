@@ -117,9 +117,10 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 Current verification run completed on **21 November 2026**:
 
 - **pnpm typecheck**: Passed across all workspace projects (0 TypeScript errors).
-- **pnpm test (Unit Tests)**: 16 test files, 127 tests passed, 0 failed.
+- **pnpm test (Unit Tests)**: 16 test files, 139 tests passed, 0 failed.
 - **Controller E2E Tests**: 2 test files, 27 tests passed, 0 failed (`test/auth.controller.e2e-spec.ts`, `test/users.controller.e2e-spec.ts`).
 - **Live Database Interactive Verification**: Full end-to-end walkthrough verified against local PostgreSQL & Redis (login, profile, staff provisioning, first-login password change gate, frictionless first-time password change without temporary password requirement, min 8 char validation rejection & acceptance, subsequent password change requiring current password, promotion, OTP forgot/reset password, sessions listing, soft account deactivation protection, device logout, member types & borrowing policies matrix, and cross-tenant RLS isolation).
+- **Security Hardening & Cleanup**: Helmet security headers (CSP, HSTS preload, frameguard: deny, noSniff, xssFilter) active; global `Cache-Control: no-store` on API responses; Redis caching with tenant key isolation and mutation invalidation (`MemberTypesService`); rate-limiting decoupled from `src/redis/` into `src/common/guards/` and `src/common/decorators/`; proxy-aware client IP extraction (`x-forwarded-for`); 1MB payload limits; CORS configured.
 - **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 11 prerendered static routes including `/member-types`).
 
 Verification commands:
