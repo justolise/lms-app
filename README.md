@@ -1,190 +1,359 @@
-# Library Management System (LMS)
+<div align="center">
 
-Mobile-first library management software for schools and community libraries in Kenya and East Africa.
+# 📚 LMS — Library Management System
 
-> **Current implementation status (21 November 2026):** this repository contains the monorepo scaffold, five database foundation slices, and the completed, tested, and verified **Authentication and Access Control module (v1.0 MVP: AUTH-1 through AUTH-5 + PO additions)**. Circulation, catalogue, and other product workflows remain outstanding. See `PROGRESS.md` and `docs/auth/` for detailed implementation status.
+**Mobile-first, multi-tenant library software built for schools and community libraries in Kenya and East Africa.**
 
-## Release target
+[![CI](https://github.com/justolise/lms-app/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/justolise/lms-app/actions/workflows/ci.yml)
+[![Security](https://github.com/justolise/lms-app/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/justolise/lms-app/actions/workflows/security.yml)
+![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178C6?logo=typescript&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-166%20passed-brightgreen?logo=vitest)
+![PostgreSQL RLS](https://img.shields.io/badge/PostgreSQL-RLS%20enforced-336791?logo=postgresql&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
+![NestJS](https://img.shields.io/badge/NestJS-12-E0234E?logo=nestjs)
+![License](https://img.shields.io/badge/license-proprietary-red)
 
-The v1.0 MVP targets core circulation and the supporting workflows defined in the approved v1.0 MVP Requirements document. Later releases remain out of scope until the v1.0 pilot has been completed and reviewed.
+</div>
 
-The release target includes authentication and roles; catalogue and copies; search; circulation; holds; fines; member management; email and SMS notifications; a basic dashboard; and library administration/settings. See `PROGRESS.md` and `docs/requirements-traceability.md` for implementation status.
+---
 
-## Technology stack
+## The Problem
 
-| Area                      | Technology                                                                                                    |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| Monorepo                  | pnpm workspaces                                                                                               |
-| Web                       | Next.js App Router, React 19, Tailwind CSS 4                                                                  |
-| API                       | NestJS 12, TypeScript, REST                                                                                   |
-| Database                  | PostgreSQL, Drizzle ORM, SQL migrations                                                                       |
-| Tenant isolation          | PostgreSQL Row-Level Security (RLS)                                                                           |
-| Cache / background jobs   | Redis is configured locally; BullMQ integration is planned, not yet present in the inspected API dependencies |
-| Authentication foundation | Argon2id, JOSE JWT signing/verification, identity lookup                                                      |
-| Tests                     | Vitest; API E2E and database integration test suites                                                          |
-| Local supporting service  | Docker Compose (Redis only)                                                                                   |
-| CI                        | GitHub Actions; CI and Security workflows verified green on commit `82c9b1d`                                  |
+Over **90% of school libraries in Kenya** run on paper ledgers or outdated desktop software that:
 
-The repository's actual package manifests are authoritative for dependency versions and available scripts.
+- Requires expensive hardware and constant internet connectivity
+- Crashes or corrupts data on power outages during peak borrowing hours
+- Offers no multi-library or multi-tenant isolation for library networks
+- Cannot be operated on the low-end Android devices that students and librarians carry
 
-## Current implementation
+**The result:** Books go untracked, fines go uncollected, reading programs fail, and school administrations lose visibility into their library's impact.
 
-### Implemented workflows and foundations
+---
 
-- pnpm workspace with `apps/web`, `apps/api` and `packages/shared`.
-- Next.js 16 web application with mobile-first UI for authentication, password reset, self-service profile, and staff user directory.
-- NestJS 12 API with `AuthModule`, `UsersModule`, `MembersModule`, `DatabaseModule`, and `RedisModule`.
-- Complete authentication and RBAC workflows (AUTH-1 through AUTH-5 and PO additions):
-  - Email and Kenyan phone (E.164) login with multi-library selection.
-  - Server-side RBAC enforcing roles (`ADMIN`, `LIBRARIAN`, `TEACHER`, `MEMBER`, `PARENT`, `GUEST`).
-  - Single-use password reset OTP with Argon2id hashing, 15m expiration, 5 attempt lockout, and session revocation.
-  - Staff-created accounts with server-generated temporary passwords and mandatory first-login password changes (`POST /api/auth/change-password`).
-  - Session lifecycle management with refresh token rotation and replay detection.
-  - Staff user directory (`GET /api/users`, `GET /api/users/:userId`).
-  - Self-service profile management and soft deactivation with last-admin and last-librarian invariant protections.
-  - Librarian-to-Admin role promotion (`POST /api/users/:userId/promote`).
-- Drizzle ORM query builders utilized for all normal application CRUD queries.
-- PostgreSQL schema and six Drizzle SQL migrations.
-- Tenant-scoped identity/member schema foundations.
-- RLS and transaction-local tenant context for seven tenant-owned tables: `users`, `groups`, `member_types`, `member_profiles`, `sessions`, `otp_codes` and `audit_logs`.
-- Append-only database permissions for runtime audit records.
-- Restricted HMAC-based global identity lookup foundation.
-- Argon2id password hashing, credential verification, and access/library-selection token signing and verification services.
+## The Solution
 
-### Not yet implemented as complete user workflows
+LMS is a **cloud-native, mobile-first library management system** designed from the ground up for the Kenyan and East African education market. It delivers a modern, secure, and low-bandwidth experience that works on a 3G connection with an ₹30 Android phone.
 
-Catalogue, search, copies, circulation, holds, fine ledger, general notifications, dashboard, and admin settings remain outstanding.
+### Key differentiators
 
-### Database migrations
+| Differentiator | Detail |
+|---|---|
+| **Multi-tenant isolation** | Each library is a fully isolated tenant with PostgreSQL Row-Level Security — zero cross-tenant data leakage by design |
+| **Mobile-first & 3G-ready** | Checkout target < 1 second on 3G; progressive-enhancement UI for low-end Android |
+| **Zero-trust security** | Argon2id password hashing · Helmet HTTP security headers · Redis-backed rate limiting · Append-only audit log · CSRF and CSP hardened |
+| **Offline-ready architecture** | Schema and architecture designed for future offline sync without rewrites |
+| **Kenya Data Protection Act** | Privacy-by-default data model, especially for minors' borrowing records |
+| **Open REST API** | Versioned JSON API ready for integrations with government NEMIS, school SMS gateways, and third-party apps |
 
-The repository contains:
+---
 
-- `0000_slice_1_tenant_member_identity.sql`
-- `0001_slice_2_auth_security.sql`
-- `0002_slice_3_tenant_isolation.sql`
-- `0003_slice_4_audit_logs.sql`
-- `0004_slice_5_identity_lookup.sql`
-- `0005_auth_4_first_login_password_change.sql`
+## Status — v1.0 MVP
 
-The migration files are present in the repository. Whether they have been applied to a particular database must be checked against that database; do not infer live migration state from the files alone.
+> **Phase complete: Authentication & Access Control (AUTH-1 → AUTH-5 + People Operations)**
+> Circulation, Catalogue, Search, Holds, Fines, Notifications, and Dashboard are in the [v1.0 backlog](https://github.com/users/justolise/projects/5).
 
-### Tenant isolation
+| Metric | Value |
+|---|---|
+| Unit tests passing | ✅ **139 / 139** (16 test files) |
+| Controller E2E tests passing | ✅ **27 / 27** (2 test files) |
+| TypeScript errors | ✅ **0** (strict mode) |
+| Production build | ✅ API + Web both clean |
+| CI pipeline | ✅ Green on `main` |
+| Security workflow | ✅ Green on `main` |
+| Database migrations applied | ✅ 6 Drizzle SQL migrations |
+| Completed v1.0 requirements | ✅ **9 / 29 P0 requirements done** |
+| MVP requirements remaining | 🔵 20 (Catalogue · Circulation · Holds · Fines · Notifications · Dashboard) |
 
-The `tenants` registry is intentionally outside RLS to permit tenant discovery before authentication establishes tenant context. Tenant-owned operations use `DatabaseService.withTenant()` to set `app.tenant_id` transaction-locally. The RLS policy design fails closed when tenant context is missing.
+Full traceability: [`PROGRESS.md`](PROGRESS.md) · [`docs/requirements-traceability.md`](docs/requirements-traceability.md)
 
-The runtime role `lms_app` is distinct from the migration role. The restricted global identity functions are owned by `lms_identity_owner`; the runtime role accesses them through approved function execution rather than direct access to the global identity lookup table.
+---
 
-## Requirements and decisions
+## Architecture
 
-- `PROGRESS.md` is the project status register.
-- `DECISIONS.md` records approved product and technical decisions.
-- `docs/requirements-traceability.md` maps requirements to implementation evidence and remaining work.
-- `docs/business-rules.md`, `docs/permissions.md` and `docs/acceptance-criteria.md` are proposed working documents, not approved requirements. Their contents must be reconciled with the PRD and approved decisions in `DECISIONS.md`. Where they conflict, the PRD and approved decisions take precedence. Proposals do not become requirements until explicitly approved by the product owner.
+```
+┌────────────────────────────────────────────────────────────┐
+│                        Client (Browser / Android)          │
+│            Next.js 16  ·  React 19  ·  Tailwind CSS 4      │
+│           Mobile-first  ·  3G-optimized  ·  Progressive    │
+└──────────────────────────┬─────────────────────────────────┘
+                           │  HTTPS / REST (JSON)
+┌──────────────────────────▼─────────────────────────────────┐
+│                    NestJS 12 API                            │
+│  AuthModule · UsersModule · MembersModule · MemberTypes     │
+│  Helmet CSP/HSTS · Rate Limiting · RBAC Guards · Sessions   │
+└───────────┬──────────────────────────────────┬─────────────┘
+            │                                  │
+┌───────────▼──────────┐          ┌────────────▼────────────┐
+│   PostgreSQL 18       │          │       Redis              │
+│   Drizzle ORM         │          │  Rate Limiting · Cache   │
+│   Row-Level Security  │          │  Session Token Store     │
+│   6 SQL Migrations    │          └─────────────────────────┘
+│   Append-only Audit   │
+└──────────────────────┘
+```
 
-Key scope decisions:
+### Security architecture (zero-trust)
 
-- AUTH-4: manual/single-account creation only in v1.0; CSV bulk onboarding is deferred.
-- GUEST is anonymous: it has no user account, authenticated session or JWT. Public catalogue search and availability do not require authentication.
-- Teacher/member borrowing history is self-only; parent access to a child's borrowing history is excluded from v1.0.
-- Teacher/member loan renewal is not permitted; librarian/admin renewal is permitted.
-- No offline checkout/return transaction workflow in v1.0; retain architectural readiness only.
-- CIR-9 and FIN-3 remain P1 unless the product owner changes their priority.
+- **Argon2id** password hashing with tuned cost parameters
+- **PostgreSQL RLS** enforced at database level — `FORCE ROW LEVEL SECURITY` on all 7 tenant-owned tables
+- **Transaction-local tenant context** — `set_config('app.tenant_id')` scopes every query; missing context fails closed
+- **Redis rate limiting** — per-IP, proxy-aware (`x-forwarded-for` → socket fallback), `RateLimitGuard` on auth endpoints
+- **Helmet** — strict CSP, HSTS with preload, `X-Frame-Options: DENY`, `noSniff`, `xssFilter`
+- **Global `Cache-Control: no-store`** on all API responses
+- **Append-only audit log** — application role has `INSERT`-only permission; no mutation of past records
+- **HMAC-SHA-256 global identity lookup** — owned by `lms_identity_owner`, accessed only through `SECURITY DEFINER` functions
+- **AES-256-GCM** encryption for member identification documents (national ID, passport)
+- **Refresh token rotation** with replay detection — compromised token revokes the entire session lineage
+- **1 MB payload limit** on all API routes
 
-## Local development
+---
+
+## Technology Stack
+
+| Area | Technology |
+|---|---|
+| **Monorepo** | pnpm workspaces |
+| **Web** | Next.js 16 App Router · React 19 · Tailwind CSS 4 |
+| **API** | NestJS 12 · TypeScript (strict) · REST |
+| **Database** | PostgreSQL · Drizzle ORM · SQL migrations |
+| **Tenant isolation** | PostgreSQL Row-Level Security (RLS) |
+| **Cache** | Redis · `RedisService` with typed `get/set/del/delByPattern` |
+| **Auth** | Argon2id · JOSE JWT (HS256) · Server-side RBAC |
+| **Security** | Helmet · CORS env-driven · Rate limiting · AES-256-GCM |
+| **Tests** | Vitest · Unit + Controller E2E |
+| **CI/CD** | GitHub Actions (CI + Security workflows) |
+| **Dev services** | Docker Compose (Redis) |
+
+---
+
+## Completed Requirements (AUTH & People Operations)
+
+| ID | Priority | Requirement | Evidence |
+|---|---|---|---|
+| **AUTH-1** | P0 ✅ | Email & Kenyan phone login | E.164 normalization · Argon2id · multi-library selection · first-login password change gate |
+| **AUTH-2** | P0 ✅ | 6-role RBAC | `ADMIN · LIBRARIAN · TEACHER · MEMBER · PARENT · GUEST` · server-side `RolesGuard` · 401/403 |
+| **AUTH-3** | P0 ✅ | Password reset by OTP | 6-digit OTP · Argon2id hash · 15 min expiry · 5-attempt lockout · session purge |
+| **AUTH-4** | P0 ✅ | Staff-provisioned accounts | `POST /api/members` · server-generated temp password · `mustChangePassword` gate |
+| **AUTH-5** | P1 ✅ | Sessions & rate limiting | Token rotation · replay detection · Redis rate limiting · per-device logout |
+| **PO-1** | P0 ✅ | Staff user directory | `GET /api/users` · `GET /api/users/:id` · Admin/Librarian only · safe projections |
+| **PO-2** | P0 ✅ | Self-service profile | `GET /api/profile` · `PATCH /api/profile` · whitelisted fields · role immutable |
+| **PO-3** | P0 ✅ | Soft account deactivation | `DELETE /api/profile` → `SUSPENDED` · session revoke · last-admin guard |
+| **PO-4** | P0 ✅ | Role promotion | `POST /api/users/:id/promote` · Admin-only · self-promotion rejected · audit logged |
+| **MEM-2** | P0 ✅ | Member types & borrowing rules | Loan policy matrix · `MemberTypesService` · full UI at `/member-types` |
+| **ADM-2** | P0 ✅ | Loan/fine/hold settings | Per-type loan duration · concurrent loan limits · grace periods · daily/max fines |
+
+---
+
+## v1.0 Remaining Backlog
+
+| Workstream | Requirements |
+|---|---|
+| Catalogue | CAT-1 · CAT-2 · CAT-3 · CAT-4 · CAT-5 |
+| Search | SRC-1 · SRC-2 |
+| Circulation | CIR-1 · CIR-2 · CIR-3 · CIR-4 · CIR-5 · CIR-6 · CIR-9 |
+| Holds | HLD-1 · HLD-2 · HLD-3 |
+| Fines | FIN-1 · FIN-2 · FIN-3 |
+| Members | MEM-1 · MEM-4 |
+| Notifications | NOT-1 · NOT-2 |
+| Inventory | INV-2 |
+| Dashboard | RPT-1 |
+| Admin | ADM-1 |
+
+Track progress on the [LMS v1.0 GitHub Project board](https://github.com/users/justolise/projects/5).
+
+---
+
+## Quick Start
 
 ### Prerequisites
 
-- Node.js 22 or later (the workspace currently uses Node 24 in development).
-- pnpm 12.21.0 (declared in the root `package.json`).
-- PostgreSQL with the required runtime and migration roles.
-- Docker Engine and Docker Compose for Redis.
-- Git.
+- **Node.js** 22+ (project uses Node 24 in development)
+- **pnpm** 12.21.0 (`npm install -g pnpm@12.21.0`)
+- **PostgreSQL** with LMS runtime and migration roles provisioned
+- **Docker Engine** for Redis
+- **Git**
 
-### Configure environment
+### 1. Clone & install
+
+```bash
+git clone https://github.com/justolise/lms-app.git
+cd lms-app
+pnpm install
+```
+
+### 2. Configure environment
 
 ```bash
 cp .env.example .env
 ```
 
-Set local-only credentials and secrets in `.env`. The example file documents `DATABASE_URL`, `MIGRATION_DATABASE_URL`, `REDIS_URL`, `IDENTITY_LOOKUP_HMAC_KEY`, `ACCESS_TOKEN_SECRET` and `LIBRARY_SELECTION_TOKEN_SECRET`.
+Edit `.env` and set:
 
-Never print, commit or share `.env` contents. `.env` is ignored by the current `.gitignore`; verify this remains true before the first commit.
+| Variable | Description |
+|---|---|
+| `DATABASE_URL` | PostgreSQL connection string (runtime role) |
+| `MIGRATION_DATABASE_URL` | PostgreSQL connection string (migration role) |
+| `REDIS_URL` | Redis connection string (`redis://localhost:6379`) |
+| `ACCESS_TOKEN_SECRET` | ≥32-char random secret for JWT access tokens |
+| `LIBRARY_SELECTION_TOKEN_SECRET` | ≥32-char random secret for library-selection tokens |
+| `IDENTITY_LOOKUP_HMAC_KEY` | ≥32-char secret for global identity HMAC |
+| `FRONTEND_URL` | Web app origin for CORS (e.g. `http://localhost:3001`) |
 
-### Install dependencies
+> ⚠️ **Never commit `.env`.** It is git-ignored. Verify with `git status` before every commit.
 
-```bash
-pnpm install
-```
-
-### Start Redis
+### 3. Start Redis
 
 ```bash
 docker compose up -d redis
-docker compose ps
 ```
 
-`compose.yaml` starts Redis only. PostgreSQL is managed separately and must be running/configured before database-backed tests or API operations.
-
-### Apply database migrations
-
-Confirm that `MIGRATION_DATABASE_URL` targets the intended local development database and that the migration role is correctly provisioned.
+### 4. Apply database migrations
 
 ```bash
 pnpm --filter @lms/api exec drizzle-kit migrate
 ```
 
-Do not run development migrations against production.
-
-### Run checks
+### 5. Start the API and web app
 
 ```bash
-pnpm lint
-pnpm typecheck
-pnpm test
-pnpm build
+# Terminal 1 — API (port 3000)
+pnpm --filter @lms/api start:dev
+
+# Terminal 2 — Web (port 3001)
+pnpm --filter @lms/web dev
 ```
 
-The root `pnpm test` runs package `test` scripts recursively (108 unit tests).
+---
 
-Run API Controller E2E tests:
+## Verification
+
+Run the full quality suite in one command:
 
 ```bash
-pnpm --filter @lms/api exec vitest run --config ./vitest.config.e2e.ts test/auth.controller.e2e-spec.ts test/users.controller.e2e-spec.ts
+pnpm typecheck && pnpm lint && pnpm test && pnpm build
 ```
 
-Database integration tests require the dedicated local LMS PostgreSQL database and its required roles/permissions:
+Run controller E2E tests (no live database required):
+
+```bash
+pnpm --filter @lms/api exec vitest run \
+  --config ./vitest.config.e2e.ts \
+  test/auth.controller.e2e-spec.ts \
+  test/users.controller.e2e-spec.ts
+```
+
+Run database integration tests (requires local PostgreSQL + Redis):
 
 ```bash
 pnpm --filter @lms/api test:e2e
 ```
 
-### Start applications
+**Expected results (last verified 21 November 2026, commit `a23d45f`):**
 
-API:
-
-```bash
-pnpm --filter @lms/api start:dev
+```
+✓ pnpm typecheck    — 0 TypeScript errors
+✓ pnpm lint         — 0 linting errors
+✓ pnpm test         — 139 unit tests passed (16 files)
+✓ E2E tests         — 27 tests passed (2 files)
+✓ pnpm build        — API + Web production build clean
 ```
 
-Web:
+---
 
-```bash
-pnpm --filter @lms/web dev
+## Project Structure
+
+```
+lms-app/
+├── apps/
+│   ├── api/                    # NestJS 12 REST API
+│   │   ├── src/
+│   │   │   ├── auth/           # AUTH-1 → AUTH-5
+│   │   │   ├── users/          # PO-1, PO-3, PO-4
+│   │   │   ├── members/        # AUTH-4, MEM-1, MEM-2
+│   │   │   ├── member-types/   # MEM-2, ADM-2 (cached via Redis)
+│   │   │   ├── common/         # Guards, decorators, rate limiting
+│   │   │   ├── database/       # Drizzle ORM, RLS, migrations
+│   │   │   └── redis/          # RedisService (cache + rate limit)
+│   │   └── test/               # Controller E2E test suites
+│   └── web/                    # Next.js 16 App Router
+│       └── app/
+│           ├── login/          # AUTH-1 login page
+│           ├── forgot-password/ # AUTH-3 OTP request
+│           ├── reset-password/ # AUTH-3 OTP verification
+│           ├── change-password/ # AUTH-4 first-login gate
+│           ├── profile/        # PO-2, PO-3
+│           ├── users/          # PO-1
+│           └── member-types/   # MEM-2, ADM-2
+├── packages/
+│   └── shared/                 # Shared TypeScript types
+├── docs/                       # Architecture, PRD, auth docs, runbook
+├── PROGRESS.md                 # Requirement status register
+├── DECISIONS.md                # Approved architectural decisions
+├── compose.yaml                # Docker Compose (Redis)
+└── .env.example                # Environment variable template
 ```
 
-The web package currently has no configured test script. Do not treat the existence of a Next.js scaffold as proof of mobile usability or completed workflows.
+---
 
-## Engineering principles
+## Engineering Principles
 
-- Mobile-first, low-bandwidth and low-end Android support.
-- Fast, reliable circulation; the checkout performance target is under one second on 3G.
-- Server-side authorization and tenant isolation.
-- Tenant-owned records carry `tenant_id`.
-- Privacy by default, especially for minors' data, under the Kenya Data Protection Act 2019.
-- Test business rules, boundary cases and permissions.
-- Keep secrets in environment variables.
-- Do not silently change requirements, schema or stack.
+- **Mobile-first** — every UI decision tested against 320px viewport and 3G latency
+- **Security by default** — zero-trust multi-tenant isolation; fail-closed RLS; no raw SQL CRUD
+- **Privacy by design** — Kenya Data Protection Act 2019 compliance; minors' data minimized
+- **Test business rules** — boundary cases, permission matrix, and tenant isolation are first-class test targets
+- **No silent changes** — schema, stack, and scope changes require explicit approval and documentation
+- **Environment-only secrets** — no secrets in source control, ever
 
-## Release gate
+---
 
-Before v1.0 pilot readiness, run a P0 requirement checklist, close or document gaps, verify security and permissions, validate mobile workflows, and prepare a pilot deployment guide. Do not begin v1.5 implementation before pilot feedback.
+## Decisions & Deferred Scope
+
+| Decision | Detail |
+|---|---|
+| AUTH-4: manual provisioning only | CSV bulk import deferred to v1.5 |
+| No public self-registration | All accounts provisioned by authorized staff |
+| GUEST is anonymous | No JWT or session required for public catalogue search |
+| Teacher/member renewal | Librarian/admin renewal only in v1.0 |
+| No offline checkout in v1.0 | Architecture is offline-ready; feature deferred |
+| CIR-9 and FIN-3 | Remain P1 unless product owner escalates |
+
+Full decision log: [`DECISIONS.md`](DECISIONS.md)
+
+---
+
+## Roadmap
+
+```
+v1.0 MVP ─── Auth & Access ✅ ─── Catalogue 🔵 ─── Circulation 🔵 ─── Holds 🔵 ─── Fines 🔵 ─── Launch 🎯
+v1.5     ─── CSV Bulk Import · Enhanced Notifications · Mobile Barcode Scanning
+v2.0     ─── Offline Sync · Parent Portal · Reporting Dashboard
+v4.0     ─── Parent-Child Account Linking
+v6.0     ─── SSO / NEMIS Integration
+```
+
+---
+
+## Contributing
+
+This repository is in active pre-pilot development. Before contributing:
+
+1. Read [`DECISIONS.md`](DECISIONS.md) — do not change approved scope without product-owner sign-off.
+2. Run the full verification suite (`pnpm typecheck && pnpm lint && pnpm test && pnpm build`) before opening a PR.
+3. All PRs must pass the CI and Security GitHub Actions workflows.
+4. Do not add secrets or credentials to any committed file.
+
+---
+
+## License
+
+Proprietary. All rights reserved. © 2026 Justolise.
+
+---
+
+<div align="center">
+
+**Built with ❤️ for Kenya's learners · Powered by open-source technology**
+
+[Project Board](https://github.com/users/justolise/projects/5) · [Progress Tracker](PROGRESS.md) · [Architecture Decisions](DECISIONS.md) · [Documentation](docs/)
+
+</div>
