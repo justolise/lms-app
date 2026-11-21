@@ -17,25 +17,29 @@ Until a private repository security-reporting channel is configured, contact the
 
 A dedicated security contact and response SLA remain to be established before public production release.
 
-## Implemented foundations evidenced in the current repository
+## Implemented security controls evidenced in the current repository
 
-- Argon2id password hashing service.
-- JWT signing and verification services.
-- HMAC-SHA-256 global identity lookup.
-- Restricted identity database functions owned by a dedicated NOLOGIN role.
-- PostgreSQL RLS ENABLE and FORCE on seven tenant-owned tables.
-- Transaction-local tenant context with fail-closed policy design.
-- Append-only runtime permissions for audit records.
-- `.env` is ignored by the current `.gitignore`.
+- Argon2id password hashing and credential verification.
+- JOSE JWT signing and verification services for access and library-selection tokens.
+- Mandatory first-login password change enforcement via `AccessTokenGuard` (`must_change_password` flag).
+- Server-side Role-Based Access Control (`RolesGuard` and `AccessTokenGuard`) enforcing 6 roles (`ADMIN`, `LIBRARIAN`, `TEACHER`, `MEMBER`, `PARENT`, `GUEST`). Missing tokens return 401 Unauthorized; insufficient roles return 403 Forbidden.
+- Session lifecycle management: SHA-256 hashed refresh tokens, automatic rotation on refresh, and replay detection that revokes entire compromised session lineages.
+- Password reset via single-use OTP (`OtpService`): 6-digit random codes, Argon2id hashing, 15m expiration, 5 attempt lockout, anti-enumeration responses, and complete session revocation on reset.
+- Soft account deactivation (`DELETE /api/profile`) with transaction-locked last-admin and last-librarian invariant protections.
+- Role promotion (`POST /api/users/:userId/promote`) restricted to Admin, allowing Librarian-to-Admin only, preventing self-promotion.
+- HMAC-SHA-256 global identity lookup with blinded hashes in `identity_private`.
+- Restricted identity database functions owned by dedicated NOLOGIN role `lms_identity_owner`.
+- Member identification documents encrypted with AES-256-GCM and blinded with HMAC-SHA-256.
+- PostgreSQL RLS ENABLE and FORCE on seven tenant-owned tables (`users`, `groups`, `member_types`, `member_profiles`, `sessions`, `otp_codes`, `audit_logs`).
+- Transaction-local tenant context (`DatabaseService.withTenant()`) with fail-closed policy design.
+- Append-only runtime permissions for audit records (`audit_logs`).
+- Redis-backed distributed rate limiting for login, OTP, and password operations.
+- `.env` is ignored by `.gitignore`.
 
 ## Known outstanding security work
 
-- Login/session endpoints, refresh rotation, logout and revocation.
-- OTP generation, delivery, verification, expiry and attempt lockout.
-- Server-side RBAC across every endpoint.
-- Rate limiting and abuse controls.
-- Audit workflows for waivers, deletions, role changes and checkout overrides.
-- Security headers/CORS review for deployed environments.
+- Audit workflows for fine waivers, copy deletions, and checkout overrides (in circulation/fines modules).
+- Security headers/CORS review for deployed production environments.
 - Semgrep Community Edition static security scanning is configured; the Security workflow was verified green on commit `82c9b1d`. Finding triage and remediation remain ongoing.
 - Dependency vulnerability auditing is configured; the Security workflow was verified green on commit `82c9b1d`. Ongoing dependency audits and vulnerability remediation remain required.
 - Secret scanning and first-commit review.

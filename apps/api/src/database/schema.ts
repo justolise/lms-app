@@ -11,6 +11,7 @@ import {
   uuid,
   varchar,
   jsonb,
+  boolean,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
@@ -103,6 +104,10 @@ export const users = pgTable(
     role: userRoleEnum('role').notNull(),
 
     status: userStatusEnum('status').notNull().default('ACTIVE'),
+
+    mustChangePassword: boolean('must_change_password')
+      .notNull()
+      .default(false),
 
     emailVerifiedAt: timestamp('email_verified_at', {
       withTimezone: true,
@@ -201,6 +206,10 @@ export const memberTypes = pgTable(
 
     name: varchar('name', { length: 100 }).notNull(),
 
+    description: text('description'),
+
+    isActive: boolean('is_active').notNull().default(true),
+
     createdAt: timestamp('created_at', {
       withTimezone: true,
     })
@@ -222,6 +231,94 @@ export const memberTypes = pgTable(
     uniqueIndex('member_types_tenant_name_unique').on(
       table.tenantId,
       table.name,
+    ),
+  ],
+);
+
+// MEM-2, ADM-2, CIR-4, FIN-1: Loan and fine policies per (member type × item format).
+export const loanPolicies = pgTable(
+  'loan_policies',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'restrict' }),
+
+    memberTypeId: uuid('member_type_id').notNull(),
+
+    itemFormat: varchar('item_format', { length: 50 }).notNull().default('BOOK'),
+
+    loanDurationDays: integer('loan_duration_days').notNull().default(14),
+
+    maxConcurrentLoans: integer('max_concurrent_loans').notNull().default(5),
+
+    maxRenewals: integer('max_renewals').notNull().default(2),
+
+    gracePeriodDays: integer('grace_period_days').notNull().default(0),
+
+    dailyFineMinorUnits: integer('daily_fine_minor_units').notNull().default(0),
+
+    maxFineMinorUnits: integer('max_fine_minor_units').notNull().default(0),
+
+    createdAt: timestamp('created_at', {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp('updated_at', {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('loan_policies_tenant_id_id_unique').on(
+      table.tenantId,
+      table.id,
+    ),
+
+    uniqueIndex('loan_policies_tenant_type_format_unique').on(
+      table.tenantId,
+      table.memberTypeId,
+      table.itemFormat,
+    ),
+
+    foreignKey({
+      name: 'loan_policies_tenant_member_type_fk',
+      columns: [table.tenantId, table.memberTypeId],
+      foreignColumns: [memberTypes.tenantId, memberTypes.id],
+    }),
+
+    check(
+      'loan_policies_duration_positive',
+      sql`${table.loanDurationDays} > 0`,
+    ),
+
+    check(
+      'loan_policies_max_loans_positive',
+      sql`${table.maxConcurrentLoans} > 0`,
+    ),
+
+    check(
+      'loan_policies_renewals_nonnegative',
+      sql`${table.maxRenewals} >= 0`,
+    ),
+
+    check(
+      'loan_policies_grace_nonnegative',
+      sql`${table.gracePeriodDays} >= 0`,
+    ),
+
+    check(
+      'loan_policies_fine_nonnegative',
+      sql`${table.dailyFineMinorUnits} >= 0`,
+    ),
+
+    check(
+      'loan_policies_max_fine_nonnegative',
+      sql`${table.maxFineMinorUnits} >= 0`,
     ),
   ],
 );

@@ -59,6 +59,7 @@ export class TokenService {
       tenantId: payload.tenantId,
       role: payload.role,
       sessionId: payload.sessionId,
+      ...(payload.mustChangePassword ? { mustChangePassword: true } : {}),
     })
       .setProtectedHeader({
         alg: TOKEN_ALGORITHM,
@@ -97,6 +98,7 @@ export class TokenService {
         tenantId: payload.tenantId,
         sessionId: payload.sessionId,
         role: payload.role,
+        ...(payload.mustChangePassword ? { mustChangePassword: true } : {}),
       };
     } catch {
       throw new UnauthorizedException('Invalid or expired access token');

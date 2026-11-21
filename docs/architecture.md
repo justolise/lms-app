@@ -27,26 +27,28 @@ The package manifests are the source of truth for installed dependencies. BullMQ
 
 ## Current API module inventory
 
-The inspected `apps/api/src` tree contains:
+The `apps/api/src` tree contains:
 
 - `AppModule`, `AppController`, `AppService`
-- `DatabaseModule`, `DatabaseService`, Drizzle schema
-- `AuthModule`
-- identity normalization and identity lookup services
-- password service
-- token service and token payload DTOs
+- `DatabaseModule`, `DatabaseService`, Drizzle schema (with attached schema and Drizzle-based health check)
+- `AuthModule`: `AuthController`, `AuthService`, `SessionService`, `OtpService`, `TokenService`, `IdentityService`, `PasswordService`
+- `Guards`: `AccessTokenGuard` (with mandatory first-login password change check), `RolesGuard`
+- `UsersModule`: `UsersController`, `ProfileController`, `UsersService`
+- `MembersModule`: `MembersController`, `MembersService`, `MemberIdentifierService`
+- `RedisModule`: `RedisService` (distributed rate-limiting)
 
-The inspected `AppModule` imports the auth foundation only. Catalogue, search, circulation, holds, fines, member workflows, notifications, dashboard and admin settings modules were not present in the inspected source inventory.
+Feature modules pending implementation: Catalogue, search, circulation, holds, fines, notifications, dashboard and admin settings.
 
 ## Database foundation
 
-Five migration files exist:
+Six migration files exist:
 
-1. Tenant/member identity schema.
-2. Session and OTP security schema.
-3. Tenant RLS policies.
-4. Audit log schema and grants.
-5. Global identity lookup and restricted functions.
+1. `0000_slice_1_tenant_member_identity.sql`: Tenant/member identity schema.
+2. `0001_slice_2_auth_security.sql`: Session and OTP security schema.
+3. `0002_slice_3_tenant_isolation.sql`: Tenant RLS policies.
+4. `0003_slice_4_audit_logs.sql`: Audit log schema and grants.
+5. `0004_slice_5_identity_lookup.sql`: Global identity lookup and restricted functions.
+6. `0005_auth_4_first_login_password_change.sql`: Adds `must_change_password` to `users`.
 
 Tenant-owned RLS tables recorded in the implementation are `users`, `groups`, `member_types`, `member_profiles`, `sessions`, `otp_codes` and `audit_logs`. The `tenants` registry is intentionally outside RLS to support tenant discovery before authenticated tenant context exists.
 
@@ -54,11 +56,22 @@ Tenant-scoped database operations use `DatabaseService.withTenant()` to validate
 
 The global identity lookup stores HMAC-SHA-256 hashes rather than raw email/phone. Restricted SECURITY DEFINER functions are owned by `lms_identity_owner`; the runtime `lms_app` role does not receive direct lookup-table access.
 
-## Authentication foundation boundary
+All application queries use Drizzle ORM query builders (`tx.select()`, `tx.insert()`, `tx.update()`, `tx.delete()`).
 
-Implemented service-level foundations include identity normalization/lookup, Argon2id password hashing, credential verification and access/library-selection token signing and verification.
+## Authentication and Access Control Subsystem
 
-Not yet implemented as complete workflows: login endpoint, SessionService, refresh-token rotation, logout, OTP generation/delivery/verification, rate limiting and server-side RBAC guards.
+Implemented and verified complete workflows:
+- Login endpoints (`POST /api/auth/login`, `POST /api/auth/select-tenant`).
+- Session management: `SessionService`, refresh token rotation, replay detection revoking session lineage, and logout (`POST /api/auth/logout`, `GET /api/auth/sessions`, `POST /api/auth/sessions/:sessionId/revoke`).
+- Password reset via single-use OTP (`POST /api/auth/forgot-password`, `POST /api/auth/reset-password`).
+- Mandatory first-login password change and authenticated password update (`POST /api/auth/change-password`).
+- Server-side RBAC guards enforcing 6 roles (`ADMIN`, `LIBRARIAN`, `TEACHER`, `MEMBER`, `PARENT`, `GUEST`).
+- Staff-provisioned member accounts (`POST /api/members`) and librarian accounts (`POST /api/users/librarians`).
+- Staff user directory (`GET /api/users`, `GET /api/users/:userId`).
+- Self-service profile management and soft deactivation with last-admin and last-librarian protections (`GET /api/profile`, `PATCH /api/profile`, `DELETE /api/profile`).
+- Librarian-to-Admin role promotion (`POST /api/users/:userId/promote`).
+- Distributed Redis rate limiting across sensitive auth endpoints.
+- Next.js 16 web application with responsive mobile-first UI for all authentication workflows.
 
 ## Runtime topology
 

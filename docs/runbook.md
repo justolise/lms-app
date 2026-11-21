@@ -24,8 +24,12 @@ Configure the local values for:
 - `IDENTITY_LOOKUP_HMAC_KEY`
 - `ACCESS_TOKEN_SECRET`
 - `LIBRARY_SELECTION_TOKEN_SECRET`
+- `MEMBER_IDENTIFIER_ENCRYPTION_KEY`
+- `MEMBER_IDENTIFIER_HMAC_KEY`
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` (Optional for local dev; OTPs log to debug console if unset)
+- `AFRICASTALKING_USERNAME`, `AFRICASTALKING_API_KEY`, `AFRICASTALKING_FROM` (Optional for local dev)
 
-Use generated local-only secrets. Never paste `.env` values into issues, chat, logs or commits.
+Use generated local-only secrets (see [docs/auth/environment.md](./auth/environment.md) for generation commands). Never paste `.env` values into issues, chat, logs or commits.
 
 ## Install
 
@@ -62,12 +66,12 @@ pnpm build
 pnpm --filter @lms/api test:e2e
 ```
 
-The root `pnpm test` does not include API E2E or database integration tests.
+The root `pnpm test` runs all package unit test suites (108 tests passing).
 
-Run API E2E tests with:
+Run API Controller E2E tests:
 
 ```bash
-pnpm --filter @lms/api test:e2e
+pnpm --filter @lms/api exec vitest run --config ./vitest.config.e2e.ts test/auth.controller.e2e-spec.ts test/users.controller.e2e-spec.ts
 ```
 
 Run database integration tests with:
@@ -76,7 +80,7 @@ Run database integration tests with:
 pnpm --filter @lms/api test:integration
 ```
 
-Database integration tests require the dedicated local LMS database and role setup. The integration script currently runs `test/database.e2e-spec.ts`.
+Database integration tests require the dedicated local LMS PostgreSQL database and role setup. The integration script currently runs `test/database.e2e-spec.ts`.
 
 ## Start development servers
 

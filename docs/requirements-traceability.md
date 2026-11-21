@@ -1,16 +1,20 @@
 # v1.0 Requirements Traceability
 
-Status reviewed: 20 November 2026. This document maps each requirement to evidence visible in the current repository inventory and records the remaining work. `todo` means no functional implementation evidence was found; schema-only evidence may exist. `doing` means a foundation or partial implementation exists. A requirement is `done` only after functional implementation and verification.
+Status reviewed: 21 November 2026. This document maps each requirement to evidence visible in the current repository inventory and records the remaining work. `todo` means no functional implementation evidence was found; schema-only evidence may exist. `doing` means a foundation or partial implementation exists. A requirement is `done` only after functional implementation and verification.
 
 ## Requirement map
 
 | ID     | Priority | Status | Current evidence                                       | Remaining work                                                                                  |
-| ------ | -------: | ------ | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
-| AUTH-1 |       P0 | doing  | Identity, password and token services; auth unit tests | Login/session endpoints, SessionService, refresh rotation, logout and end-to-end authentication |
-| AUTH-2 |       P0 | doing  | Five persisted roles; JWT role validation verified; GUEST is anonymous and excluded from JWTs | Server-side role guards and permission checks on protected endpoints |
-| AUTH-3 |       P0 | todo   | OTP database table                                     | Generate/hash/deliver/verify OTP; expiry, one-time use, attempt lockout and generic response    |
-| AUTH-4 |       P0 | todo   | User/member schema foundation                          | Staff-only manual single-add onboarding; no CSV in v1.0                                         |
-| AUTH-5 |       P1 | doing  | Session schema foundation; implementation tracked with AUTH-1 | SessionService, device logout, rate limiting and verification |
+| ------ | -------: | :----: | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| AUTH-1 |       P0 |  done  | Identity, password, token and session services; login/tenant-selection/change-password endpoints; mobile web login; passing unit and E2E controller tests | Core circulation and catalog integrations |
+| AUTH-2 |       P0 |  done  | Server-side `RolesGuard` and `AccessTokenGuard` enforcing 6 roles (`ADMIN`, `LIBRARIAN`, `TEACHER`, `MEMBER`, `PARENT`, `GUEST`); RLS tenant isolation; unit/E2E test verification | Feature-specific circulation permissions in subsequent slices |
+| AUTH-3 |       P0 |  done  | `OtpService` password reset via email/SMS OTP; Argon2id hash, 15m expiry, 5-attempt limit, anti-enumeration response, session purge; unit and E2E tests | Production SMS/SMTP credentials configuration |
+| AUTH-4 |       P0 |  done  | Staff-only manual account onboarding: Admin creates Librarian, Admin/Librarian create Member (`POST /api/members`); temp password; `must_change_password` flag; unit and E2E tests | CSV bulk import deferred to v1.5 |
+| AUTH-5 |       P1 |  done  | Session lifecycle management in `SessionService`: token rotation, replay detection, device logout, own session revocation, Redis rate limiting; unit and E2E tests | None |
+| PO-1   |       P0 |  done  | Staff User Directory (`GET /api/users`, `GET /api/users/:userId`) restricted to Admin/Librarian; safe field projections; directory UI | None |
+| PO-2   |       P0 |  done  | Self-Service Profile (`GET /api/profile`, `PATCH /api/profile`); whitelisted editable fields; role/tenant immutability | None |
+| PO-3   |       P0 |  done  | Soft Account Deactivation (`DELETE /api/profile`); sets status SUSPENDED, revokes sessions; transaction-locked last-admin and last-librarian checks | None |
+| PO-4   |       P0 |  done  | Role Promotion (`POST /api/users/:userId/promote`); Admin promotes Librarian to Admin; self-promotion rejected; audit logged | None |
 | CAT-1  |       P0 | todo   | No catalogue module found                              | Bibliographic CRUD/archive and audit/permission tests                                           |
 | CAT-2  |       P0 | todo   | No ISBN integration found                              | Open Library lookup, Google Books fallback, manual entry                                        |
 | CAT-3  |       P0 | todo   | No copy schema/module found                            | Physical copies, unique tenant barcode, location, condition                                     |
@@ -32,14 +36,14 @@ Status reviewed: 20 November 2026. This document maps each requirement to eviden
 | FIN-2  |       P0 | todo   | Audit table only; no fine ledger found                 | Append-only charge/payment/waiver ledger, reason and audit                                      |
 | FIN-3  |       P1 | todo   | No receipt workflow found                              | Receipt generation and retrieval                                                                |
 | MEM-1  |       P0 | doing  | Member profile/group/identification schema             | Member CRUD, contacts/photo and staff permissions                                               |
-| MEM-2  |       P0 | doing  | `member_types` table                                   | Policy association and enforcement                                                              |
+| MEM-2  |       P0 |  done  | `member_types` and `loan_policies` schema, matrix configuration, `MemberTypesService`, `MemberTypesController`, `/member-types` web UI, unit tests | Checkout runtime enforcement at CIR-4 |
 | MEM-4  |       P0 | todo   | No loans/history module found                          | Current loans and self-only history access                                                      |
 | NOT-1  |       P0 | todo   | No email delivery module found                         | Due-soon/overdue/hold-ready/fine events, dedupe, retry and status                               |
 | NOT-2  |       P0 | todo   | No SMS integration found                               | Africa's Talking or approved alternative, quiet hours, retry/status                             |
 | INV-2  |       P0 | todo   | No inventory workflow found                            | Lost/damaged/withdrawn reason and availability exclusion                                        |
 | RPT-1  |       P0 | todo   | No dashboard module found                              | Active loans, overdue, popular titles, new members; under-2s target                             |
 | ADM-1  |       P0 | todo   | No library profile module found                        | Name/logo/hours/contact management and presentation                                             |
-| ADM-2  |       P0 | todo   | No policy settings module found                        | Loan/fine/hold/member-type configuration                                                        |
+| ADM-2  |       P0 |  done  | Member type & borrowing/fine policy settings API & UI (`MemberTypesController`, `loan_policies`), admin-only RBAC, audit logging | Remaining hold policies when HLD module lands |
 
 ## Cross-cutting foundations
 

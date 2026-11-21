@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { sql } from 'drizzle-orm';
 import { DatabaseService } from '../../database/database.service.js';
 import { IdentityService, type IdentityType } from './identity.service.js';
+import type { DatabaseTransaction } from '../../database/database.service.js';
 
 export type IdentityLookupResult = Record<string, unknown> & {
   tenantId: string;
@@ -40,18 +41,28 @@ export class IdentityLookupService {
     type: IdentityType,
     value: string,
   ): Promise<void> {
+    await this.database.withTenant(tenantId, async (tx) => {
+      await this.syncIdentityInTransaction(tx, tenantId, userId, type, value);
+    });
+  }
+
+  async syncIdentityInTransaction(
+    tx: DatabaseTransaction,
+    tenantId: string,
+    userId: string,
+    type: IdentityType,
+    value: string,
+  ): Promise<void> {
     const identityHash = this.identity.hashIdentity(type, value);
 
-    await this.database.withTenant(tenantId, async (tx) => {
-      await tx.execute(sql`
-        SELECT identity_private.sync_user_identity(
-          ${tenantId}::uuid,
-          ${userId}::uuid,
-          ${type}::public.identity_type,
-          ${identityHash}
-        )
-      `);
-    });
+    await tx.execute(sql`
+      SELECT identity_private.sync_user_identity(
+        ${tenantId}::uuid,
+        ${userId}::uuid,
+        ${type}::public.identity_type,
+        ${identityHash}
+      )
+    `);
   }
 
   async deleteIdentity(

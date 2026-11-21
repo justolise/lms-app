@@ -1,16 +1,17 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { sql } from 'drizzle-orm';
-import { drizzle } from 'drizzle-orm/node-postgres';
+import { drizzle, type NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
+import * as schema from './schema.js';
 
-type DatabaseTransaction = Parameters<
-  Parameters<ReturnType<typeof drizzle>['transaction']>[0]
+export type DatabaseTransaction = Parameters<
+  Parameters<NodePgDatabase<typeof schema>['transaction']>[0]
 >[0];
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private readonly pool: Pool;
-  readonly db: ReturnType<typeof drizzle>;
+  readonly db: NodePgDatabase<typeof schema>;
 
   constructor() {
     const connectionString = process.env.DATABASE_URL;
@@ -26,7 +27,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       connectionTimeoutMillis: 5_000,
     });
 
-    this.db = drizzle(this.pool);
+    this.db = drizzle(this.pool, { schema });
   }
 
   async withTenant<T>(
@@ -50,7 +51,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleInit(): Promise<void> {
-    await this.pool.query('SELECT 1');
+    await this.db.execute(sql`SELECT 1`);
   }
 
   async onModuleDestroy(): Promise<void> {

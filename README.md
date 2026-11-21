@@ -2,7 +2,7 @@
 
 Mobile-first library management software for schools and community libraries in Kenya and East Africa.
 
-> **Current implementation status (20 November 2026):** this repository contains the monorepo scaffold and five database foundation slices. It is not yet a usable v1.0 library management application. The v1.0 feature list below is the release target, not a claim that those workflows are implemented.
+> **Current implementation status (21 November 2026):** this repository contains the monorepo scaffold, five database foundation slices, and the completed, tested, and verified **Authentication and Access Control module (v1.0 MVP: AUTH-1 through AUTH-5 + PO additions)**. Circulation, catalogue, and other product workflows remain outstanding. See `PROGRESS.md` and `docs/auth/` for detailed implementation status.
 
 ## Release target
 
@@ -29,12 +29,22 @@ The repository's actual package manifests are authoritative for dependency versi
 
 ## Current implementation
 
-### Implemented foundation
+### Implemented workflows and foundations
 
 - pnpm workspace with `apps/web`, `apps/api` and `packages/shared`.
-- Next.js web application scaffold.
-- NestJS API scaffold.
-- PostgreSQL schema and five Drizzle SQL migrations.
+- Next.js 16 web application with mobile-first UI for authentication, password reset, self-service profile, and staff user directory.
+- NestJS 12 API with `AuthModule`, `UsersModule`, `MembersModule`, `DatabaseModule`, and `RedisModule`.
+- Complete authentication and RBAC workflows (AUTH-1 through AUTH-5 and PO additions):
+  - Email and Kenyan phone (E.164) login with multi-library selection.
+  - Server-side RBAC enforcing roles (`ADMIN`, `LIBRARIAN`, `TEACHER`, `MEMBER`, `PARENT`, `GUEST`).
+  - Single-use password reset OTP with Argon2id hashing, 15m expiration, 5 attempt lockout, and session revocation.
+  - Staff-created accounts with server-generated temporary passwords and mandatory first-login password changes (`POST /api/auth/change-password`).
+  - Session lifecycle management with refresh token rotation and replay detection.
+  - Staff user directory (`GET /api/users`, `GET /api/users/:userId`).
+  - Self-service profile management and soft deactivation with last-admin and last-librarian invariant protections.
+  - Librarian-to-Admin role promotion (`POST /api/users/:userId/promote`).
+- Drizzle ORM query builders utilized for all normal application CRUD queries.
+- PostgreSQL schema and six Drizzle SQL migrations.
 - Tenant-scoped identity/member schema foundations.
 - RLS and transaction-local tenant context for seven tenant-owned tables: `users`, `groups`, `member_types`, `member_profiles`, `sessions`, `otp_codes` and `audit_logs`.
 - Append-only database permissions for runtime audit records.
@@ -43,7 +53,7 @@ The repository's actual package manifests are authoritative for dependency versi
 
 ### Not yet implemented as complete user workflows
 
-Login/session endpoints, refresh rotation, logout, password reset delivery/verification, server-side application RBAC, staff member onboarding, catalogue, search, copies, circulation, holds, fine ledger, notifications, dashboard, and admin settings remain outstanding. Database tables or service foundations do not by themselves satisfy the corresponding functional requirement.
+Catalogue, search, copies, circulation, holds, fine ledger, general notifications, dashboard, and admin settings remain outstanding.
 
 ### Database migrations
 
@@ -54,6 +64,7 @@ The repository contains:
 - `0002_slice_3_tenant_isolation.sql`
 - `0003_slice_4_audit_logs.sql`
 - `0004_slice_5_identity_lookup.sql`
+- `0005_auth_4_first_login_password_change.sql`
 
 The migration files are present in the repository. Whether they have been applied to a particular database must be checked against that database; do not infer live migration state from the files alone.
 
@@ -133,15 +144,19 @@ pnpm test
 pnpm build
 ```
 
-The root `pnpm test` runs package `test` scripts recursively. It does **not** include API E2E tests.
+The root `pnpm test` runs package `test` scripts recursively (108 unit tests).
 
-Run API E2E tests separately:
+Run API Controller E2E tests:
+
+```bash
+pnpm --filter @lms/api exec vitest run --config ./vitest.config.e2e.ts test/auth.controller.e2e-spec.ts test/users.controller.e2e-spec.ts
+```
+
+Database integration tests require the dedicated local LMS PostgreSQL database and its required roles/permissions:
 
 ```bash
 pnpm --filter @lms/api test:e2e
 ```
-
-Database integration tests also require the dedicated local LMS database and its required roles/permissions. Check the test configuration before running them.
 
 ### Start applications
 

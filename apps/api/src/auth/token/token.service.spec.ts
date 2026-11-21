@@ -68,6 +68,21 @@ describe('TokenService', () => {
       expect(result).toEqual(payload);
     });
 
+    it('should verify an access token with mustChangePassword flag', async () => {
+      const payload = {
+        userId: '11111111-1111-4111-8111-111111111111',
+        tenantId: '22222222-2222-4222-8222-222222222222',
+        role: 'LIBRARIAN' as const,
+        sessionId: '33333333-3333-4333-8333-333333333333',
+        mustChangePassword: true,
+      };
+
+      const token = await service.signAccessToken(payload);
+      const result = await service.verifyAccessToken(token);
+
+      expect(result).toEqual(payload);
+    });
+
     it('should reject an invalid token', async () => {
       await expect(
         service.verifyAccessToken('invalid.token.value'),
@@ -136,6 +151,21 @@ describe('TokenService', () => {
       const token = await service.signLibrarySelectionToken(payload);
 
       const result = await service.verifyLibrarySelectionToken(token);
+
+      expect(result).toEqual(payload);
+    });
+
+    it('should verify an access token with mustChangePassword flag', async () => {
+      const payload = {
+        userId: '11111111-1111-4111-8111-111111111111',
+        tenantId: '22222222-2222-4222-8222-222222222222',
+        role: 'LIBRARIAN' as const,
+        sessionId: '33333333-3333-4333-8333-333333333333',
+        mustChangePassword: true,
+      };
+
+      const token = await service.signAccessToken(payload);
+      const result = await service.verifyAccessToken(token);
 
       expect(result).toEqual(payload);
     });

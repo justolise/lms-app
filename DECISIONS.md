@@ -38,6 +38,7 @@ This file records product-owner-approved decisions and material technical decisi
 ## Authentication and identity decisions
 
 - Hash passwords with Argon2id.
+- Password policy enforces a minimum of 8 characters (`@MinLength(8)`). On first login (`mustChangePassword: true`), `currentPassword` is optional to eliminate patron friction when activating accounts provisioned with complex server-generated temporary passwords; subsequent regular password changes strictly require verifying `currentPassword`.
 - Use short-lived access tokens.
 - Store refresh-token hashes, not plaintext refresh tokens.
 - Enforce role-based permissions on the API.
@@ -147,12 +148,74 @@ The following records describe completed foundation work, not completed function
 - Runtime `lms_app` cannot directly access the lookup table.
 - Migration: `0004_slice_5_identity_lookup.sql`.
 
-### Authentication service foundation
+### Authentication service foundation (Historical foundation note)
 
 - Identity normalization and lookup services exist.
 - Argon2id password hashing and credential verification exist.
 - Access and library-selection token signing/verification services exist.
-- Login endpoints, SessionService, refresh-token rotation, logout, password-reset delivery/verification and application RBAC remain outstanding.
+
+### Implementation Record — v1.0 Authentication and Access Control (21 November 2026)
+
+#### 1. Drizzle ORM Policy for Application Queries
+
+- **Decision**: All application CRUD operations across authentication, sessions, users, members, and OTP must use Drizzle ORM query builders (`tx.select()`, `tx.insert()`, `tx.update()`, `tx.delete()`).
+- **Rationale**: Enforces type safety, eliminates handwritten raw SQL risks, and ensures schema synchronicity.
+- **Exceptions**: The two approved PostgreSQL exceptions remain: `DatabaseService.withTenant()` (`set_config('app.tenant_id', ..., true)`) and the three restricted SECURITY DEFINER procedures in `identity_private`.
+- **Health Check**: Replaced `this.pool.query('SELECT 1')` with Drizzle's `this.db.execute(sql\`SELECT 1\`)`.
+
+#### 2. First-Login Password Change Enforcement
+
+- **Decision**: Added `must_change_password BOOLEAN NOT NULL DEFAULT FALSE` to `users` via migration `0005_auth_4_first_login_password_change.sql`. Staff-provisioned accounts (Members and Librarians) are created with `must_change_password = true`.
+- **Enforcement**: Included `mustChangePassword` in the signed access-token payload. `AccessTokenGuard` checks this claim and returns `403 Forbidden` (`Password change required on first login`) for all endpoints except `POST /api/auth/change-password`, `POST /api/auth/logout`, and `GET /api/auth/sessions`.
+- **Frictionless First Password Change**: On first login (`mustChangePassword: true`), `currentPassword` is optional to prevent user frustration with lengthy, random 32-character temporary passwords. The user sets their preferred new password directly (minimum 8 characters, `@MinLength(8)`). Upon success, `must_change_password` is set to `false`. Subsequent regular password changes strictly require providing and validating the current password.
+
+#### 3. Password Reset OTP Design
+
+- **Decision**: Implemented `OtpService` utilizing the existing `otp_codes` table.
+- **Specifications**: 6-digit cryptographically random numeric code (`randomInt(100000, 1000000)`), hashed with Argon2id, 15-minute expiration window, maximum 5 invalid verification attempts before lockout.
+- **Consumption & Security**: Atomic single-use consumption (`consumed_at = NOW()`) inside a transaction that updates the user's password, resets `must_change_password = false`, revokes all active sessions via `SessionService.revokeAllUserSessions()`, and records an immutable audit log (`PASSWORD_RESET_COMPLETED`).
+- **Anti-Enumeration**: `POST /api/auth/forgot-password` returns a generic response (`If an account exists, a reset code has been sent.`) regardless of whether the identifier exists or is malformed.
+
+#### 4. Session Management, Rotation, and Replay Detection
+
+- **Decision**: Refresh tokens are rotated on every invocation of `POST /api/auth/refresh`.
+- **Replay Protection**: If an already-rotated refresh token hash is presented, the system detects a potential replay attack, logs a security warning, and revokes the entire session lineage.
+- **Revocation**: Users can list their active sessions (`GET /api/auth/sessions`), revoke specific sessions (`POST /api/auth/sessions/:sessionId/revoke`), or revoke all other sessions during password changes.
+
+#### 5. Staff User Directory Permissions and Exposure
+
+- **Decision**: Endpoints `GET /api/users` and `GET /api/users/:userId` are restricted exclusively to `ADMIN` and `LIBRARIAN` roles within the caller's tenant.
+- **Privacy Protections**: Query projections strictly whitelist safe fields (`id`, `fullName`, `email`, `phone`, `role`, `status`, `createdAt`, and member profile details). Password hashes, OTP codes, refresh token hashes, and internal encryption keys are never exposed.
+
+#### 6. Self-Service Profile and Soft Account Deactivation
+
+- **Decision**: Endpoints `GET /api/profile`, `PATCH /api/profile`, and `DELETE /api/profile` allow authenticated users to manage their own accounts only.
+- **Immutability of Privileges**: Profile updates forbid modifying `role`, `tenantId`, `status`, or credentials.
+- **Soft Deactivation**: `DELETE /api/profile` performs a soft deactivation by setting `status = 'SUSPENDED'`, revoking all active sessions, and recording an audit event. Member profiles, loans, and fines remain intact.
+- **Last-Account Invariant Protection**: Under a `SELECT ... FOR UPDATE` transaction lock, the system verifies that the last active `ADMIN` cannot deactivate their account, and the last active `LIBRARIAN` cannot deactivate their account.
+
+#### 7. Role Promotion
+
+- **Decision**: Implemented `POST /api/users/:userId/promote`.
+- **Constraints**: Restricted exclusively to `ADMIN`. The target user must currently have the role `LIBRARIAN` in the same tenant. Self-promotion is rejected. Demotion is not implemented. Target user active sessions are revoked to force re-authentication with new privileges.
+
+#### 8. Notification & OTP Delivery Fallbacks
+
+- **Decision**: Added delivery adapters for SMTP (Email) and Africa's Talking (Kenyan SMS). In `development` and `test` environments, when provider credentials are unset, the system logs the OTP code to the debug logger rather than failing the request. In `production`, unconfigured providers throw `ServiceUnavailableException`.
+
+#### 9. Frontend Mobile-First Architecture
+
+- **Decision**: Built mobile-first responsive interfaces using Next.js 16 (App Router) with Next.js rewrite reverse proxying `/api/:path*` to the NestJS API engine. Accessible on low-end Android browsers over slow connections.
+
+#### 10. Member Types and Borrowing Policy Matrix (MEM-2, ADM-2)
+
+- **Decision**: Adopted Option B (Matrix Architecture) separating patron classification from borrowing policies. The `member_types` table stores category identity (`name`, `description`, `is_active`), while `loan_policies` is keyed by `(tenant_id, member_type_id, item_format)`.
+- **Borrowing & Fine Rules Co-location**: Co-located loan duration (`loan_duration_days`), loan caps (`max_concurrent_loans`), and renewals (`max_renewals`) with fine terms (`grace_period_days`, `daily_fine_minor_units`, `max_fine_minor_units`) per item format.
+- **Data Integrity Constraints**: Enforced check constraints for positive loan duration and concurrent loans (`> 0`), and non-negative renewals, grace days, and fine amounts (`>= 0`).
+- **Tenant Isolation**: Applied PostgreSQL RLS `ENABLE` and `FORCE` on `loan_policies` with tenant check policies.
+- **RBAC**: Member type and policy mutation endpoints (`POST`, `PATCH`, `DELETE`) are strictly restricted to `ADMIN`. Member type discovery (`GET /api/member-types` and `GET /api/members/types`) is accessible to both `ADMIN` and `LIBRARIAN` for patron registration.
+- **Audit Logging**: All policy creation, updates, and deletions are recorded in `audit_logs` immutably.
+- **Existing Loans Protection**: Loan terms will be captured at checkout (CIR-1) ensuring existing loans preserve the terms under which they were issued even when policies change.
 
 ## Open decisions / operational confirmations
 

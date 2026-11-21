@@ -10,6 +10,7 @@
     "build": "pnpm -r --if-present build",
     "test": "pnpm -r --if-present test",
     "typecheck": "pnpm -r --if-present typecheck",
-    "lint": "pnpm -r --if-present lint"
+    "lint": "pnpm -r --if-present lint",
+    "seed": "pnpm --filter @lms/api seed"
   }
 }

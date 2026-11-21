@@ -1,69 +1,92 @@
-import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-25"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/6 px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/8">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col justify-between">
+      <header className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+        <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
+              LMS Portal
+            </span>
+            <span className="text-xs px-2 py-0.5 rounded bg-zinc-200 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 font-medium">
+              v1.0 MVP
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="text-sm font-medium px-4 py-2 rounded-md bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 hover:bg-zinc-800 transition-colors"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+              Sign In
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-39.5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-3.5 w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/8 px-5 transition-colors hover:border-transparent hover:bg-black/4 dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-39.5"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </header>
+
+      <main className="max-w-5xl mx-auto px-4 py-16 flex-1 flex flex-col items-center justify-center text-center">
+        <div className="max-w-2xl space-y-6">
+          <h1 className="text-4xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-100 sm:text-5xl">
+            Modern Library Management System
+          </h1>
+          <p className="text-lg text-zinc-600 dark:text-zinc-400">
+            Secure multi-tenant library access for schools and community
+            libraries in Kenya and East Africa.
+          </p>
+
+          <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/login"
+              className="w-full sm:w-auto px-6 py-3 rounded-md bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 font-semibold shadow-sm hover:bg-zinc-800 transition-colors"
+            >
+              Access Library Portal
+            </Link>
+            <Link
+              href="/forgot-password"
+              className="w-full sm:w-auto px-6 py-3 rounded-md border border-zinc-300 dark:border-zinc-700 font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+            >
+              Reset Password
+            </Link>
+          </div>
+        </div>
+
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 text-left w-full max-w-4xl">
+          <div className="p-5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+            <h3 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 mb-1">
+              Multi-Tenant Isolation
+            </h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400">
+              PostgreSQL Row-Level Security ensures complete data isolation
+              between libraries while supporting single-sign-on discovery.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+            <h3 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 mb-1">
+              Kenyan Identity Support
+            </h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400">
+              Sign in with email or Kenyan phone numbers with E.164
+              normalization, OTP reset, and encrypted identity documents.
+            </p>
+          </div>
+
+          <div className="p-5 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+            <h3 className="font-bold text-sm text-zinc-900 dark:text-zinc-100 mb-1">
+              Strict RBAC &amp; Audit Trail
+            </h3>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400">
+              Six-role authorization model with Argon2id password hashing, token
+              rotation, and immutable security audit logs.
+            </p>
+          </div>
         </div>
       </main>
+
+      <footer className="border-t border-zinc-200 dark:border-zinc-800 py-6 text-center text-xs text-zinc-500">
+        Library Management System v1.0 &copy; 2026. Production-quality
+        authentication and access control.
+      </footer>
     </div>
   );
 }

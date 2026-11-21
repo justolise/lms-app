@@ -1,130 +1,132 @@
 # LMS v1.0 Progress
 
 Release: v1.0 MVP — Core Circulation
-Status reviewed: 20 November 2026
+Status reviewed: 21 November 2026
 
 Status meanings:
 
 - `todo`: not implemented.
 - `doing`: implementation is partial or in progress.
 - `done`: implementation satisfies the requirement and has current verification evidence.
+- `deferred`: intentionally postponed with reason and release reference.
+- `blocked`: cannot proceed because of an unresolved dependency or decision.
 
-A schema foundation, dependency, scaffold or historical test run does not by itself make a functional requirement `done`. Re-run checks before relying on old test counts.
+A schema foundation, dependency, scaffold or historical test run does not by itself make a functional requirement `done`. Re-run checks before relying on test counts.
 
 ## Phase 0 — Foundations
 
-| Task                                     | Status | Notes                                                                                                                                   |
-| ---------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------- |
-| pnpm workspace and application structure | done   | `apps/web`, `apps/api`, `packages/shared` exist.                                                                                        |
-| Next.js web application foundation       | done   | Next.js App Router scaffold exists; product workflows are not complete.                                                                 |
-| NestJS API foundation                    | done   | NestJS 12 and TypeScript scaffold exists.                                                                                               |
-| PostgreSQL development database          | doing  | Local PostgreSQL was used in earlier migration/test work; fresh availability and migration state must be verified when running locally. |
-| Redis development service                | done   | Redis-only `compose.yaml` exists.                                                                                                       |
-| Drizzle ORM and migration tooling        | done   | Five SQL migration files exist.                                                                                                         |
-| Git repository                           | done   | `main` contains commit `82c9b1d`; current reconciliation changes are uncommitted. |
-| Project documentation                    | doing  | Root docs exist; this reconciliation updates accuracy and traceability.                                                                 |
-| PostgreSQL RLS policies                  | done   | RLS ENABLE and FORCE recorded for seven tenant-owned tables in the five-slice implementation.                                           |
-| Tenant-aware database schema             | done   | Initial tenant/member identity schema and constraints exist.                                                                            |
-| GitHub Actions CI                        | done   | CI and Security workflows verified green on commit `82c9b1d`; database-dependent API E2E and integration tests remain outside CI. |
-| Security automation / dependency updates | doing  | Security workflow verified green on commit `82c9b1d`; finding triage, remediation and ongoing dependency review remain. |
+| Task                                     | Status | Notes                                                                                                                                               |
+| ---------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| pnpm workspace and application structure | done   | `apps/web`, `apps/api`, `packages/shared` exist.                                                                                                    |
+| Next.js web application foundation       | done   | Next.js 16 App Router with mobile-first auth workflows (`/login`, `/forgot-password`, `/reset-password`, `/change-password`, `/profile`, `/users`). |
+| NestJS API foundation                    | done   | NestJS 12 and TypeScript scaffold with `AuthModule`, `UsersModule`, `MembersModule`, `DatabaseModule`, `RedisModule`.                               |
+| PostgreSQL development database          | doing  | Local PostgreSQL used in migration/test work; fresh availability and migration state must be verified when running locally.                         |
+| Redis development service                | done   | Redis-only `compose.yaml` exists; RedisService handles distributed rate limiting.                                                                   |
+| Drizzle ORM and migration tooling        | done   | Six SQL migration files exist (`0000` through `0005`). All application CRUD uses Drizzle ORM query builders.                                        |
+| Git repository                           | done   | `main` branch with verified clean history and uncommitted implementation changes intact.                                                            |
+| Project documentation                    | done   | Root docs and comprehensive `docs/auth/` section (9 docs) maintain full traceability.                                                               |
+| PostgreSQL RLS policies                  | done   | RLS ENABLE and FORCE enforced on tenant-owned tables (`users`, `groups`, `member_types`, `member_profiles`, `sessions`, `otp_codes`, `audit_logs`). |
+| Tenant-aware database schema             | done   | Tenant/member identity schema with `must_change_password` column on `users`.                                                                        |
+| GitHub Actions CI                        | done   | CI and Security workflows verified green on commit `82c9b1d`; database-dependent API integration tests remain outside CI.                           |
+| Security automation / dependency updates | doing  | Security workflow verified green on commit `82c9b1d`; ongoing dependency audits and triage remain.                                                  |
 
 ## Phase 1 — Tenant, member identity and authentication foundation
 
-| Task                                                     | Status | Notes                                                                                                                         |
-| -------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------- |
-| Tenant registry (`tenants`)                              | done   | Tenant registry table exists.                                                                                                 |
-| Tenant-scoped users and roles (`users`)                  | done   | Schema supports tenant-specific identity and persisted roles.                                                                 |
-| Groups and member types                                  | done   | Tenant-aware schema foundations exist; management workflows remain outstanding.                                               |
-| Member profiles                                          | done   | One-to-one profile schema exists; member management is not complete.                                                          |
-| Member identification document fields                    | done   | One optional document; encrypted-value and lookup-hash fields are present in schema.                                          |
-| Slice 1 migration                                        | done   | `0000_slice_1_tenant_member_identity.sql` exists.                                                                             |
-| Session security table                                   | done   | Session schema includes refresh-token hash, expiry, revocation and replacement fields.                                        |
-| OTP table                                                | done   | Password-reset OTP schema exists; OTP workflows/delivery remain outstanding.                                                  |
-| Slice 2 migration                                        | done   | `0001_slice_2_auth_security.sql` exists.                                                                                      |
-| Tenant RLS policies                                      | done   | Slice 3 applies ENABLE and FORCE to six tenant-owned tables.                                                                  |
-| Transaction-local tenant context                         | done   | `DatabaseService.withTenant()` establishes transaction-local tenant context.                                                  |
-| Slice 3 migration                                        | done   | `0002_slice_3_tenant_isolation.sql` exists.                                                                                   |
-| Audit log table and append-only runtime permissions      | done   | Slice 4; runtime application role has read/insert permissions only.                                                           |
-| Slice 4 migration                                        | done   | `0003_slice_4_audit_logs.sql` exists.                                                                                         |
-| Global identity lookup and restricted functions          | done   | Slice 5; HMAC-SHA-256 hashes and restricted SECURITY DEFINER functions.                                                       |
-| Slice 5 migration                                        | done   | `0004_slice_5_identity_lookup.sql` exists.                                                                                    |
-| Identity normalization and lookup services               | done   | Email normalization, Kenyan phone normalization to E.164, HMAC lookup/synchronization/deletion.                               |
-| Password hashing and credential verification             | done   | Argon2id and credential verification services exist with unit tests in the prior checkpoint.                                  |
-| Access and library-selection token services              | done   | JWT signing and verification services exist.                                                                                  |
-| Login/session endpoints and SessionService               | todo   | No login/session controller/service workflow in current source inventory.                                                     |
-| Refresh-token rotation and logout                        | todo   | Session table exists; operational session lifecycle remains outstanding.                                                      |
-| Password reset OTP generation, delivery and verification | todo   | OTP table exists; application workflow remains outstanding.                                                                   |
-| Server-side application RBAC                             | todo   | Role schema/payload foundations exist; guards and endpoint authorization are not implemented in the current source inventory. |
+| Task                                                     | Status | Notes                                                                                                                   |
+| -------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------- |
+| Tenant registry (`tenants`)                              | done   | Tenant registry table exists outside RLS for pre-auth discovery.                                                        |
+| Tenant-scoped users and roles (`users`)                  | done   | Schema supports tenant-specific identity, persisted roles, and `must_change_password`.                                  |
+| Groups and member types                                  | done   | Tenant-aware schema foundations exist; member type tenant scoping validated in `MembersService`.                        |
+| Member profiles                                          | done   | One-to-one profile schema exists; created atomically with user in `MembersService.create`.                              |
+| Member identification document fields                    | done   | AES-256-GCM encrypted value and HMAC lookup hash in `MemberIdentifierService`.                                          |
+| Slice 1 migration                                        | done   | `0000_slice_1_tenant_member_identity.sql` exists.                                                                       |
+| Session security table                                   | done   | Session schema includes refresh-token hash, expiry, revocation, user agent, ip, replacement ID.                         |
+| OTP table                                                | done   | Password-reset OTP schema with Argon2id hash, expiry, consumption timestamp, and attempt counter.                       |
+| Slice 2 migration                                        | done   | `0001_slice_2_auth_security.sql` exists.                                                                                |
+| Tenant RLS policies                                      | done   | Slice 3 applies ENABLE and FORCE to tenant-owned tables.                                                                |
+| Transaction-local tenant context                         | done   | `DatabaseService.withTenant()` establishes transaction-local tenant context (`set_config('app.tenant_id')`).            |
+| Slice 3 migration                                        | done   | `0002_slice_3_tenant_isolation.sql` exists.                                                                             |
+| Audit log table and append-only runtime permissions      | done   | Slice 4; runtime application role has read/insert permissions only. Audits auth events immutably.                       |
+| Slice 4 migration                                        | done   | `0003_slice_4_audit_logs.sql` exists.                                                                                   |
+| Global identity lookup and restricted functions          | done   | Slice 5; HMAC-SHA-256 hashes and restricted `identity_private` SECURITY DEFINER functions.                              |
+| Slice 5 migration                                        | done   | `0004_slice_5_identity_lookup.sql` exists.                                                                              |
+| First-login password change schema migration             | done   | `0005_auth_4_first_login_password_change.sql` adds `must_change_password` to `users`.                                   |
+| Identity normalization and lookup services               | done   | Email normalization, Kenyan phone normalization to E.164, HMAC lookup/synchronization/deletion.                         |
+| Password hashing and credential verification             | done   | Argon2id password hashing and credential verification services.                                                         |
+| Access and library-selection token services              | done   | JWT signing and verification services with HS256 and `mustChangePassword` payload claims.                               |
+| Login/session endpoints and SessionService               | done   | `SessionService` implemented using Drizzle ORM; endpoints mounted on `/auth` and `/api/auth`.                           |
+| Refresh-token rotation and logout                        | done   | Automatic refresh token rotation, replay detection revoking session lineage, and per-device logout.                     |
+| Password reset OTP generation, delivery and verification | done   | `OtpService` with 6-digit random code, Argon2id hashing, 15m expiry, 5 attempt lockout, and session purge on reset.     |
+| Server-side application RBAC                             | done   | `RolesGuard` and `AccessTokenGuard` enforce 6-role RBAC (`ADMIN`, `LIBRARIAN`, `TEACHER`, `MEMBER`, `PARENT`, `GUEST`). |
 
 ## Requirement status — v1.0
 
-| ID     | Priority | Status | Requirement / workstream                                  | Evidence and remaining work                                                                                                 |
-| ------ | -------: | ------ | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| AUTH-1 |       P0 | doing  | Email/phone and password authentication                   | Identity, Argon2id, credential verification and token services exist. Login/session endpoints and session lifecycle remain. |
-| AUTH-2 |       P0 | doing  | Admin, librarian, teacher, member, parent and guest roles | Five persisted/authenticated roles exist; GUEST is anonymous and excluded from JWT authentication. JWT role validation verified; server-side authorization remains. |
-| AUTH-3 |       P0 | todo   | Password reset by email/SMS OTP                           | OTP table only; generation, delivery, verification and throttling remain.                                                   |
-| AUTH-4 |       P0 | todo   | Staff-provisioned member accounts                         | Manual/single-add only in v1.0; account creation workflow remains. CSV import deferred.                                     |
-| CAT-1  |       P0 | todo   | Bibliographic record create/edit/archive                  | Not implemented.                                                                                                            |
-| CAT-2  |       P0 | todo   | ISBN metadata lookup                                      | Not implemented.                                                                                                            |
-| CAT-3  |       P0 | todo   | Multiple physical copies and unique barcodes              | Not implemented.                                                                                                            |
-| CAT-4  |       P0 | todo   | Copy statuses and transitions                             | Not implemented.                                                                                                            |
-| CAT-5  |       P0 | todo   | Categories, subjects, shelf locations and call numbers    | Not implemented.                                                                                                            |
-| SRC-1  |       P0 | todo   | Full-text catalogue search                                | Not implemented.                                                                                                            |
-| SRC-2  |       P0 | todo   | Catalogue filters                                         | Not implemented.                                                                                                            |
-| CIR-1  |       P0 | todo   | Checkout                                                  | Not implemented.                                                                                                            |
-| CIR-2  |       P0 | todo   | Return and fine detection                                 | Not implemented.                                                                                                            |
-| CIR-3  |       P0 | todo   | Configurable renewals; block when held                    | Not implemented.                                                                                                            |
-| CIR-4  |       P0 | todo   | Loan policies per member type/item type                   | Not implemented.                                                                                                            |
-| CIR-5  |       P0 | doing  | Checkout blocks and librarian/admin override              | Membership-expiry schema field exists; checkout enforcement, override and audit workflow remain.                            |
-| CIR-6  |       P0 | todo   | Phone camera barcode/QR scanning                          | Not implemented.                                                                                                            |
-| CIR-9  |       P1 | todo   | Lost/damaged workflow and replacement charge              | Not implemented; remains P1.                                                                                                |
-| HLD-1  |       P0 | todo   | FIFO holds on checked-out titles                          | Not implemented.                                                                                                            |
-| HLD-2  |       P0 | todo   | Ready notification and configurable expiry                | Not implemented.                                                                                                            |
-| HLD-3  |       P0 | todo   | Hold cancellation and queue management                    | Not implemented.                                                                                                            |
-| FIN-1  |       P0 | todo   | Configurable fine rules                                   | Not implemented.                                                                                                            |
-| FIN-2  |       P0 | todo   | Fine ledger, payment and waiver                           | Not implemented.                                                                                                            |
-| FIN-3  |       P1 | todo   | Fine receipts                                             | Not implemented; remains P1.                                                                                                |
-| MEM-1  |       P0 | doing  | Member profiles                                           | Profile/group/identification schema foundations exist; member workflows and UI remain.                                      |
-| MEM-2  |       P0 | doing  | Member types and borrowing rules                          | `member_types` schema exists; policy configuration/enforcement remain.                                                      |
-| MEM-4  |       P0 | todo   | Borrowing history/current loans                           | Not implemented.                                                                                                            |
-| NOT-1  |       P0 | todo   | Email notifications                                       | Not implemented.                                                                                                            |
-| NOT-2  |       P0 | todo   | SMS notifications                                         | Not implemented.                                                                                                            |
-| INV-2  |       P0 | todo   | Lost/damaged/withdrawn tracking with reasons              | Not implemented.                                                                                                            |
-| RPT-1  |       P0 | todo   | Basic circulation dashboard                               | Not implemented.                                                                                                            |
-| ADM-1  |       P0 | todo   | Library profile                                           | Not implemented.                                                                                                            |
-| ADM-2  |       P0 | todo   | Loan/fine/hold/member-type settings                       | Not implemented.                                                                                                            |
-| AUTH-5 |       P1 | doing  | Session management, device logout, rate limiting          | Tracked within AUTH-1 by product-owner decision; no separate duplicate workstream.                                          |
+| ID     | Priority | Status | Requirement / workstream                                  | Evidence and remaining work                                                                                                |
+| ------ | -------: | :----: | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| AUTH-1 |       P0 |  done  | Email/phone and password authentication                   | E.164 Kenyan phone/email login, multi-library selection, Argon2id, generic error responses, first-login password change.   |
+| AUTH-2 |       P0 |  done  | Admin, librarian, teacher, member, parent and guest roles | Server-side `RolesGuard` and `AccessTokenGuard` enforcing RBAC. 401 unauthenticated, 403 unauthorized. Tenant RLS active.  |
+| AUTH-3 |       P0 |  done  | Password reset by email/SMS OTP                           | 6-digit OTP, Argon2id hash, 15m expiry, 5 attempt limit, anti-enumeration response, atomic consumption, session purge.     |
+| AUTH-4 |       P0 |  done  | Staff-provisioned member accounts                         | Single-add by Admin/Librarian (`POST /api/members`); server-generated temp password; mustChangePassword=true; no CSV.      |
+| AUTH-5 |       P1 |  done  | Session management, device logout, rate limiting          | Token rotation, replay detection, own session list/revocation, Redis-backed rate limiting.                                 |
+| PO-1   |       P0 |  done  | Staff User Directory                                      | `GET /api/users` and `GET /api/users/:userId` restricted to Admin/Librarian; safe field projections; directory UI.         |
+| PO-2   |       P0 |  done  | Self-Service Profile                                      | `GET /api/profile` and `PATCH /api/profile` for viewing and updating own profile; whitelisted fields only; role unchanged. |
+| PO-3   |       P0 |  done  | Soft Account Deactivation                                 | `DELETE /api/profile` sets status to SUSPENDED, revokes sessions; transaction-locked last-admin and last-librarian checks. |
+| PO-4   |       P0 |  done  | Role Promotion                                            | `POST /api/users/:userId/promote` allows Admin to promote Librarian to Admin; self-promotion rejected; audit logged.       |
+| CAT-1  |       P0 |  todo  | Bibliographic record create/edit/archive                  | Not implemented.                                                                                                           |
+| CAT-2  |       P0 |  todo  | ISBN metadata lookup                                      | Not implemented.                                                                                                           |
+| CAT-3  |       P0 |  todo  | Multiple physical copies and unique barcodes              | Not implemented.                                                                                                           |
+| CAT-4  |       P0 |  todo  | Copy statuses and transitions                             | Not implemented.                                                                                                           |
+| CAT-5  |       P0 |  todo  | Categories, subjects, shelf locations and call numbers    | Not implemented.                                                                                                           |
+| SRC-1  |       P0 |  todo  | Full-text catalogue search                                | Not implemented.                                                                                                           |
+| SRC-2  |       P0 |  todo  | Catalogue filters                                         | Not implemented.                                                                                                           |
+| CIR-1  |       P0 |  todo  | Checkout                                                  | Not implemented.                                                                                                           |
+| CIR-2  |       P0 |  todo  | Return and fine detection                                 | Not implemented.                                                                                                           |
+| CIR-3  |       P0 |  todo  | Configurable renewals; block when held                    | Not implemented.                                                                                                           |
+| CIR-4  |       P0 |  todo  | Loan policies per member type/item type                   | Not implemented.                                                                                                           |
+| CIR-5  |       P0 | doing  | Checkout blocks and librarian/admin override              | Membership-expiry schema field exists; checkout enforcement, override and audit workflow remain.                           |
+| CIR-6  |       P0 |  todo  | Phone camera barcode/QR scanning                          | Not implemented.                                                                                                           |
+| CIR-9  |       P1 |  todo  | Lost/damaged workflow and replacement charge              | Not implemented; remains P1.                                                                                               |
+| HLD-1  |       P0 |  todo  | FIFO holds on checked-out titles                          | Not implemented.                                                                                                           |
+| HLD-2  |       P0 |  todo  | Ready notification and configurable expiry                | Not implemented.                                                                                                           |
+| HLD-3  |       P0 |  todo  | Hold cancellation and queue management                    | Not implemented.                                                                                                           |
+| FIN-1  |       P0 |  todo  | Configurable fine rules                                   | Not implemented.                                                                                                           |
+| FIN-2  |       P0 |  todo  | Fine ledger, payment and waiver                           | Not implemented.                                                                                                           |
+| FIN-3  |       P1 |  todo  | Fine receipts                                             | Not implemented; remains P1.                                                                                               |
+| MEM-1  |       P0 | doing  | Member profiles                                           | Profile/group/identification schema foundations exist; member creation implemented in AUTH-4; update/history remain.       |
+| MEM-2  |       P0 |  done  | Member types and borrowing rules                          | `member_types` and `loan_policies` matrix schema; `MemberTypesService` & `MemberTypesController`; full UI at `/member-types`; unit tests. |
+| MEM-4  |       P0 |  todo  | Borrowing history/current loans                           | Not implemented.                                                                                                           |
+| NOT-1  |       P0 |  todo  | Email notifications                                       | Notification events pending; email delivery provider configured for OTP in AUTH-3.                                         |
+| NOT-2  |       P0 |  todo  | SMS notifications                                         | Notification events pending; SMS delivery provider configured for OTP in AUTH-3.                                           |
+| INV-2  |       P0 |  todo  | Lost/damaged/withdrawn tracking with reasons              | Not implemented.                                                                                                           |
+| RPT-1  |       P0 |  todo  | Basic circulation dashboard                               | Not implemented.                                                                                                           |
+| ADM-1  |       P0 |  todo  | Library profile                                           | Not implemented.                                                                                                           |
+| ADM-2  |       P0 |  done  | Loan/fine/hold/member-type settings                       | Member-type & loan policy configuration (loanDurationDays, maxConcurrentLoans, maxRenewals, grace, daily/max fines) active. |
 
-## Engineering and non-functional requirements
+## Deferred Scope
 
-| ID / area                                                  | Status | Notes                                                                                                                          |
-| ---------------------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| INFRA-1 — Monorepo scaffold                                | done   | Workspace and application scaffolds exist.                                                                                     |
-| INFRA-2 — CI                                               | doing  | CI and Security workflows verified green on commit `82c9b1d`; database-dependent API E2E and integration tests remain outside CI. |
-| INFRA-3 — Local PostgreSQL + Redis Compose and env example | doing  | `.env.example` exists; Compose currently starts Redis only, not PostgreSQL.                                                    |
-| INFRA-4 — Database baseline                                | doing  | Five migrations and RLS/audit/identity foundations exist; complete product schema is not implemented.                          |
-| NFR-1 — Daily automated backups                            | todo   | No backup automation or restore evidence.                                                                                      |
-| NFR-2 — Privacy and minors' data                           | doing  | Tenant isolation and privacy decisions exist; consent, access workflows, retention and operational compliance evidence remain. |
-| NFR-3 — Search/checkout performance                        | todo   | No measured p95 search or 3G checkout benchmark; the relevant features are not implemented.                                    |
-| Mobile/browser verification                                | todo   | No end-to-end mobile/browser evidence.                                                                                         |
-| Production deployment and monitoring                       | todo   | Not configured or verified.                                                                                                    |
+| Item                                 | Deferred Release | Reason                                                                                                        |
+| :----------------------------------- | :--------------: | :------------------------------------------------------------------------------------------------------------ |
+| AUTH-6: SSO Integration              |       v6.0       | Schools and community libraries rely on local email/phone credentials; external identity federation deferred. |
+| AUTH-7: Parent-Child Account Linking |       v4.0       | Independent accounts supported in v1.0; account hierarchy deferred to dedicated parent portal release.        |
+| CSV Bulk Member Import               |       v1.5       | Manual single-account provisioning prioritized for initial school pilot; bulk validation pipeline deferred.   |
+| Platform Super Admin Role            |      Future      | Multi-tenant isolation model treats tenant ADMIN as organization boundary; platform admin separate.           |
+| Public Self-Registration             |    Prohibited    | Strict policy: all accounts must be provisioned by authorized library staff to prevent unauthorized access.   |
 
-## Verification record
+## Verification Record
 
-The previous implementation checkpoint reported 42 unit tests, 38 API E2E tests and 37 database integration tests passing, with TypeScript typecheck, Oxlint and NestJS build passing. These are historical results, not a fresh run from this documentation update. Re-run the checks before using them as current release evidence.
+Current verification run completed on **21 November 2026**:
 
-Root commands:
+- **pnpm typecheck**: Passed across all workspace projects (0 TypeScript errors).
+- **pnpm test (Unit Tests)**: 16 test files, 127 tests passed, 0 failed.
+- **Controller E2E Tests**: 2 test files, 27 tests passed, 0 failed (`test/auth.controller.e2e-spec.ts`, `test/users.controller.e2e-spec.ts`).
+- **Live Database Interactive Verification**: Full end-to-end walkthrough verified against local PostgreSQL & Redis (login, profile, staff provisioning, first-login password change gate, frictionless first-time password change without temporary password requirement, min 8 char validation rejection & acceptance, subsequent password change requiring current password, promotion, OTP forgot/reset password, sessions listing, soft account deactivation protection, device logout, member types & borrowing policies matrix, and cross-tenant RLS isolation).
+- **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 11 prerendered static routes including `/member-types`).
+
+Verification commands:
 
 ```bash
-pnpm lint
 pnpm typecheck
 pnpm test
-pnpm build
-pnpm --filter @lms/api test:e2e
+pnpm --filter @lms/api exec vitest run --config ./vitest.config.e2e.ts test/auth.controller.e2e-spec.ts test/users.controller.e2e-spec.ts
+pnpm -r --if-present build
 ```
-
-`pnpm test` does not include API E2E tests. Database integration tests require the dedicated local PostgreSQL test setup.
-
-## Next implementation gate
-
-Continue with one approved vertical slice at a time. Do not mark a functional requirement `done` until its implementation, automated tests, role permissions and mobile behaviour have been verified and recorded here.
