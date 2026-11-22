@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.0](https://github.com/justolise/lms-app/compare/v0.4.0...v0.5.0) (2026-11-22)
+
+
+### Features
+
+* **circulation:** implement CIR-1 to CIR-6 checkout, return, renewal, and barcode scanner ([88d0d3d](https://github.com/justolise/lms-app/commit/88d0d3de5919de6d145b2045a0d38db023eec7e2))
+
+
+### Bug Fixes
+
+* **circulation:** invalidate catalogue list cache on checkout and return ([652e8f3](https://github.com/justolise/lms-app/commit/652e8f31897aa6f1a5f3535eda4e27a30c89dd0e))
+
 ## [0.4.0](https://github.com/justolise/lms-app/compare/v0.3.0...v0.4.0) (2026-11-21)
 
 
