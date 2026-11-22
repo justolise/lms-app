@@ -4,11 +4,13 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
+  Optional,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { and, eq, sql } from 'drizzle-orm';
 
 import { DatabaseService } from '../database/database.service.js';
+import { RedisService } from '../redis/redis.service.js';
 import {
   copies,
   loans,
@@ -78,7 +80,20 @@ function computeFine(
 
 @Injectable()
 export class CirculationService {
-  constructor(private readonly database: DatabaseService) {}
+  constructor(
+    private readonly database: DatabaseService,
+    @Optional() private readonly redis?: RedisService,
+  ) {}
+
+  private async invalidateCache(tenantId: string): Promise<void> {
+    if (this.redis) {
+      try {
+        await this.redis.del(`cache:catalogue:${tenantId}`);
+      } catch {
+        // Non-blocking
+      }
+    }
+  }
 
   // ─── Checkout (CIR-1, CIR-4, CIR-5) ───────────────────────────────────────
 
@@ -90,7 +105,7 @@ export class CirculationService {
   ) {
     const isLibrarian = actorRole === 'ADMIN' || actorRole === 'LIBRARIAN';
 
-    return this.database.withTenant(tenantId, async (tx) => {
+    const result = await this.database.withTenant(tenantId, async (tx) => {
       // ── Idempotency check ───────────────────────────────────
       if (dto.idempotencyKey) {
         const [existing] = await tx
@@ -297,12 +312,15 @@ export class CirculationService {
 
       return loan;
     });
+
+    await this.invalidateCache(tenantId);
+    return result;
   }
 
   // ─── Return (CIR-2) ────────────────────────────────────────────────────────
 
   async returnLoan(tenantId: string, actorId: string, dto: ReturnLoanDto) {
-    return this.database.withTenant(tenantId, async (tx) => {
+    const result = await this.database.withTenant(tenantId, async (tx) => {
       // ── Idempotency check ───────────────────────────────────
       if (dto.idempotencyKey) {
         // A returned loan already has returnedAt set; look up by idempotency key
@@ -409,6 +427,9 @@ export class CirculationService {
         fineKes: fineMinorUnits / 100,
       };
     });
+
+    await this.invalidateCache(tenantId);
+    return result;
   }
 
   // ─── Renew (CIR-3) ─────────────────────────────────────────────────────────
