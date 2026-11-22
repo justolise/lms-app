@@ -64,6 +64,22 @@ export const tenants = pgTable(
 
     status: tenantStatusEnum('status').notNull().default('ACTIVE'),
 
+    logoUrl: text('logo_url'),
+
+    email: varchar('email', { length: 254 }),
+
+    phone: varchar('phone', { length: 50 }),
+
+    address: text('address'),
+
+    openingHours: text('opening_hours'),
+
+    website: varchar('website', { length: 255 }),
+
+    description: text('description'),
+
+    borrowingRulesSummary: text('borrowing_rules_summary'),
+
     createdAt: timestamp('created_at', {
       withTimezone: true,
     })

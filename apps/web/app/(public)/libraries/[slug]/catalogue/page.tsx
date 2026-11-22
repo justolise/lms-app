@@ -33,6 +33,14 @@ interface PublicLibrary {
   name: string;
   slug: string;
   libraryCode: string;
+  logoUrl?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  openingHours?: string | null;
+  website?: string | null;
+  description?: string | null;
+  borrowingRulesSummary?: string | null;
 }
 
 interface CatalogueResponse {
@@ -251,26 +259,65 @@ function TenantPublicCatalogueContent() {
       <div className="bg-linear-to-b from-forest-50/70 to-transparent dark:from-forest-900/20 dark:to-transparent py-10 px-4 sm:px-6 lg:px-8 border-b border-border">
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Badge variant="primary" className="text-xs uppercase">
-                  Public Catalogue
-                </Badge>
-                {library?.libraryCode && (
-                  <span className="text-xs text-muted-foreground font-mono">
-                    [{library.libraryCode}]
-                  </span>
+            <div className="flex items-start gap-4">
+              {library?.logoUrl && (
+                // biome-ignore lint/performance/noImgElement: Library tenant branding logo
+                <img
+                  src={library.logoUrl}
+                  alt={`${libraryDisplayName} Logo`}
+                  className="h-14 w-14 object-contain rounded-xl bg-surface p-1 border border-border shadow-xs shrink-0 mt-0.5"
+                />
+              )}
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge variant="primary" className="text-xs uppercase">
+                    Public Catalogue
+                  </Badge>
+                  {library?.libraryCode && (
+                    <span className="text-xs text-muted-foreground font-mono">
+                      [{library.libraryCode}]
+                    </span>
+                  )}
+                </div>
+                <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
+                  {libraryDisplayName}
+                </h1>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {library?.description ||
+                    "Browse our collection online. No account required."}
+                </p>
+
+                {(library?.address ||
+                  library?.phone ||
+                  library?.email ||
+                  library?.openingHours) && (
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
+                    {library.openingHours && (
+                      <span className="flex items-center gap-1 font-medium text-foreground">
+                        <span>🕒</span> {library.openingHours.split("\n")[0]}
+                      </span>
+                    )}
+                    {library.address && (
+                      <span className="flex items-center gap-1">
+                        <span>📍</span> {library.address}
+                      </span>
+                    )}
+                    {library.phone && (
+                      <span className="flex items-center gap-1">
+                        <span>📞</span> {library.phone}
+                      </span>
+                    )}
+                    {library.email && (
+                      <span className="flex items-center gap-1">
+                        <span>✉️</span> {library.email}
+                      </span>
+                    )}
+                  </div>
                 )}
               </div>
-              <h1 className="text-3xl font-extrabold text-foreground tracking-tight">
-                {libraryDisplayName}
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Browse our collection online. No account required.
-              </p>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 sm:self-start">
               <Link href={`/libraries/${slug}/request-membership`}>
                 <Button variant="primary" size="md">
                   Request Membership
@@ -283,6 +330,18 @@ function TenantPublicCatalogueContent() {
               </Link>
             </div>
           </div>
+
+          {library?.borrowingRulesSummary && (
+            <div className="bg-surface/80 rounded-xl p-3 border border-border text-xs text-muted-foreground flex items-start gap-2">
+              <span className="text-base shrink-0">📋</span>
+              <div>
+                <strong className="text-foreground">
+                  Borrowing Guidelines:{" "}
+                </strong>
+                {library.borrowingRulesSummary}
+              </div>
+            </div>
+          )}
 
           {/* Search & Filters */}
           <div className="flex flex-col md:flex-row gap-3 pt-2">

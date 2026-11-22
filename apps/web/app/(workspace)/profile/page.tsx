@@ -9,6 +9,7 @@ import { DeactivateModal } from "@/features/users/components/DeactivateModal";
 import { ProfileCard } from "@/features/users/components/ProfileCard";
 import { usersService } from "@/features/users/services/users.service";
 import type { UserProfile } from "@/features/users/types/users.types";
+import { ThemeToggle } from "@/lib/theme/theme-toggle";
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
@@ -57,6 +58,24 @@ export default function ProfilePage() {
             onProfileUpdated={(updated) => setProfile(updated)}
             onDeactivateClick={() => setShowDeactivateModal(true)}
           />
+
+          {/* Theme & Appearance Settings */}
+          <div className="bg-surface rounded-2xl border border-border p-6 shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-base font-bold text-foreground">
+                  Appearance &amp; Theme
+                </h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Choose your interface appearance preference: Light, Dark, or
+                  System default.
+                </p>
+              </div>
+              <div className="shrink-0">
+                <ThemeToggle />
+              </div>
+            </div>
+          </div>
 
           <div className="space-y-2 pt-4">
             <h2 className="text-lg font-bold text-foreground">

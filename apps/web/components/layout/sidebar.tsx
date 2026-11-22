@@ -197,6 +197,26 @@ const ADMIN_NAV_ITEMS: NavEntry[] = [
       </svg>
     ),
   },
+  {
+    label: "Library Profile",
+    href: "/settings",
+    permission: PERMISSIONS.TENANT_PROFILE_MANAGE,
+    icon: ({ className }) => (
+      <svg
+        className={className}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+        />
+      </svg>
+    ),
+  },
 ];
 
 export function Sidebar({
@@ -221,12 +241,12 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "hidden lg:flex flex-col border-r border-border bg-surface transition-all duration-300 z-30",
+        "hidden lg:flex flex-col h-screen h-[100dvh] sticky top-0 shrink-0 border-r border-border bg-surface transition-all duration-300 z-30 select-none",
         isCollapsed ? "w-20" : "w-64",
       )}
     >
       {/* Brand Header */}
-      <div className="flex h-16 items-center justify-between px-4 border-b border-border">
+      <div className="flex h-16 shrink-0 items-center justify-between px-4 border-b border-border">
         <Link
           href="/dashboard"
           className="flex items-center gap-3 overflow-hidden"
@@ -388,14 +408,14 @@ export function Sidebar({
       </div>
 
       {/* Footer Profile & Logout */}
-      <div className="border-t border-border p-3">
+      <div className="border-t border-border p-3 shrink-0 space-y-2">
         {user ? (
-          <div className="flex items-center justify-between gap-2">
+          <>
             <Link
               href="/profile"
               title="View profile and settings"
               className={cn(
-                "flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-surface-hover overflow-hidden flex-1",
+                "flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-surface-hover overflow-hidden w-full",
                 isCollapsed && "justify-center p-0",
               )}
             >
@@ -403,7 +423,7 @@ export function Sidebar({
                 {user.fullName ? user.fullName[0].toUpperCase() : "U"}
               </div>
               {!isCollapsed && (
-                <div className="flex flex-col truncate">
+                <div className="flex flex-col truncate flex-1 min-w-0">
                   <span className="text-sm font-medium text-foreground truncate">
                     {user.fullName}
                   </span>
@@ -418,29 +438,32 @@ export function Sidebar({
                 </div>
               )}
             </Link>
-            {!isCollapsed && (
-              <button
-                type="button"
-                onClick={() => logout()}
-                title="Sign Out"
-                className="flex items-center gap-1 p-2 text-muted-foreground hover:text-danger rounded-lg hover:bg-danger/10 transition-colors cursor-pointer"
+
+            <button
+              type="button"
+              onClick={() => logout()}
+              title="Sign Out"
+              className={cn(
+                "flex items-center gap-2.5 w-full rounded-lg px-2.5 py-2 text-xs font-semibold text-danger hover:bg-danger/10 hover:text-danger transition-colors cursor-pointer border border-transparent hover:border-danger/20",
+                isCollapsed && "justify-center px-0",
+              )}
+            >
+              <svg
+                className="h-4 w-4 shrink-0"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                  />
-                </svg>
-              </button>
-            )}
-          </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+              {!isCollapsed && <span>Sign Out</span>}
+            </button>
+          </>
         ) : (
           <Link
             href="/login"

@@ -81,6 +81,15 @@ export function MoreMenuDrawer({
           >
             Member Types & Policies
           </Link>
+          {role === "ADMIN" && (
+            <Link
+              href="/settings"
+              onClick={onClose}
+              className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-surface-hover"
+            >
+              Library Profile & Settings
+            </Link>
+          )}
           <Link
             href="/users"
             onClick={onClose}

@@ -47,6 +47,14 @@ export class PublicService {
     name: string;
     slug: string;
     libraryCode: string;
+    logoUrl?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
+    openingHours?: string | null;
+    website?: string | null;
+    description?: string | null;
+    borrowingRulesSummary?: string | null;
   }> {
     const cleanSlug = slug?.trim().toLowerCase();
 
@@ -57,6 +65,14 @@ export class PublicService {
           name: tenants.name,
           libraryCode: tenants.libraryCode,
           status: tenants.status,
+          logoUrl: tenants.logoUrl,
+          email: tenants.email,
+          phone: tenants.phone,
+          address: tenants.address,
+          openingHours: tenants.openingHours,
+          website: tenants.website,
+          description: tenants.description,
+          borrowingRulesSummary: tenants.borrowingRulesSummary,
         })
         .from(tenants)
         .where(
@@ -76,6 +92,14 @@ export class PublicService {
           name: tenant.name,
           slug: tenant.libraryCode.toLowerCase(),
           libraryCode: tenant.libraryCode,
+          logoUrl: tenant.logoUrl,
+          email: tenant.email,
+          phone: tenant.phone,
+          address: tenant.address,
+          openingHours: tenant.openingHours,
+          website: tenant.website,
+          description: tenant.description,
+          borrowingRulesSummary: tenant.borrowingRulesSummary,
         };
       }
     }
@@ -87,6 +111,14 @@ export class PublicService {
         name: tenants.name,
         libraryCode: tenants.libraryCode,
         status: tenants.status,
+        logoUrl: tenants.logoUrl,
+        email: tenants.email,
+        phone: tenants.phone,
+        address: tenants.address,
+        openingHours: tenants.openingHours,
+        website: tenants.website,
+        description: tenants.description,
+        borrowingRulesSummary: tenants.borrowingRulesSummary,
       })
       .from(tenants)
       .where(eq(tenants.status, 'ACTIVE'))
@@ -99,6 +131,14 @@ export class PublicService {
         name: tenant.name,
         slug: tenant.libraryCode.toLowerCase(),
         libraryCode: tenant.libraryCode,
+        logoUrl: tenant.logoUrl,
+        email: tenant.email,
+        phone: tenant.phone,
+        address: tenant.address,
+        openingHours: tenant.openingHours,
+        website: tenant.website,
+        description: tenant.description,
+        borrowingRulesSummary: tenant.borrowingRulesSummary,
       };
     }
 
@@ -123,6 +163,14 @@ export class PublicService {
         name: tenants.name,
         libraryCode: tenants.libraryCode,
         status: tenants.status,
+        logoUrl: tenants.logoUrl,
+        email: tenants.email,
+        phone: tenants.phone,
+        address: tenants.address,
+        openingHours: tenants.openingHours,
+        website: tenants.website,
+        description: tenants.description,
+        borrowingRulesSummary: tenants.borrowingRulesSummary,
       })
       .from(tenants)
       .where(eq(tenants.status, 'ACTIVE'));
@@ -141,6 +189,14 @@ export class PublicService {
       slug: tenant.slug,
       libraryCode: tenant.libraryCode,
       status: 'ACTIVE',
+      logoUrl: tenant.logoUrl,
+      email: tenant.email,
+      phone: tenant.phone,
+      address: tenant.address,
+      openingHours: tenant.openingHours,
+      website: tenant.website,
+      description: tenant.description,
+      borrowingRulesSummary: tenant.borrowingRulesSummary,
     };
   }
 

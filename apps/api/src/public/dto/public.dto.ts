@@ -24,6 +24,14 @@ export interface PublicLibraryDto {
   slug: string;
   libraryCode: string;
   status: string;
+  logoUrl?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  openingHours?: string | null;
+  website?: string | null;
+  description?: string | null;
+  borrowingRulesSummary?: string | null;
 }
 
 // ─── Public Catalogue Search & Pagination Query ───────────────────────────────

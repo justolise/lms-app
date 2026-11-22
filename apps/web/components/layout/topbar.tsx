@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/lib/auth/auth-context";
-import { ThemeToggle } from "@/lib/theme/theme-toggle";
 
 const TITLE_MAP: Record<string, string> = {
   "/dashboard": "Operational Dashboard",
@@ -16,13 +15,14 @@ const TITLE_MAP: Record<string, string> = {
   "/categories": "Subject Categories Tree",
   "/member-types": "Member Types & Policies",
   "/users": "Staff Directory",
+  "/settings": "Library Profile & Settings",
   "/profile": "Personal Profile",
   "/change-password": "Change Password",
 };
 
 export function Topbar({ onMenuToggle }: { onMenuToggle?: () => void }) {
   const pathname = usePathname();
-  const { user, role, logout } = useAuth();
+  const { user, role } = useAuth();
 
   // Derive desk title
   let currentTitle = "Workspace";
@@ -34,7 +34,7 @@ export function Topbar({ onMenuToggle }: { onMenuToggle?: () => void }) {
   }
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 w-full items-center justify-between border-b border-border bg-surface/90 px-4 backdrop-blur-md lg:px-6">
+    <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-border bg-surface/95 px-4 backdrop-blur-md lg:px-6">
       {/* Left: Mobile Drawer Trigger + Breadcrumb */}
       <div className="flex items-center gap-3">
         {onMenuToggle && (
@@ -95,9 +95,6 @@ export function Topbar({ onMenuToggle }: { onMenuToggle?: () => void }) {
           </kbd>
         </div>
 
-        {/* Theme Mode Switcher */}
-        <ThemeToggle />
-
         {/* Profile & Logout Controls */}
         {user ? (
           <div className="flex items-center gap-2">
@@ -118,28 +115,6 @@ export function Topbar({ onMenuToggle }: { onMenuToggle?: () => void }) {
                 {role || "MEMBER"}
               </Badge>
             </Link>
-
-            <button
-              type="button"
-              onClick={() => logout()}
-              title="Sign Out"
-              className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-danger hover:bg-danger/10 hover:border-danger/30 transition-colors cursor-pointer"
-            >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                />
-              </svg>
-              <span className="hidden sm:inline">Sign Out</span>
-            </button>
           </div>
         ) : (
           <Link

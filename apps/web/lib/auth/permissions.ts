@@ -30,6 +30,7 @@ export const PERMISSIONS = {
   USERS_INVITE_LIBRARIAN: "users:invite_librarian",
   USERS_PROMOTE: "users:promote",
   USERS_TOGGLE_STATUS: "users:toggle_status",
+  TENANT_PROFILE_MANAGE: "tenant:profile_manage",
 
   // Holds & Reservations (HLD-1, HLD-2, HLD-3)
   HOLDS_PLACE: "holds:place",

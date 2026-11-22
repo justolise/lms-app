@@ -26,6 +26,10 @@ describe("RBAC Permissions Architecture", () => {
       hasPermission("ADMIN", PERMISSIONS.LOAN_POLICIES_MANAGE),
       true,
     );
+    assert.strictEqual(
+      hasPermission("ADMIN", PERMISSIONS.TENANT_PROFILE_MANAGE),
+      true,
+    );
   });
 
   it("restricts LIBRARIAN from promoting users to admin", () => {
