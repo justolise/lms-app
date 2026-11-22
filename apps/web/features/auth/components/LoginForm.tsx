@@ -2,22 +2,31 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert } from "@/components/feedback/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { useAuth } from "@/lib/auth/auth-context";
 import { authService } from "../services/auth.service";
 import type { IdentifierType, LibraryMembership } from "../types/auth.types";
 
 export function LoginForm() {
   const router = useRouter();
+  const { isAuthenticated, isLoading, refreshProfile } = useAuth();
   const [identifierType, setIdentifierType] = useState<IdentifierType>("EMAIL");
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // If already authenticated, redirect directly to dashboard
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace("/dashboard");
+    }
+  }, [isLoading, isAuthenticated, router]);
 
   // Multi-library membership selection state
   const [memberships, setMemberships] = useState<LibraryMembership[] | null>(
@@ -48,10 +57,12 @@ export function LoginForm() {
         return;
       }
 
+      await refreshProfile();
+
       if (data.user?.mustChangePassword) {
-        router.push("/change-password?firstLogin=true");
+        router.replace("/change-password?firstLogin=true");
       } else {
-        router.push("/profile");
+        router.replace("/dashboard");
       }
     } catch (err) {
       setError(
@@ -74,10 +85,12 @@ export function LoginForm() {
     try {
       const data = await authService.selectMembership(selectedTenantId);
 
+      await refreshProfile();
+
       if (data.user?.mustChangePassword) {
-        router.push("/change-password?firstLogin=true");
+        router.replace("/change-password?firstLogin=true");
       } else {
-        router.push("/profile");
+        router.replace("/dashboard");
       }
     } catch (err) {
       setError(
