@@ -230,6 +230,122 @@ export async function seedInitialAdmin(config: SeedAdminConfig = {}) {
         console.log(`ℹ️ Default BOOK loan policy already exists: ${existingPolicies[0].id}`);
       }
 
+      // Ensure Sample Catalogue Items and Copies Exist
+      const existingBooks = await tx
+        .select({ id: schema.catalogueItems.id })
+        .from(schema.catalogueItems)
+        .where(eq(schema.catalogueItems.tenantId, tenant.id))
+        .limit(1);
+
+      if (existingBooks.length === 0) {
+        console.log(`Creating sample categories and catalogue books...`);
+
+        // Category
+        const [catLiterature] = await tx
+          .insert(schema.categories)
+          .values({
+            tenantId: tenant.id,
+            name: 'African Literature',
+            description: 'Novels, drama and poetry by African authors',
+          })
+          .returning();
+
+        const [catSciences] = await tx
+          .insert(schema.categories)
+          .values({
+            tenantId: tenant.id,
+            name: 'Sciences & Mathematics',
+            description: 'Core scientific textbooks and reference materials',
+          })
+          .returning();
+
+        const sampleBooksData = [
+          {
+            title: 'The River Between',
+            subtitle: 'Heinemann African Writers Series',
+            authors: ["Ngũgĩ wa Thiong'o"],
+            isbn13: '9780435905484',
+            publisher: 'Heinemann',
+            publishedYear: 1965,
+            language: 'en',
+            format: 'BOOK' as const,
+            callNumber: '823.914 NGU',
+            shelfLocation: 'AF-LIT-01',
+            categoryId: catLiterature.id,
+            subjects: ['Kenyan Literature', 'Colonial Period', 'Fiction'],
+          },
+          {
+            title: 'Things Fall Apart',
+            subtitle: 'The African Trilogy Book 1',
+            authors: ['Chinua Achebe'],
+            isbn13: '9780385474542',
+            publisher: 'Anchor Books',
+            publishedYear: 1958,
+            language: 'en',
+            format: 'BOOK' as const,
+            callNumber: '823.914 ACH',
+            shelfLocation: 'AF-LIT-02',
+            subjects: ['Nigerian Literature', 'Classics', 'Fiction'],
+          },
+          {
+            title: 'Blossoms of the Savannah',
+            subtitle: 'Set book for literature in English',
+            authors: ['Henry Ole Kulet'],
+            isbn13: '9789966467348',
+            publisher: 'Longhorn Publishers',
+            publishedYear: 2008,
+            language: 'en',
+            format: 'BOOK' as const,
+            callNumber: '823.914 KUL',
+            shelfLocation: 'AF-LIT-03',
+            categoryId: catLiterature.id,
+            subjects: ['Kenyan Literature', 'Culture', 'Set Books'],
+          },
+          {
+            title: 'Secondary Physics: Form 1 & 2',
+            subtitle: 'Kenya National Curriculum',
+            authors: ['Kenya Institute of Curriculum Development'],
+            isbn13: '9789966250018',
+            publisher: 'KLB',
+            publishedYear: 2021,
+            language: 'en',
+            format: 'BOOK' as const,
+            callNumber: '530 KICD',
+            shelfLocation: 'SCI-01',
+            categoryId: catSciences.id,
+            subjects: ['Physics', 'Secondary Education', 'Sciences'],
+          },
+        ];
+
+        let copySeq = 1;
+        for (const bookData of sampleBooksData) {
+          const [insertedBook] = await tx
+            .insert(schema.catalogueItems)
+            .values({
+              tenantId: tenant.id,
+              createdBy: user.id,
+              ...bookData,
+            })
+            .returning();
+
+          // Create 2 available copies for each book
+          for (let c = 1; c <= 2; c++) {
+            const barcode = `${tenant.libraryCode}-${String(copySeq++).padStart(5, '0')}`;
+            await tx.insert(schema.copies).values({
+              tenantId: tenant.id,
+              catalogueItemId: insertedBook.id,
+              barcode,
+              condition: 'GOOD',
+              status: 'AVAILABLE',
+              shelfLocation: bookData.shelfLocation,
+            });
+          }
+        }
+        console.log(`✅ Seeded ${sampleBooksData.length} sample titles and physical copies.`);
+      } else {
+        console.log(`ℹ️ Catalogue books already exist for tenant: ${tenant.id}`);
+      }
+
       console.log(`\n🎉 Seeding complete! You can now log in with:`);
       console.log(`──────────────────────────────────────────────`);
       console.log(`Tenant Name:    ${tenant.name}`);

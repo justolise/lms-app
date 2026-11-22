@@ -16,7 +16,7 @@ import type { AuthenticatedRequest } from '../common/interfaces/authenticated-re
 import type { CancelHoldDto } from './dto/cancel-hold.dto.js';
 import type { CreateHoldDto } from './dto/create-hold.dto.js';
 import type { HoldIdParamDto } from './dto/hold-params.dto.js';
-import type { HoldsService } from './holds.service.js';
+import { HoldsService } from './holds.service.js';
 
 @Controller(['holds', 'api/holds'])
 @UseGuards(AccessTokenGuard, RolesGuard)

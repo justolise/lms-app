@@ -1,6 +1,7 @@
 # API Security & Input Validation
 
 ## Request Pipeline Hardening
+
 1. **Payload Limits**: Express JSON and URL-encoded parsers restricted to 1MB to prevent memory exhaustion denial of service.
 2. **Global ValidationPipe**:
    - `whitelist: true`: Strips undeclared properties from request bodies.

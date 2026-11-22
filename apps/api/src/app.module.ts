@@ -8,6 +8,7 @@ import { CirculationModule } from "./circulation/circulation.module.js";
 import { HoldsModule } from "./holds/holds.module.js";
 import { MemberTypesModule } from "./member-types/member-types.module.js";
 import { MembersModule } from "./members/members.module.js";
+import { PublicModule } from "./public/public.module.js";
 import { RedisModule } from "./redis/redis.module.js";
 import { UsersModule } from "./users/users.module.js";
 
@@ -22,6 +23,7 @@ import { UsersModule } from "./users/users.module.js";
 		CategoriesModule,
 		CirculationModule,
 		HoldsModule,
+		PublicModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

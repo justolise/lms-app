@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 
-import type { DatabaseService } from '../database/database.service.js';
+import { DatabaseService } from '../database/database.service.js';
 import {
   auditLogs,
   catalogueItems,
@@ -18,8 +18,8 @@ import {
   memberProfiles,
   users,
 } from '../database/schema.js';
-import type { FulfillHoldResult, HoldsService } from '../holds/holds.service.js';
-import type { RedisService } from '../redis/redis.service.js';
+import { type FulfillHoldResult, HoldsService } from '../holds/holds.service.js';
+import { RedisService } from '../redis/redis.service.js';
 import type { CheckoutDto } from './dto/checkout.dto.js';
 import type { ReturnLoanDto } from './dto/return-loan.dto.js';
 

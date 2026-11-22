@@ -1130,3 +1130,54 @@ export const holds = pgTable(
 export type Hold = typeof holds.$inferSelect;
 export type NewHold = typeof holds.$inferInsert;
 
+// ─── MEM-ENQ: Public membership enquiries ─────────────────────────────────────
+// Unauthenticated patrons submit contact information requesting a library card.
+// Staff review and provision accounts manually (no self-registration per DECISIONS.md).
+export const membershipEnquiries = pgTable(
+  'membership_enquiries',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    // Resolved from libraryCode at submission time — allows multi-tenant routing.
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'restrict' }),
+
+    fullName: varchar('full_name', { length: 200 }).notNull(),
+
+    email: varchar('email', { length: 254 }),
+
+    phone: varchar('phone', { length: 30 }).notNull(),
+
+    idNumber: varchar('id_number', { length: 50 }).notNull(),
+
+    memberType: varchar('member_type', { length: 50 }),
+
+    organization: varchar('organization', { length: 300 }),
+
+    notes: text('notes'),
+
+    // Lifecycle: PENDING → APPROVED or REJECTED by staff.
+    status: varchar('status', { length: 20 }).notNull().default('PENDING'),
+
+    // Set when a staff member provisions the account.
+    reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+
+    reviewedBy: uuid('reviewed_by'),
+
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index('membership_enquiries_tenant_status_idx').on(
+      table.tenantId,
+      table.status,
+      table.createdAt,
+    ),
+  ],
+);
+
+export type MembershipEnquiry = typeof membershipEnquiries.$inferSelect;
+export type NewMembershipEnquiry = typeof membershipEnquiries.$inferInsert;
+

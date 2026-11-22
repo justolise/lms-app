@@ -1,17 +1,36 @@
 @import "tailwindcss";
 
 :root {
-  /* Core palette */
-  --background: #f9fafb;
+  /* Brand: Forest Green */
+  --forest-900: #112f27;
+  --forest-800: #173f35;
+  --forest-700: #205b49;
+  --forest-600: #2f7663;
+  --forest-500: #4d927c;
+  --forest-100: #d0e2d6;
+  --forest-50: #e7f0ea;
+
+  /* Accent: Warm Amber */
+  --amber-600: #c6903b;
+  --amber-500: #ddaa55;
+  --amber-400: #e5b667;
+  --amber-100: #faedd9;
+
+  /* Light Surface Palette */
+  --background: #f8faf9;
   --foreground: #111827;
   --surface: #ffffff;
-  --surface-hover: #f3f4f6;
-  --border: #e5e7eb;
+  --surface-hover: #f1f5f3;
+  --border: #e2e8e5;
 
   /* Semantic Brand & Action Tokens */
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  --primary: var(--forest-700);
+  --primary-hover: var(--forest-800);
   --primary-foreground: #ffffff;
+
+  --accent: var(--amber-500);
+  --accent-hover: var(--amber-600);
+  --accent-foreground: #112f27;
 
   --secondary: #4b5563;
   --secondary-hover: #374151;
@@ -27,11 +46,59 @@
   --warning: #d97706;
   --warning-foreground: #ffffff;
 
-  --muted: #f3f4f6;
-  --muted-foreground: #6b7280;
+  --muted: #f1f5f3;
+  --muted-foreground: #5a6b65;
+}
+
+.dark {
+  /* Dark Surface Palette */
+  --background: #0d1715;
+  --foreground: #f3f5f4;
+  --surface: #142320;
+  --surface-hover: #1b2f2b;
+  --border: #223c36;
+
+  /* Semantic Brand Tokens for Dark Mode */
+  --primary: #3d8a74;
+  --primary-hover: #4d927c;
+  --primary-foreground: #ffffff;
+
+  --accent: var(--amber-400);
+  --accent-hover: var(--amber-500);
+  --accent-foreground: #0b1f1a;
+
+  --secondary: #94a3b8;
+  --secondary-hover: #cbd5e1;
+  --secondary-foreground: #0f172a;
+
+  --danger: #ef4444;
+  --danger-hover: #dc2626;
+  --danger-foreground: #ffffff;
+
+  --success: #22c55e;
+  --success-foreground: #ffffff;
+
+  --warning: #f59e0b;
+  --warning-foreground: #000000;
+
+  --muted: #1a2c28;
+  --muted-foreground: #8fa39b;
 }
 
 @theme inline {
+  --color-forest-900: var(--forest-900);
+  --color-forest-800: var(--forest-800);
+  --color-forest-700: var(--forest-700);
+  --color-forest-600: var(--forest-600);
+  --color-forest-500: var(--forest-500);
+  --color-forest-100: var(--forest-100);
+  --color-forest-50: var(--forest-50);
+
+  --color-amber-600: var(--amber-600);
+  --color-amber-500: var(--amber-500);
+  --color-amber-400: var(--amber-400);
+  --color-amber-100: var(--amber-100);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
@@ -41,6 +108,10 @@
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-foreground: var(--primary-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-foreground: var(--accent-foreground);
 
   --color-secondary: var(--secondary);
   --color-secondary-hover: var(--secondary-hover);
@@ -63,39 +134,27 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #09090b;
-    --foreground: #f4f4f5;
-    --surface: #18181b;
-    --surface-hover: #27272a;
-    --border: #27272a;
-
-    --primary: #3b82f6;
-    --primary-hover: #2563eb;
-    --primary-foreground: #ffffff;
-
-    --secondary: #71717a;
-    --secondary-hover: #52525b;
-    --secondary-foreground: #ffffff;
-
-    --danger: #ef4444;
-    --danger-hover: #dc2626;
-    --danger-foreground: #ffffff;
-
-    --success: #22c55e;
-    --success-foreground: #ffffff;
-
-    --warning: #f59e0b;
-    --warning-foreground: #000000;
-
-    --muted: #27272a;
-    --muted-foreground: #a1a1aa;
-  }
-}
-
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--surface);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
 }

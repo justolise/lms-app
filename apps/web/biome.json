@@ -20,11 +20,18 @@
       "preset": "recommended",
       "a11y": {
         "noLabelWithoutControl": "off",
-        "useButtonType": "off"
+        "useButtonType": "off",
+        "noSvgWithoutTitle": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off"
       },
       "correctness": {
         "useExhaustiveDependencies": "off",
         "noUnusedVariables": "warn"
+      },
+      "performance": {
+        "noImgElement": "warn"
       }
     }
   },

@@ -6,10 +6,8 @@ import {
 } from "@nestjs/common";
 import { and, desc, eq, inArray, lte } from "drizzle-orm";
 
-import type {
-	DatabaseService,
-	DatabaseTransaction,
-} from "../database/database.service.js";
+import type { DatabaseTransaction } from "../database/database.service.js";
+import { DatabaseService } from "../database/database.service.js";
 import {
 	auditLogs,
 	catalogueItems,
