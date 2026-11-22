@@ -1009,3 +1009,119 @@ export const loans = pgTable(
     }).onDelete('restrict'),
   ],
 );
+
+export type Loan = typeof loans.$inferSelect;
+export type NewLoan = typeof loans.$inferInsert;
+
+// ─── HLD-1 through HLD-3: Holds & Reservations ──────────────────────────────
+
+export const holdStatusEnum = pgEnum('hold_status', [
+  'PENDING',
+  'READY',
+  'FULFILLED',
+  'CANCELLED',
+  'EXPIRED',
+]);
+
+export const holds = pgTable(
+  'holds',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'restrict' }),
+
+    // Member placing hold — composite FK to users(tenant_id, id)
+    userId: uuid('user_id').notNull(),
+
+    // Title on which hold is placed — composite FK to catalogue_items(tenant_id, id)
+    catalogueItemId: uuid('catalogue_item_id').notNull(),
+
+    // Assigned physical copy once ready for pickup — nullable FK to copies(tenant_id, id)
+    copyId: uuid('copy_id'),
+
+    status: holdStatusEnum('status').notNull().default('PENDING'),
+
+    // Pickup window in hours once ready (default: 72 hours)
+    pickupWindowHours: integer('pickup_window_hours').notNull().default(72),
+
+    // Timestamps
+    placedAt: timestamp('placed_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    readyAt: timestamp('ready_at', { withTimezone: true }),
+
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+
+    fulfilledAt: timestamp('fulfilled_at', { withTimezone: true }),
+
+    cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+
+    cancellationReason: varchar('cancellation_reason', { length: 255 }),
+
+    cancelledByUserId: uuid('cancelled_by_user_id'),
+
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('holds_tenant_id_id_unique').on(table.tenantId, table.id),
+
+    // Only 1 active hold per user per title
+    uniqueIndex('holds_tenant_user_title_active_unique')
+      .on(table.tenantId, table.userId, table.catalogueItemId)
+      .where(sql`${table.status} IN ('PENDING', 'READY')`),
+
+    // FIFO queue index
+    index('holds_queue_fifo_idx').on(
+      table.tenantId,
+      table.catalogueItemId,
+      table.status,
+      table.placedAt,
+    ),
+
+    // User's holds index
+    index('holds_tenant_user_status_idx').on(
+      table.tenantId,
+      table.userId,
+      table.status,
+    ),
+
+    // Copy claimant index
+    index('holds_tenant_copy_status_idx').on(
+      table.tenantId,
+      table.copyId,
+      table.status,
+    ),
+
+    // Foreign keys
+    foreignKey({
+      name: 'holds_tenant_user_fk',
+      columns: [table.tenantId, table.userId],
+      foreignColumns: [users.tenantId, users.id],
+    }).onDelete('restrict'),
+
+    foreignKey({
+      name: 'holds_tenant_catalogue_item_fk',
+      columns: [table.tenantId, table.catalogueItemId],
+      foreignColumns: [catalogueItems.tenantId, catalogueItems.id],
+    }).onDelete('restrict'),
+
+    foreignKey({
+      name: 'holds_tenant_copy_fk',
+      columns: [table.tenantId, table.copyId],
+      foreignColumns: [copies.tenantId, copies.id],
+    }).onDelete('set null'),
+  ],
+);
+
+export type Hold = typeof holds.$inferSelect;
+export type NewHold = typeof holds.$inferInsert;
+

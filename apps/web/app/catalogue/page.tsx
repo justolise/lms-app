@@ -17,6 +17,8 @@ import type {
   CategoryOption,
 } from "@/features/catalogue/types/catalogue.types";
 import { categoriesService } from "@/features/categories/services/categories.service";
+import { PlaceHoldModal } from "@/features/holds/components/PlaceHoldModal";
+import type { Hold } from "@/features/holds/types/holds.types";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 
 export default function CataloguePage() {
@@ -37,6 +39,7 @@ export default function CataloguePage() {
   const [editingItem, setEditingItem] = useState<CatalogueItem | null>(null);
   const [selectedItemForCopies, setSelectedItemForCopies] =
     useState<CatalogueItem | null>(null);
+  const [holdItem, setHoldItem] = useState<CatalogueItem | null>(null);
 
   async function loadCategories() {
     try {
@@ -92,6 +95,12 @@ export default function CataloguePage() {
     }
   }
 
+  function handleHoldSuccess(hold: Hold) {
+    setActionMessage(
+      `Hold placed successfully! You are in the queue for "${hold.bookTitle ?? "this title"}". Queue position: ${hold.queuePosition ?? "—"}.`,
+    );
+  }
+
   return (
     <div className="min-h-screen bg-surface-raised flex flex-col">
       <Navbar />
@@ -105,8 +114,8 @@ export default function CataloguePage() {
                   Library Catalogue
                 </h1>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Browse titles, check copy availability, or register new
-                  physical inventory.
+                  Browse titles, check copy availability, reserve unavailable
+                  titles, or register new physical inventory.
                 </p>
               </div>
               <Can permission={PERMISSIONS.CATALOGUE_CREATE}>
@@ -146,6 +155,7 @@ export default function CataloguePage() {
                 setShowAddModal(true);
               }}
               onArchiveItem={handleArchive}
+              onPlaceHold={(item) => setHoldItem(item)}
             />
 
             <BookModal
@@ -171,6 +181,13 @@ export default function CataloguePage() {
               isOpen={Boolean(selectedItemForCopies)}
               onClose={() => setSelectedItemForCopies(null)}
               onCopiesChanged={() => loadCatalogue()}
+            />
+
+            <PlaceHoldModal
+              isOpen={Boolean(holdItem)}
+              item={holdItem}
+              onClose={() => setHoldItem(null)}
+              onSuccess={handleHoldSuccess}
             />
           </Container>
         </main>

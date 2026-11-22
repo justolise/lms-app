@@ -31,6 +31,13 @@ export const PERMISSIONS = {
   USERS_PROMOTE: "users:promote",
   USERS_TOGGLE_STATUS: "users:toggle_status",
 
+  // Holds & Reservations (HLD-1, HLD-2, HLD-3)
+  HOLDS_PLACE: "holds:place",
+  HOLDS_READ_OWN: "holds:read_own",
+  HOLDS_READ_ALL: "holds:read_all",
+  HOLDS_CANCEL_OWN: "holds:cancel_own",
+  HOLDS_CANCEL_ANY: "holds:cancel_any",
+
   // Profile & Self-Service
   PROFILE_MANAGE_OWN: "profile:manage_own",
 } as const;

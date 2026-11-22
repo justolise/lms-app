@@ -8,10 +8,11 @@ import { CheckoutDesk } from "@/features/circulation/components/CheckoutDesk";
 import { LoansLedger } from "@/features/circulation/components/LoansLedger";
 import { RenewDesk } from "@/features/circulation/components/RenewDesk";
 import { ReturnDesk } from "@/features/circulation/components/ReturnDesk";
+import { HoldsQueue } from "@/features/holds/components/HoldsQueue";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 import { cn } from "@/utils/classnames";
 
-type Tab = "checkout" | "return" | "renew" | "loans";
+type Tab = "checkout" | "return" | "renew" | "loans" | "holds";
 
 export default function CirculationPage() {
   const [activeTab, setActiveTab] = useState<Tab>("checkout");
@@ -29,7 +30,8 @@ export default function CirculationPage() {
               </h1>
               <p className="mt-1 text-sm text-muted-foreground">
                 Issue books, process returns with automated fine assessment,
-                extend active loans, and audit the loans ledger.
+                extend active loans, audit the loans ledger, and manage the
+                holds queue.
               </p>
             </div>
 
@@ -83,9 +85,21 @@ export default function CirculationPage() {
               >
                 Loans Ledger
               </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("holds")}
+                className={cn(
+                  "pb-3 text-sm font-semibold border-b-2 -mb-px transition-colors whitespace-nowrap cursor-pointer",
+                  activeTab === "holds"
+                    ? "border-primary text-primary"
+                    : "border-transparent text-muted-foreground hover:text-foreground",
+                )}
+              >
+                Holds Queue
+              </button>
             </div>
 
-            {/* Active Tab Desk */}
+            {/* Active Tab Content */}
             <div>
               {activeTab === "checkout" && <CheckoutDesk />}
               {activeTab === "return" && <ReturnDesk />}
@@ -96,6 +110,7 @@ export default function CirculationPage() {
                   description="Real-time audit log of all active and returned loans across patrons."
                 />
               )}
+              {activeTab === "holds" && <HoldsQueue />}
             </div>
           </Container>
         </main>

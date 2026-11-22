@@ -6,6 +6,7 @@ import { Container } from "@/components/layout/container";
 import { Navbar } from "@/components/layout/navbar";
 import { Spinner } from "@/components/ui/spinner";
 import { LoansLedger } from "@/features/circulation/components/LoansLedger";
+import { MyHoldsList } from "@/features/holds/components/MyHoldsList";
 import { DeactivateModal } from "@/features/users/components/DeactivateModal";
 import { ProfileCard } from "@/features/users/components/ProfileCard";
 import { SessionsList } from "@/features/users/components/SessionsList";
@@ -46,8 +47,8 @@ export default function ProfilePage() {
               User Profile &amp; Settings
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Manage your personal credentials, view your borrowed books, and
-              monitor active sessions.
+              Manage your personal credentials, view your borrowed books,
+              monitor reservations, and review active sessions.
             </p>
           </div>
 
@@ -67,6 +68,8 @@ export default function ProfilePage() {
                 onProfileUpdated={(updated) => setProfile(updated)}
                 onDeactivateClick={() => setShowDeactivateModal(true)}
               />
+
+              <MyHoldsList />
 
               <LoansLedger
                 title="My Borrowed Books"

@@ -14,6 +14,7 @@ interface CatalogueTableProps {
   onManageCopies: (item: CatalogueItem) => void;
   onEditItem?: (item: CatalogueItem) => void;
   onArchiveItem?: (item: CatalogueItem) => void;
+  onPlaceHold?: (item: CatalogueItem) => void;
 }
 
 export function CatalogueTable({
@@ -23,6 +24,7 @@ export function CatalogueTable({
   onManageCopies,
   onEditItem,
   onArchiveItem,
+  onPlaceHold,
 }: CatalogueTableProps) {
   const categoryMap = new Map<string, string>();
   for (const c of categories) {
@@ -105,7 +107,20 @@ export function CatalogueTable({
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <div className="inline-flex items-center gap-1.5">
+                    <div className="inline-flex items-center gap-1.5 flex-wrap justify-end">
+                      {/* Place Hold — shown when no copies available */}
+                      {!hasCopies && onPlaceHold && (
+                        <Can permission={PERMISSIONS.HOLDS_PLACE}>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => onPlaceHold(item)}
+                          >
+                            Place Hold
+                          </Button>
+                        </Can>
+                      )}
+
                       <Can permission={PERMISSIONS.COPIES_MANAGE}>
                         <Button
                           size="sm"

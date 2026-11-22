@@ -100,9 +100,9 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 | CIR-5  |       P0 |  done  | Checkout blocks and librarian/admin override              | Verification of overdue loans, fine ceilings, and membership expiry with staff override audit logging. |
 | CIR-6  |       P0 |  done  | Phone camera barcode/QR scanning                          | In-browser `zxing-wasm` multi-format scanner (QR, Code128, Code39, EAN13) with fallback manual input. |
 | CIR-9  |       P1 |  todo  | Lost/damaged workflow and replacement charge              | Not implemented; remains P1.                                                                                               |
-| HLD-1  |       P0 |  todo  | FIFO holds on checked-out titles                          | Not implemented.                                                                                                           |
-| HLD-2  |       P0 |  todo  | Ready notification and configurable expiry                | Not implemented.                                                                                                           |
-| HLD-3  |       P0 |  todo  | Hold cancellation and queue management                    | Not implemented.                                                                                                           |
+| HLD-1  |       P0 |  done  | FIFO holds on checked-out titles                          | Hold placement on titles with zero available copies; duplicate check; pickup window resolution; verified in HoldsService and CirculationService checkout integration; unit tests. |
+| HLD-2  |       P0 |  done  | Ready notification and configurable expiry                | Return desk fulfillment (`fulfillNextHoldOnReturn`) reserving copy to `RESERVED` and setting pickup countdown; verification on checkout; unit tests. |
+| HLD-3  |       P0 |  done  | Hold cancellation and queue management                    | Hold cancellation (patron own or staff any) with copy release if ready; queue re-indexing; full staff queue table and patron My Holds UI. |
 | FIN-1  |       P0 |  todo  | Configurable fine rules                                   | Not implemented.                                                                                                           |
 | FIN-2  |       P0 |  todo  | Fine ledger, payment and waiver                           | Not implemented.                                                                                                           |
 | FIN-3  |       P1 |  todo  | Fine receipts                                             | Not implemented; remains P1.                                                                                               |
@@ -128,14 +128,14 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 
 ## Verification Record
 
-Current verification run completed on **21 November 2026**:
+Current verification run completed on **22 November 2026**:
 
 - **pnpm typecheck**: Passed across all workspace projects (0 TypeScript errors).
-- **pnpm test (Unit Tests)**: 20 test files, 175 tests passed, 0 failed.
+- **pnpm test (Unit Tests)**: 22 test files, 220 tests passed, 0 failed.
 - **Controller E2E Tests**: 2 test files, 27 tests passed, 0 failed (`test/auth.controller.e2e-spec.ts`, `test/users.controller.e2e-spec.ts`).
 - **Live Database Interactive Verification**: Full end-to-end walkthrough verified against local PostgreSQL & Redis (login, profile, staff provisioning, first-login password change gate, frictionless first-time password change without temporary password requirement, min 8 char validation rejection & acceptance, subsequent password change requiring current password, promotion, OTP forgot/reset password, sessions listing, soft account deactivation protection, device logout, member types & borrowing policies matrix, and cross-tenant RLS isolation).
 - **Security Hardening & Cleanup**: Helmet security headers (CSP, HSTS preload, frameguard: deny, noSniff, xssFilter) active; global `Cache-Control: no-store` on API responses; Redis caching with tenant key isolation and mutation invalidation (`MemberTypesService`, `CatalogueService`); rate-limiting decoupled from `src/redis/` into `src/common/guards/` and `src/common/decorators/`; proxy-aware client IP extraction (`x-forwarded-for`); 1MB payload limits; CORS configured.
-- **Phase 2 Catalogue**: `CategoriesModule` and `CatalogueModule` (catalogue items + copies + ISBN lookup) added; 30 new unit tests (10 categories, 11 catalogue, 9 copies); `0007_catalogue.sql` migration with RLS, indexes, and GIN tsvector for search.
+- **Phase 2 Catalogue & Holds**: `CategoriesModule`, `CatalogueModule`, `CirculationModule`, and `HoldsModule` added; 49 unit tests across catalogue, copies, circulation, and holds; `0007_catalogue.sql`, `0008_circulation.sql`, `0009_holds.sql` migrations with RLS, indexes, and FIFO queue ordering.
 - **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 11 prerendered static routes).
 
 Verification commands:

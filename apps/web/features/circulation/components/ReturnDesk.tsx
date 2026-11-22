@@ -73,30 +73,61 @@ export function ReturnDesk() {
       </form>
 
       {result && (
-        <Alert
-          variant={result.overdueDays > 0 ? "warning" : "success"}
-          title={
-            result.overdueDays > 0
-              ? `Returned ${result.overdueDays} Day(s) Overdue`
-              : "Returned On Time!"
-          }
-        >
-          <div className="space-y-1 mt-1 text-xs">
-            <p>
-              Status: <strong>AVAILABLE</strong>
-            </p>
-            {result.fineMinorUnits > 0 ? (
-              <p className="text-sm font-bold text-danger">
-                Fine Due: {formatKes(result.fineMinorUnits)}
+        <>
+          <Alert
+            variant={result.overdueDays > 0 ? "warning" : "success"}
+            title={
+              result.overdueDays > 0
+                ? `Returned ${result.overdueDays} Day(s) Overdue`
+                : "Returned On Time!"
+            }
+          >
+            <div className="space-y-1 mt-1 text-xs">
+              <p>
+                Status:{" "}
+                <strong>
+                  {result.holdFulfilled ? "ON HOLD (reserved)" : "AVAILABLE"}
+                </strong>
               </p>
-            ) : (
-              <p className="text-success font-medium">No fine charged.</p>
-            )}
-            <p className="font-mono text-muted-foreground">
-              Loan ID: {result.loan.id}
-            </p>
-          </div>
-        </Alert>
+              {result.fineMinorUnits > 0 ? (
+                <p className="text-sm font-bold text-danger">
+                  Fine Due: {formatKes(result.fineMinorUnits)}
+                </p>
+              ) : (
+                <p className="text-success font-medium">No fine charged.</p>
+              )}
+              <p className="font-mono text-muted-foreground">
+                Loan ID: {result.loan.id}
+              </p>
+            </div>
+          </Alert>
+
+          {result.holdFulfilled && (
+            <Alert
+              variant="info"
+              title="Hold Fulfilled — Copy Reserved for Pickup"
+            >
+              <p className="text-xs mt-1">
+                This copy has been automatically reserved for the next patron
+                waiting in the hold queue. It is <strong>not available</strong>{" "}
+                for general checkout.
+                {result.holdExpiresAt && (
+                  <>
+                    {" "}
+                    Pickup window expires on{" "}
+                    <strong>
+                      {new Date(result.holdExpiresAt).toLocaleString("en-KE", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </strong>
+                    .
+                  </>
+                )}
+              </p>
+            </Alert>
+          )}
+        </>
       )}
     </div>
   );

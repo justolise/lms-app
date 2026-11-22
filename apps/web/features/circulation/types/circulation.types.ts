@@ -26,6 +26,9 @@ export interface ReturnLoanResult {
   overdueDays: number;
   fineMinorUnits: number;
   fineKes: number;
+  holdFulfilled?: boolean;
+  claimantUserId?: string | null;
+  holdExpiresAt?: string | null;
 }
 
 export interface CheckoutPayload {

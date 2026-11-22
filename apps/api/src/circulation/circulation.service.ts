@@ -1,6 +1,4 @@
 import {
-  BadRequestException,
-  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -9,17 +7,18 @@ import {
 } from '@nestjs/common';
 import { and, eq, sql } from 'drizzle-orm';
 
-import { DatabaseService } from '../database/database.service.js';
-import { RedisService } from '../redis/redis.service.js';
+import type { DatabaseService } from '../database/database.service.js';
 import {
+  auditLogs,
+  catalogueItems,
   copies,
-  loans,
   loanPolicies,
+  loans,
   memberProfiles,
   users,
-  catalogueItems,
-  auditLogs,
 } from '../database/schema.js';
+import type { FulfillHoldResult, HoldsService } from '../holds/holds.service.js';
+import type { RedisService } from '../redis/redis.service.js';
 import type { CheckoutDto } from './dto/checkout.dto.js';
 import type { ReturnLoanDto } from './dto/return-loan.dto.js';
 
@@ -44,7 +43,7 @@ function computeOverdueDays(dueAt: Date, now: Date): number {
   );
 
   const diffDays = (todayMidnight - dueMidnight) / 86_400_000;
-  return diffDays > 0 ? diffDays : 0;
+  return Math.max(diffDays , 0);
 }
 
 /** Compute the due-at timestamp: end of the due local date in Africa/Nairobi. */
@@ -82,6 +81,7 @@ function computeFine(
 export class CirculationService {
   constructor(
     private readonly database: DatabaseService,
+    @Optional() private readonly holdsService?: HoldsService,
     @Optional() private readonly redis?: RedisService,
   ) {}
 
@@ -132,8 +132,8 @@ export class CirculationService {
 
       if (!copy) throw new NotFoundException('Copy not found');
 
-      // Hard block: copy must be AVAILABLE
-      if (copy.status !== 'AVAILABLE') {
+      // Hard block: copy must be AVAILABLE or RESERVED
+      if (copy.status !== 'AVAILABLE' && copy.status !== 'RESERVED') {
         throw new UnprocessableEntityException(
           `Copy is not available for checkout (status: ${copy.status})`,
         );
@@ -173,6 +173,23 @@ export class CirculationService {
         throw new NotFoundException('Member not found');
 
       const member = memberRows[0];
+
+      // If copy is RESERVED, verify that the member is the approved claimant (HLD-1)
+      let claimedHoldId: string | null = null;
+      if (copy.status === 'RESERVED') {
+        if (!this.holdsService) {
+          throw new UnprocessableEntityException(
+            'Copy is on hold and holds service is not available',
+          );
+        }
+        const claimantCheck = await this.holdsService.verifyClaimantForCheckout(
+          tx,
+          tenantId,
+          copy.id,
+          member.userId,
+        );
+        claimedHoldId = claimantCheck.holdId;
+      }
 
       if (!member.memberTypeId) {
         throw new UnprocessableEntityException(
@@ -294,6 +311,15 @@ export class CirculationService {
           and(eq(copies.tenantId, tenantId), eq(copies.id, copy.id)),
         );
 
+      // ── Fulfill hold if copy was claimed (HLD-1) ─────────────
+      if (claimedHoldId && this.holdsService) {
+        await this.holdsService.fulfillHoldOnCheckout(
+          tx,
+          tenantId,
+          claimedHoldId,
+        );
+      }
+
       // ── Audit log ───────────────────────────────────────────
       await tx.insert(auditLogs).values({
         tenantId,
@@ -397,13 +423,21 @@ export class CirculationService {
         )
         .returning();
 
-      // ── Update copy status ──────────────────────────────────
-      await tx
-        .update(copies)
-        .set({ status: 'AVAILABLE', updatedAt: now })
-        .where(
-          and(eq(copies.tenantId, tenantId), eq(copies.id, copy.id)),
+      // ── Process holds or update copy status (HLD-2) ─────────
+      let holdResult: FulfillHoldResult = { holdFulfilled: false };
+      if (this.holdsService) {
+        holdResult = await this.holdsService.fulfillNextHoldOnReturn(
+          tx,
+          tenantId,
+          loan.catalogueItemId,
+          copy.id,
         );
+      } else {
+        await tx
+          .update(copies)
+          .set({ status: 'AVAILABLE', updatedAt: now })
+          .where(and(eq(copies.tenantId, tenantId), eq(copies.id, copy.id)));
+      }
 
       // ── Audit log ───────────────────────────────────────────
       await tx.insert(auditLogs).values({
@@ -417,6 +451,7 @@ export class CirculationService {
           barcode: copy.barcode,
           overdueDays,
           fineMinorUnits,
+          holdFulfilled: holdResult.holdFulfilled,
         },
       });
 
@@ -425,6 +460,9 @@ export class CirculationService {
         overdueDays,
         fineMinorUnits,
         fineKes: fineMinorUnits / 100,
+        holdFulfilled: holdResult.holdFulfilled,
+        claimantUserId: holdResult.claimantUserId,
+        holdExpiresAt: holdResult.expiresAt,
       };
     });
 
@@ -458,7 +496,19 @@ export class CirculationService {
         );
       }
 
-      // Note: hold-blocking renewals (CIR-3 extension) can be added when holds module lands.
+      // ── Block renewal if holds are waiting (CIR-3 / HLD-1) ──
+      if (this.holdsService) {
+        const hasHolds = await this.holdsService.hasActiveHoldsForTitle(
+          tx,
+          tenantId,
+          loan.catalogueItemId,
+        );
+        if (hasHolds) {
+          throw new UnprocessableEntityException(
+            'Cannot renew loan: this title has pending holds waiting in queue (HLD-1)',
+          );
+        }
+      }
 
       const now = new Date();
       const newDueAt = computeDueAt(loan.dueAt, loan.loanDurationDays);
