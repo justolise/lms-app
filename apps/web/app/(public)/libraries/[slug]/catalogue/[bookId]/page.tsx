@@ -132,7 +132,7 @@ function AvailabilityBanner({
 
 function TenantPublicBookDetailContent() {
   const params = useParams();
-  const slug = (params?.slug as string) || "test-lib";
+  const slug = (params?.slug as string) || "";
   const bookId = params?.bookId as string;
 
   const [book, setBook] = useState<PublicBookDetail | null>(null);
@@ -140,6 +140,7 @@ function TenantPublicBookDetailContent() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!slug || !bookId) return;
     async function loadBook() {
       setIsLoading(true);
       setError(null);

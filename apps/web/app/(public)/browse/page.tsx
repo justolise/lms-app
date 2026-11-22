@@ -148,16 +148,12 @@ interface LibraryOption {
   libraryCode: string;
 }
 
-const DEFAULT_LIBRARY_CODE = process.env.NEXT_PUBLIC_LIBRARY_CODE ?? "TEST-LIB";
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
-
 export default function PublicCataloguePage() {
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [books, setBooks] = useState<PublicBook[]>([]);
   const [libraries, setLibraries] = useState<LibraryOption[]>([]);
-  const [selectedLibraryCode, setSelectedLibraryCode] =
-    useState(DEFAULT_LIBRARY_CODE);
+  const [selectedLibraryCode, setSelectedLibraryCode] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [total, setTotal] = useState(0);
@@ -166,23 +162,24 @@ export default function PublicCataloguePage() {
   useEffect(() => {
     async function loadLibraries() {
       try {
-        const res = await fetch(`${API_BASE}/public/libraries`);
+        const res = await fetch("/api/public/libraries");
         if (res.ok) {
           const list: LibraryOption[] = await res.json();
           setLibraries(list);
-          if (
-            list.length > 0 &&
-            !list.some((l) => l.libraryCode === selectedLibraryCode)
-          ) {
-            setSelectedLibraryCode(list[0].libraryCode);
+          if (list.length > 0) {
+            setSelectedLibraryCode((current) =>
+              current && list.some((l) => l.libraryCode === current)
+                ? current
+                : list[0].libraryCode,
+            );
           }
         }
       } catch {
-        // Fallback silently to default code
+        // Fallback silently
       }
     }
     loadLibraries();
-  }, [selectedLibraryCode]);
+  }, []);
 
   // Debounce search input
   useEffect(() => {
@@ -200,7 +197,7 @@ export default function PublicCataloguePage() {
       });
       if (q.trim()) params.set("q", q.trim());
 
-      const res = await fetch(`${API_BASE}/public/catalogue?${params}`);
+      const res = await fetch(`/api/public/catalogue?${params}`);
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.message ?? `HTTP ${res.status}`);
@@ -380,7 +377,11 @@ export default function PublicCataloguePage() {
             </Link>{" "}
             or{" "}
             <Link
-              href="/request-membership"
+              href={
+                selectedLibraryCode
+                  ? `/request-membership?library=${selectedLibraryCode.toLowerCase()}`
+                  : "/request-membership"
+              }
               className="text-primary underline underline-offset-2"
             >
               apply for a library card

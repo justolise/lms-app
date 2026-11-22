@@ -151,7 +151,7 @@ function BookCardSkeleton() {
 
 function TenantPublicCatalogueContent() {
   const params = useParams();
-  const slug = (params?.slug as string) || "test-lib";
+  const slug = (params?.slug as string) || "";
 
   const [library, setLibrary] = useState<PublicLibrary | null>(null);
   const [books, setBooks] = useState<PublicBook[]>([]);
@@ -179,6 +179,7 @@ function TenantPublicCatalogueContent() {
 
   // Load library info
   useEffect(() => {
+    if (!slug) return;
     async function loadLibrary() {
       try {
         const res = await fetch(`/api/public/libraries/${slug}`);
