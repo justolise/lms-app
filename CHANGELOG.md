@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.8.0](https://github.com/justolise/lms-app/compare/v0.7.0...v0.8.0) (2026-11-22)
+
+
+### Features
+
+* **fines:** implement configurable fine rules, append-only fine ledger, payments with receipts, and waiver desk (FIN-1, FIN-2, FIN-3) ([27fbb42](https://github.com/justolise/lms-app/commit/27fbb4230967ed60aac13bca833a1b59ae903b49))
+* **public:** tenant-specific catalogue with search and pagination, and public membership enquiry ([97ee2c9](https://github.com/justolise/lms-app/commit/97ee2c920463d6db0e641bfe1a92767ef91d8989))
+* **web:** add library selection to enquiry UI and route via relative API proxy ([9eccc2b](https://github.com/justolise/lms-app/commit/9eccc2bcb182288e125d7bd13272bb1ddb702aaa))
+
+
+### Bug Fixes
+
+* **db:** apply holds and membership_enquiries migrations with idempotent RLS and grants ([bdc46ad](https://github.com/justolise/lms-app/commit/bdc46ad344d481d7f24edda0c3c73cb4e6a07972))
+* **multi-tenant:** eliminate hardcoded tenant fallbacks and link library context across public routes ([24f123e](https://github.com/justolise/lms-app/commit/24f123ececdffd0a46a277be3870f913b6454a82))
+
+
+### Documentation
+
+* **progress:** update verification records for 228 tests, migration 0011, and multi-tenant hardening ([9f2c858](https://github.com/justolise/lms-app/commit/9f2c858b2733d9142c4a946e33143d33bca85c70))
+
 ## [0.7.0](https://github.com/justolise/lms-app/compare/v0.6.0...v0.7.0) (2026-11-22)
 
 
