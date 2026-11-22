@@ -43,7 +43,6 @@ interface CatalogueResponse {
   totalPages: number;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
 
 function AvailabilityBadge({
   status,
@@ -182,7 +181,7 @@ function TenantPublicCatalogueContent() {
   useEffect(() => {
     async function loadLibrary() {
       try {
-        const res = await fetch(`${API_BASE}/public/libraries/${slug}`);
+        const res = await fetch(`/api/public/libraries/${slug}`);
         if (res.ok) {
           const data = await res.json();
           setLibrary(data);
@@ -214,7 +213,7 @@ function TenantPublicCatalogueContent() {
         if (availOnly) searchParams.set("availableOnly", "true");
 
         const res = await fetch(
-          `${API_BASE}/public/libraries/${slug}/catalogue?${searchParams.toString()}`,
+          `/api/public/libraries/${slug}/catalogue?${searchParams.toString()}`,
         );
 
         if (!res.ok) {

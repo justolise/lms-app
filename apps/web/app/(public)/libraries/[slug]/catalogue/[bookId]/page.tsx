@@ -29,7 +29,6 @@ interface PublicBookDetail {
   availabilityStatus: "AVAILABLE" | "ON_LOAN" | null;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
 
 function AvailabilityBanner({
   status,
@@ -146,7 +145,7 @@ function TenantPublicBookDetailContent() {
       setError(null);
       try {
         const res = await fetch(
-          `${API_BASE}/public/libraries/${slug}/catalogue/${bookId}`,
+          `/api/public/libraries/${slug}/catalogue/${bookId}`,
         );
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));

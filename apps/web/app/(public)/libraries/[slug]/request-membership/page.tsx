@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { Alert } from "@/components/feedback/alert";
 import { Button } from "@/components/ui/button";
@@ -22,16 +22,17 @@ interface PublicLibrary {
   libraryCode: string;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://127.0.0.1:3000";
-
 function MembershipRequestForm() {
+  const router = useRouter();
   const params = useParams();
-  const slug = (params?.slug as string) || "test-lib";
+  const slug = (params?.slug as string) || "city-lib";
 
+  const [libraries, setLibraries] = useState<PublicLibrary[]>([]);
   const [library, setLibrary] = useState<PublicLibrary | null>(null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [idNumber, setIdNumber] = useState("");
   const [memberType, setMemberType] = useState("STUDENT");
   const [organization, setOrganization] = useState("");
   const [notes, setNotes] = useState("");
@@ -43,9 +44,17 @@ function MembershipRequestForm() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadLibrary() {
+    async function loadData() {
       try {
-        const res = await fetch(`${API_BASE}/public/libraries/${slug}`);
+        // Load libraries list for selector
+        const libsRes = await fetch("/api/public/libraries");
+        if (libsRes.ok) {
+          const allLibs: PublicLibrary[] = await libsRes.json();
+          setLibraries(allLibs);
+        }
+
+        // Load specific library info
+        const res = await fetch(`/api/public/libraries/${slug}`);
         if (res.ok) {
           const data = await res.json();
           setLibrary(data);
@@ -54,10 +63,16 @@ function MembershipRequestForm() {
         // Fallback silently
       }
     }
-    loadLibrary();
+    loadData();
   }, [slug]);
 
   const libraryName = library?.name || "Library";
+
+  const handleLibraryChange = (newSlug: string) => {
+    if (newSlug && newSlug !== slug) {
+      router.push(`/libraries/${newSlug}/request-membership`);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +88,7 @@ function MembershipRequestForm() {
     setIsSubmitting(true);
     try {
       const res = await fetch(
-        `${API_BASE}/public/libraries/${slug}/membership-requests`,
+        `/api/public/libraries/${slug}/membership-requests`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -81,6 +96,7 @@ function MembershipRequestForm() {
             fullName: fullName.trim(),
             email: email.trim(),
             phone: phone.trim(),
+            idNumber: idNumber.trim() || undefined,
             memberType: memberType || undefined,
             organization: organization.trim() || undefined,
             notes: notes.trim() || undefined,
@@ -157,7 +173,7 @@ function MembershipRequestForm() {
                 Enquiry Successfully Received
               </h2>
               <p className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">
-                Status: Pending Staff Review
+                Status: Pending Staff Review &bull; {libraryName}
               </p>
             </div>
 
@@ -189,7 +205,7 @@ function MembershipRequestForm() {
               ) : (
                 <p className="text-amber-700 dark:text-amber-400">
                   Note: Email confirmation delivery was skipped, but your
-                  enquiry was successfully stored for staff review.
+                  enquiry was successfully stored for {libraryName} staff review.
                 </p>
               )}
             </div>
@@ -228,6 +244,23 @@ function MembershipRequestForm() {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Library Selection Dropdown */}
+              {libraries.length > 0 && (
+                <div className="p-3.5 rounded-lg border border-primary/20 bg-forest-50/40 dark:bg-forest-900/10 space-y-1.5">
+                  <Select
+                    label="Selected Library Branch *"
+                    id="branch-selector"
+                    value={slug}
+                    onChange={(e) => handleLibraryChange(e.target.value)}
+                    helperText="Enquiries belong strictly to this library. Switch branches if applying to a different location."
+                    options={libraries.map((lib) => ({
+                      value: lib.slug,
+                      label: `${lib.name} [${lib.libraryCode}]`,
+                    }))}
+                  />
+                </div>
+              )}
+
               <Input
                 label="Full Legal Name *"
                 placeholder="e.g. Amani Mwangi"
@@ -255,6 +288,12 @@ function MembershipRequestForm() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Input
+                  label="National ID / Student ID (Optional)"
+                  placeholder="e.g. 12345678"
+                  value={idNumber}
+                  onChange={(e) => setIdNumber(e.target.value)}
+                />
                 <Select
                   label="Preferred Member Category *"
                   value={memberType}
@@ -265,13 +304,14 @@ function MembershipRequestForm() {
                     { value: "COMMUNITY", label: "Community / General Public" },
                   ]}
                 />
-                <Input
-                  label="Institution / Department (Optional)"
-                  placeholder="e.g. Technical Institute"
-                  value={organization}
-                  onChange={(e) => setOrganization(e.target.value)}
-                />
               </div>
+
+              <Input
+                label="Institution / Department (Optional)"
+                placeholder="e.g. Technical Institute or Local Resident"
+                value={organization}
+                onChange={(e) => setOrganization(e.target.value)}
+              />
 
               <div className="space-y-1">
                 <label className="block text-sm font-medium text-foreground">
@@ -305,11 +345,11 @@ function MembershipRequestForm() {
   );
 }
 
-export default function TenantPublicMembershipRequestPage() {
+export default function RequestMembershipPage() {
   return (
     <Suspense
       fallback={
-        <div className="py-12 px-4 text-center text-sm text-muted-foreground">
+        <div className="py-12 max-w-2xl mx-auto text-center text-sm text-muted-foreground">
           Loading membership enquiry form...
         </div>
       }
