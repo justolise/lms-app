@@ -73,7 +73,7 @@ function BookCard({ book, slug }: { book: PublicBook; slug: string }) {
       <Card className="flex flex-col h-full hover:shadow-md transition-all duration-200 group-hover:border-primary/50">
         <CardContent className="flex flex-col h-full p-4 gap-3">
           {/* Cover placeholder / Image */}
-          <div className="aspect-[2/3] w-full max-w-[120px] mx-auto rounded-md bg-forest-50 dark:bg-forest-900/40 border border-border flex items-center justify-center overflow-hidden shrink-0">
+          <div className="aspect-2/3 w-full max-w-30 mx-auto rounded-md bg-forest-50 dark:bg-forest-900/40 border border-border flex items-center justify-center overflow-hidden shrink-0">
             {book.coverUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -138,7 +138,7 @@ function BookCardSkeleton() {
   return (
     <Card className="flex flex-col h-full">
       <CardContent className="flex flex-col h-full p-4 gap-3">
-        <Skeleton className="aspect-[2/3] w-full max-w-[120px] mx-auto rounded-md" />
+        <Skeleton className="aspect-2/3 w-full max-w-30 mx-auto rounded-md" />
         <div className="flex flex-col gap-2 flex-1">
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-3 w-3/4" />

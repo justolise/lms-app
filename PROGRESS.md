@@ -134,7 +134,7 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 Current verification run completed on **22 November 2026**:
 
 - **pnpm typecheck**: Passed across all workspace projects (0 TypeScript errors).
-- **pnpm test (Unit Tests)**: 22 test files, 220 tests passed, 0 failed.
+- **pnpm test (Unit Tests)**: 23 test files, 228 tests passed, 0 failed.
 - **Controller E2E Tests**: 2 test files, 27 tests passed, 0 failed (`test/auth.controller.e2e-spec.ts`, `test/users.controller.e2e-spec.ts`).
 - **Comprehensive Security Audit & Hardening**:
   - Critical concurrency hardening in checkout/return/renew with pessimistic `.for('update')`, copy status optimistic guards, and `0010_circulation_concurrency.sql` partial unique index `loans_tenant_copy_active_unique`.
@@ -147,8 +147,9 @@ Current verification run completed on **22 November 2026**:
   - Centralized NestJS `HttpExceptionFilter` preventing internal error stack leaks.
   - Supply-chain remediation: pnpm overrides applied; `pnpm audit` reports 0 vulnerabilities.
   - Comprehensive documentation suite delivered across 15 documents in `docs/security/`.
-- **Phase 2 Catalogue & Holds**: `CategoriesModule`, `CatalogueModule`, `CirculationModule`, and `HoldsModule` added; 49 unit tests across catalogue, copies, circulation, and holds; `0007_catalogue.sql`, `0008_circulation.sql`, `0009_holds.sql`, and `0010_circulation_concurrency.sql` migrations with RLS, indexes, and FIFO queue ordering.
-- **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 11 prerendered static routes).
+- **Phase 2 Catalogue & Holds & Public Enquiries**: `CategoriesModule`, `CatalogueModule`, `CirculationModule`, `HoldsModule`, and `PublicModule` active; 57 unit tests across catalogue, copies, circulation, holds, and public services; 11 migration files (`0000` through `0011_slice_6_membership_enquiries.sql`) with idempotent RLS, indexes, FIFO queue ordering, and `app.tenant_id` context enforcement.
+- **Multi-Tenant SaaS Hardening**: Removed all hardcoded library codes/fallbacks from public catalogue and enquiry pages; dynamic tenant branch selection on `/request-membership` and `/libraries/:slug/request-membership`; relative `/api/public/...` routing through Next.js proxy.
+- **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 23 prerendered routes).
 
 Verification commands:
 
