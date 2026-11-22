@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.9.0](https://github.com/justolise/lms-app/compare/v0.8.0...v0.9.0) (2026-11-22)
+
+
+### Features
+
+* **auth,web:** extend session to 24h, auto-redirect on expiry, and clean sessions from profile UI ([507e716](https://github.com/justolise/lms-app/commit/507e716e15834af9ca11c38a8cf42998aeb10622))
+* **members:** MEM-1, MEM-4 + lint clean (0 warnings) ([bab985a](https://github.com/justolise/lms-app/commit/bab985ae72a47284f603da418239d642f349a955))
+
+
+### Bug Fixes
+
+* **circulation,members:** use jsonb_array_elements_text for authors field; fix enquiries route ordering ([7af0733](https://github.com/justolise/lms-app/commit/7af07331cbeddc8c0aa6ae58ef07316bb7c4cd54))
+* **web:** refresh auth profile on login and redirect to dashboard ([9ef390b](https://github.com/justolise/lms-app/commit/9ef390b0a63c8dd312598da26fbd83b24cb49f94))
+
+
+### Documentation
+
+* **readme:** update project status, feature matrix, architecture, and verification metrics ([7a39aba](https://github.com/justolise/lms-app/commit/7a39aba9bcb484feb4e3a09f3fd0fae92c2d39ed))
+
 ## [0.8.0](https://github.com/justolise/lms-app/compare/v0.7.0...v0.8.0) (2026-11-22)
 
 
