@@ -251,28 +251,30 @@ export function Sidebar({
           href="/dashboard"
           className="flex items-center gap-3 overflow-hidden"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest-800 text-white shadow-xs">
-            {/* Forest emblem icon */}
-            <svg
-              className="h-6 w-6 text-amber-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 3v1m0 16v1m9-9h-1M4 9h-1m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-              />
-            </svg>
-          </div>
-          {!isCollapsed && (
-            <div className="flex flex-col">
-              <span className="text-sm font-bold tracking-tight text-foreground line-clamp-1">
-                Commonplace
+          {/* Library logo or fallback emblem */}
+          {user?.tenantLogoUrl ? (
+            // biome-ignore lint/performance/noImgElement: tenant logo configured by admin
+            <img
+              src={user.tenantLogoUrl}
+              alt={user.tenantName ?? "Library"}
+              className="h-10 w-10 shrink-0 rounded-xl object-contain bg-forest-800 p-1"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+            />
+          ) : (
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest-800 text-white shadow-xs">
+              <span className="text-lg font-bold text-amber-400">
+                {user?.tenantName ? user.tenantName[0].toUpperCase() : "L"}
               </span>
-              <span className="text-xs text-muted-foreground line-clamp-1">
+            </div>
+          )}
+          {!isCollapsed && (
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-bold tracking-tight text-foreground line-clamp-1">
+                {user?.tenantName ?? "Library"}
+              </span>
+              <span className="text-xs text-muted-foreground">
                 Library System
               </span>
             </div>
@@ -435,6 +437,11 @@ export function Sidebar({
                       {role || "MEMBER"}
                     </Badge>
                   </div>
+                  {user.tenantName && (
+                    <span className="text-[10px] text-muted-foreground truncate mt-0.5">
+                      {user.tenantName}
+                    </span>
+                  )}
                 </div>
               )}
             </Link>

@@ -33,6 +33,8 @@ export function Topbar({ onMenuToggle }: { onMenuToggle?: () => void }) {
     }
   }
 
+  const libraryName = user?.tenantName ?? "Library Workspace";
+
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-border bg-surface/95 px-4 backdrop-blur-md lg:px-6">
       {/* Left: Mobile Drawer Trigger + Breadcrumb */}
@@ -65,7 +67,7 @@ export function Topbar({ onMenuToggle }: { onMenuToggle?: () => void }) {
             {currentTitle}
           </h1>
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span>Workspace</span>
+            <span className="truncate max-w-32">{libraryName}</span>
             <span>/</span>
             <span className="text-primary font-medium">{currentTitle}</span>
           </div>

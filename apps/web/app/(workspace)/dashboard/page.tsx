@@ -86,8 +86,9 @@ export default function DashboardPage() {
               Welcome back, {user?.fullName || "Librarian"}
             </h1>
             <p className="mt-1 text-sm text-forest-100 max-w-xl">
-              Commonplace Library System workspace. Manage circulation, titles,
-              patron memberships, and loan policies.
+              {user?.tenantName
+                ? `${user.tenantName} — manage circulation, titles, patron memberships, and loan policies.`
+                : "Manage circulation, titles, patron memberships, and loan policies."}
             </p>
           </div>
 

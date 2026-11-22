@@ -13,6 +13,7 @@ import {
   groups,
   memberProfiles,
   memberTypes,
+  tenants,
   users,
 } from '../database/schema.js';
 import { IdentityLookupService } from '../auth/identity/identity-lookup.service.js';
@@ -254,6 +255,13 @@ export class UsersService {
           role: users.role,
           status: users.status,
           createdAt: users.createdAt,
+          tenantName: tenants.name,
+          tenantLogoUrl: tenants.logoUrl,
+          tenantEmail: tenants.email,
+          tenantPhone: tenants.phone,
+          tenantAddress: tenants.address,
+          tenantOpeningHours: tenants.openingHours,
+          tenantWebsite: tenants.website,
           admissionNumber: memberProfiles.admissionNumber,
           memberTypeId: memberProfiles.memberTypeId,
           memberTypeName: memberTypes.name,
@@ -262,6 +270,7 @@ export class UsersService {
           membershipExpiresAt: memberProfiles.membershipExpiresAt,
         })
         .from(users)
+        .innerJoin(tenants, eq(tenants.id, users.tenantId))
         .leftJoin(
           memberProfiles,
           and(
@@ -294,6 +303,14 @@ export class UsersService {
 
       return {
         id: user.id,
+        tenantId: user.tenantId,
+        tenantName: user.tenantName,
+        tenantLogoUrl: user.tenantLogoUrl ?? undefined,
+        tenantEmail: user.tenantEmail ?? undefined,
+        tenantPhone: user.tenantPhone ?? undefined,
+        tenantAddress: user.tenantAddress ?? undefined,
+        tenantOpeningHours: user.tenantOpeningHours ?? undefined,
+        tenantWebsite: user.tenantWebsite ?? undefined,
         fullName: user.fullName,
         email: user.email,
         phone: user.phone,
