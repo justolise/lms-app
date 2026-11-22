@@ -10,7 +10,6 @@ import { RedisService } from '../redis/redis.service.js';
 import {
   tenants,
   catalogueItems,
-  copies,
   categories,
   membershipEnquiries,
 } from '../database/schema.js';

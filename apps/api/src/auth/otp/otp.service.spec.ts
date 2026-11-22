@@ -14,7 +14,6 @@ describe('OtpService (AUTH-3)', () => {
   const tenantId = '11111111-1111-4111-8111-111111111111';
   const userId = '22222222-2222-4222-8222-222222222222';
   const testEmail = 'user@example.com';
-  const testPhone = '+254712345678';
 
   let selectRows: any[] = [];
   let updateRows: any[] = [];
@@ -30,6 +29,7 @@ describe('OtpService (AUTH-3)', () => {
       values: vi.fn(() => chain),
       set: vi.fn(() => chain),
       returning: vi.fn(() => chain),
+      // oxlint-disable-next-line unicorn/no-thenable -- intentional: makes mock chain awaitable like Drizzle queries
       then: (onfulfilled: any, onrejected: any) =>
         Promise.resolve(getRows()).then(onfulfilled, onrejected),
     };
@@ -86,6 +86,7 @@ describe('OtpService (AUTH-3)', () => {
 
   describe('requestPasswordReset', () => {
     it('returns generic message for unknown email without disclosing account absence', async () => {
+      // oxlint-disable-next-line typescript/unbound-method
       vi.mocked(identityLookup.findIdentity).mockResolvedValue([]);
 
       const result = await service.requestPasswordReset('EMAIL', 'unknown@example.com');
@@ -97,6 +98,7 @@ describe('OtpService (AUTH-3)', () => {
     });
 
     it('returns generic message for unknown phone without disclosing account absence', async () => {
+      // oxlint-disable-next-line typescript/unbound-method
       vi.mocked(identityLookup.findIdentity).mockResolvedValue([]);
 
       const result = await service.requestPasswordReset('PHONE', '+254799999999');
@@ -108,6 +110,7 @@ describe('OtpService (AUTH-3)', () => {
     });
 
     it('creates OTP hash and delivers when account exists', async () => {
+      // oxlint-disable-next-line typescript/unbound-method
       vi.mocked(identityLookup.findIdentity).mockResolvedValue([
         { tenantId, userId },
       ]);
@@ -133,6 +136,7 @@ describe('OtpService (AUTH-3)', () => {
 
   describe('verifyAndResetPassword', () => {
     it('resets password and revokes all active sessions with valid OTP', async () => {
+      // oxlint-disable-next-line typescript/unbound-method
       vi.mocked(identityLookup.findIdentity).mockResolvedValue([
         { tenantId, userId },
       ]);
@@ -147,6 +151,7 @@ describe('OtpService (AUTH-3)', () => {
       ];
       updateRows = [{ id: 'otp-id-1' }];
 
+      // oxlint-disable-next-line typescript/unbound-method
       vi.mocked(passwordService.verify).mockResolvedValue(true);
 
       const result = await service.verifyAndResetPassword(
@@ -157,6 +162,7 @@ describe('OtpService (AUTH-3)', () => {
       );
 
       expect(result.success).toBe(true);
+      // oxlint-disable-next-line typescript/unbound-method
       expect(sessionService.revokeAllUserSessions).toHaveBeenCalledWith(
         tenantId,
         userId,
@@ -164,6 +170,7 @@ describe('OtpService (AUTH-3)', () => {
     });
 
     it('rejects wrong OTP and increments attempts', async () => {
+      // oxlint-disable-next-line typescript/unbound-method
       vi.mocked(identityLookup.findIdentity).mockResolvedValue([
         { tenantId, userId },
       ]);
@@ -177,6 +184,7 @@ describe('OtpService (AUTH-3)', () => {
         },
       ];
 
+      // oxlint-disable-next-line typescript/unbound-method
       vi.mocked(passwordService.verify).mockResolvedValue(false);
 
       await expect(
@@ -189,10 +197,12 @@ describe('OtpService (AUTH-3)', () => {
       ).rejects.toThrow(BadRequestException);
 
       expect(tx.update).toHaveBeenCalled();
+      // oxlint-disable-next-line typescript/unbound-method
       expect(sessionService.revokeAllUserSessions).not.toHaveBeenCalled();
     });
 
     it('rejects expired OTP or when no active OTP is found', async () => {
+      // oxlint-disable-next-line typescript/unbound-method
       vi.mocked(identityLookup.findIdentity).mockResolvedValue([
         { tenantId, userId },
       ]);

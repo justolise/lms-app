@@ -27,7 +27,6 @@ import { AUTH_RATE_LIMITS } from './constants/auth-rate-limit.constants.js';
 import { RateLimit } from '../common/decorators/rate-limit.decorator.js';
 import { AccessTokenGuard } from '../common/guards/access-token.guard.js';
 import { SessionIdParamDto } from './session/dto/session-id-param.dto.js';
-import type { AccessTokenPayload } from './token/dto/access-token-payload.dto.js';
 import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface.js';
 import {
   ACCESS_COOKIE,

@@ -6,7 +6,7 @@ import {
   Optional,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 
 import { DatabaseService } from '../database/database.service.js';
 import {
@@ -614,10 +614,44 @@ export class CirculationService {
         conditions.push(eq(loans.status, statusFilter as 'ACTIVE'));
       }
       return tx
-        .select()
+        .select({
+          id: loans.id,
+          tenantId: loans.tenantId,
+          userId: loans.userId,
+          copyId: loans.copyId,
+          copyBarcode: copies.barcode,
+          catalogueItemId: loans.catalogueItemId,
+          bookTitle: catalogueItems.title,
+          bookAuthor: sql<string>`array_to_string(${catalogueItems.authors}, ', ')`,
+          bookFormat: catalogueItems.format,
+          loanDurationDays: loans.loanDurationDays,
+          maxRenewals: loans.maxRenewals,
+          renewalCount: loans.renewalCount,
+          checkedOutAt: loans.checkedOutAt,
+          dueAt: loans.dueAt,
+          returnedAt: loans.returnedAt,
+          status: loans.status,
+          fineMinorUnits: loans.fineMinorUnits,
+          overrideReason: loans.overrideReason,
+          createdAt: loans.createdAt,
+        })
         .from(loans)
+        .leftJoin(
+          catalogueItems,
+          and(
+            eq(catalogueItems.tenantId, loans.tenantId),
+            eq(catalogueItems.id, loans.catalogueItemId),
+          ),
+        )
+        .leftJoin(
+          copies,
+          and(
+            eq(copies.tenantId, loans.tenantId),
+            eq(copies.id, loans.copyId),
+          ),
+        )
         .where(and(...conditions))
-        .orderBy(sql`${loans.checkedOutAt} DESC`);
+        .orderBy(desc(loans.checkedOutAt));
     });
   }
 
@@ -628,10 +662,44 @@ export class CirculationService {
         conditions.push(eq(loans.status, statusFilter as 'ACTIVE'));
       }
       return tx
-        .select()
+        .select({
+          id: loans.id,
+          tenantId: loans.tenantId,
+          userId: loans.userId,
+          copyId: loans.copyId,
+          copyBarcode: copies.barcode,
+          catalogueItemId: loans.catalogueItemId,
+          bookTitle: catalogueItems.title,
+          bookAuthor: sql<string>`array_to_string(${catalogueItems.authors}, ', ')`,
+          bookFormat: catalogueItems.format,
+          loanDurationDays: loans.loanDurationDays,
+          maxRenewals: loans.maxRenewals,
+          renewalCount: loans.renewalCount,
+          checkedOutAt: loans.checkedOutAt,
+          dueAt: loans.dueAt,
+          returnedAt: loans.returnedAt,
+          status: loans.status,
+          fineMinorUnits: loans.fineMinorUnits,
+          overrideReason: loans.overrideReason,
+          createdAt: loans.createdAt,
+        })
         .from(loans)
+        .leftJoin(
+          catalogueItems,
+          and(
+            eq(catalogueItems.tenantId, loans.tenantId),
+            eq(catalogueItems.id, loans.catalogueItemId),
+          ),
+        )
+        .leftJoin(
+          copies,
+          and(
+            eq(copies.tenantId, loans.tenantId),
+            eq(copies.id, loans.copyId),
+          ),
+        )
         .where(and(...conditions))
-        .orderBy(sql`${loans.checkedOutAt} DESC`);
+        .orderBy(desc(loans.checkedOutAt));
     });
   }
 }

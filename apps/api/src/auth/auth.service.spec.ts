@@ -37,6 +37,7 @@ describe('AuthService', () => {
       values: vi.fn(() => chain),
       set: vi.fn(() => chain),
       returning: vi.fn(() => chain),
+      // oxlint-disable-next-line unicorn/no-thenable -- intentional: makes mock chain awaitable like Drizzle queries
       then: (onfulfilled: any, onrejected: any) => {
         if (throwDbError) {
           return Promise.reject(throwDbError).then(onfulfilled, onrejected);

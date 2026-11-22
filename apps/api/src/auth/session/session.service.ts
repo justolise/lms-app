@@ -9,7 +9,6 @@ import { and, desc, eq, gt, isNull, ne } from 'drizzle-orm';
 import { DatabaseService } from '../../database/database.service.js';
 import { sessions, users, tenants } from '../../database/schema.js';
 import { TokenService } from '../token/token.service.js';
-import type { AuthRole } from '../token/dto/access-token-payload.dto.js';
 import { REFRESH_TOKEN_LIFETIME_MS } from '../token/token.constants.js';
 
 import type {

@@ -30,6 +30,7 @@ describe('MemberTypesService (MEM-2, ADM-2)', () => {
       values: vi.fn(() => chain),
       set: vi.fn(() => chain),
       returning: vi.fn(() => chain),
+      // oxlint-disable-next-line unicorn/no-thenable -- intentional: makes mock chain awaitable like Drizzle queries
       then: (onfulfilled: any, onrejected: any) => {
         const rows = queue.length > 0 ? queue.shift()! : [];
         return Promise.resolve(rows).then(onfulfilled, onrejected);

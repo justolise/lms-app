@@ -27,6 +27,7 @@ describe('SessionService', () => {
       values: vi.fn(() => chain),
       set: vi.fn(() => chain),
       returning: vi.fn(() => chain),
+      // oxlint-disable-next-line unicorn/no-thenable -- intentional: makes mock chain awaitable like Drizzle queries
       then: (onfulfilled: any, onrejected: any) => {
         const rows = queue.length > 0 ? queue.shift()! : [];
         return Promise.resolve(rows).then(onfulfilled, onrejected);
@@ -89,6 +90,7 @@ describe('SessionService', () => {
 
     expect(withTenant).toHaveBeenCalledWith(tenantId, expect.any(Function));
     expect(tx.insert).toHaveBeenCalledOnce();
+    // oxlint-disable-next-line typescript/unbound-method
     expect(tokenService.signAccessToken).toHaveBeenCalledWith({
       userId,
       tenantId,

@@ -4,7 +4,6 @@ import { PublicService } from './public.service.js';
 
 describe('PublicService', () => {
   let service: PublicService;
-  let mockDb: any;
   let mockTx: any;
   let mockDatabaseService: any;
 

@@ -16,10 +16,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { CreateMemberModal } from "@/features/members/components/CreateMemberModal";
+import { EditMemberModal } from "@/features/members/components/EditMemberModal";
+import { MemberHistoryModal } from "@/features/members/components/MemberHistoryModal";
 import { membersService } from "@/features/members/services/members.service";
-import { usersService } from "@/features/users/services/users.service";
-import type { DirectoryUser } from "@/features/users/types/users.types";
+import type { MemberDirectoryItem } from "@/features/members/types/members.types";
 import { PERMISSIONS } from "@/lib/auth/permissions";
+import { formatDate } from "@/utils/date";
 
 interface MembershipEnquiry {
   id: string;
@@ -38,11 +40,17 @@ export default function MembersDeskPage() {
     "directory",
   );
 
-  // Directory state
-  const [members, setMembers] = useState<DirectoryUser[]>([]);
+  // Directory state (MEM-1)
+  const [members, setMembers] = useState<MemberDirectoryItem[]>([]);
   const [loadingMembers, setLoadingMembers] = useState(true);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");
+
+  // Edit and history modals state
+  const [editingMember, setEditingMember] =
+    useState<MemberDirectoryItem | null>(null);
+  const [viewingHistoryMember, setViewingHistoryMember] =
+    useState<MemberDirectoryItem | null>(null);
 
   // Enquiries state
   const [enquiries, setEnquiries] = useState<MembershipEnquiry[]>([]);
@@ -65,12 +73,8 @@ export default function MembersDeskPage() {
     setLoadingMembers(true);
     setError(null);
     try {
-      const data = await usersService.getDirectory(1, 50, query);
-      const patronRoles = new Set(["MEMBER", "TEACHER", "PARENT"]);
-      const filtered = (data.users || []).filter((u) =>
-        patronRoles.has(u.role),
-      );
-      setMembers(filtered);
+      const data = await membersService.listMembers({ search: query });
+      setMembers(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Error loading patrons");
     } finally {
@@ -133,8 +137,8 @@ export default function MembersDeskPage() {
               Patrons &amp; Memberships Desk
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Review public membership enquiries, verify patron identification,
-              and provision library accounts.
+              Manage member profiles, view borrowing history, and review public
+              membership applications (MEM-1, MEM-4).
             </p>
           </div>
 
@@ -191,24 +195,9 @@ export default function MembersDeskPage() {
           <div className="space-y-4">
             <form onSubmit={handleSearchSubmit} className="flex gap-2 max-w-md">
               <Input
-                placeholder="Search by patron name, phone, or email..."
+                placeholder="Search by name, admission #, phone, or email..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                leftAddon={
-                  <svg
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
-                }
               />
               <Button type="submit" variant="secondary">
                 Filter
@@ -231,18 +220,20 @@ export default function MembersDeskPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Patron Name</TableHead>
-                  <TableHead>Role / Type</TableHead>
-                  <TableHead>Contact (Email / Phone)</TableHead>
+                  <TableHead>Admission / ID #</TableHead>
+                  <TableHead>Member Type</TableHead>
+                  <TableHead>Contact Details</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Registered</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loadingMembers ? (
                   <TableRow>
                     <TableCell
-                      colSpan={5}
-                      className="text-center py-8 text-muted-foreground"
+                      colSpan={7}
+                      className="text-center py-8 text-muted-foreground text-xs"
                     >
                       Loading patron directory...
                     </TableCell>
@@ -250,8 +241,8 @@ export default function MembersDeskPage() {
                 ) : members.length === 0 ? (
                   <TableRow>
                     <TableCell
-                      colSpan={5}
-                      className="text-center py-8 text-muted-foreground"
+                      colSpan={7}
+                      className="text-center py-8 text-muted-foreground text-xs"
                     >
                       No patrons found matching your search.
                     </TableCell>
@@ -259,20 +250,22 @@ export default function MembersDeskPage() {
                 ) : (
                   members.map((member) => (
                     <TableRow key={member.id}>
-                      <TableCell className="font-medium text-foreground">
+                      <TableCell className="font-semibold text-foreground text-xs">
                         {member.fullName}
                       </TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {member.admissionNumber || "—"}
+                      </TableCell>
                       <TableCell>
-                        <Badge
-                          variant={
-                            member.role === "TEACHER" ? "primary" : "default"
-                          }
-                        >
-                          {member.role}
+                        <Badge variant="primary" className="text-[11px]">
+                          {member.memberTypeName || "Standard"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {member.email || member.phone || "—"}
+                      <TableCell className="text-xs text-muted-foreground">
+                        <div>{member.phone || "No phone"}</div>
+                        {member.email && (
+                          <div className="text-[11px]">{member.email}</div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -284,9 +277,25 @@ export default function MembersDeskPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-xs text-muted-foreground">
-                        {member.createdAt
-                          ? new Date(member.createdAt).toLocaleDateString()
-                          : "—"}
+                        {formatDate(member.createdAt)}
+                      </TableCell>
+                      <TableCell className="text-right space-x-2 whitespace-nowrap">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setViewingHistoryMember(member)}
+                        >
+                          History
+                        </Button>
+                        <Can permission={PERMISSIONS.MEMBERS_CREATE}>
+                          <Button
+                            size="sm"
+                            variant="secondary"
+                            onClick={() => setEditingMember(member)}
+                          >
+                            Edit
+                          </Button>
+                        </Can>
                       </TableCell>
                     </TableRow>
                   ))
@@ -309,7 +318,7 @@ export default function MembersDeskPage() {
                 variant="outline"
                 size="sm"
                 onClick={loadEnquiries}
-                isLoading={loadingEnquiries}
+                disabled={loadingEnquiries}
               >
                 Refresh
               </Button>
@@ -349,7 +358,7 @@ export default function MembersDeskPage() {
                   enquiries.map((enq) => (
                     <TableRow key={enq.id}>
                       <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                        {new Date(enq.createdAt).toLocaleDateString()}
+                        {formatDate(enq.createdAt)}
                       </TableCell>
                       <TableCell className="font-semibold text-foreground">
                         <div>{enq.fullName}</div>
@@ -411,7 +420,6 @@ export default function MembersDeskPage() {
                           )}
                           <Can permission={PERMISSIONS.MEMBERS_CREATE}>
                             <Button
-                              variant="primary"
                               size="sm"
                               className="text-xs h-8"
                               onClick={() => handleProvisionFromEnquiry(enq)}
@@ -453,6 +461,28 @@ export default function MembersDeskPage() {
                 loadEnquiries();
               }
             }}
+          />
+        )}
+
+        {/* Edit Member Profile Modal (MEM-1) */}
+        {editingMember && (
+          <EditMemberModal
+            isOpen={!!editingMember}
+            member={editingMember}
+            onClose={() => setEditingMember(null)}
+            onUpdated={() => {
+              setActionMessage("Member profile updated successfully.");
+              loadMembers(search);
+            }}
+          />
+        )}
+
+        {/* Member Borrowing History Modal (MEM-4) */}
+        {viewingHistoryMember && (
+          <MemberHistoryModal
+            isOpen={!!viewingHistoryMember}
+            member={viewingHistoryMember}
+            onClose={() => setViewingHistoryMember(null)}
           />
         )}
       </div>

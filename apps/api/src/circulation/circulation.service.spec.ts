@@ -173,6 +173,7 @@ function makeMockTx(sequences: {
       orderBy: () => q,
       for: () => q,
       // Allow `await` directly on the chain
+      // oxlint-disable-next-line unicorn/no-thenable -- intentional: makes mock chain awaitable like Drizzle queries
       then: (resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) =>
         Promise.resolve(result).then(resolve, reject),
     };

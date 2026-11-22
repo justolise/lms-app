@@ -1,7 +1,5 @@
 import {
-  BadRequestException,
   ConflictException,
-  NotFoundException,
 } from '@nestjs/common';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -37,6 +35,7 @@ describe('UsersService (AUTH-4, Directory, Profile, Deactivation, Role Promotion
       values: vi.fn(() => chain),
       set: vi.fn(() => chain),
       returning: vi.fn(() => chain),
+      // oxlint-disable-next-line unicorn/no-thenable -- intentional: makes mock chain awaitable like Drizzle queries
       then: (onfulfilled: any, onrejected: any) => {
         const rows = queue.length > 0 ? queue.shift()! : [];
         return Promise.resolve(rows).then(onfulfilled, onrejected);
@@ -95,6 +94,7 @@ describe('UsersService (AUTH-4, Directory, Profile, Deactivation, Role Promotion
 
   describe('createLibrarian (AUTH-4)', () => {
     it('creates a librarian with temporary password and mustChangePassword = true', async () => {
+      // oxlint-disable-next-line typescript/unbound-method
       vi.mocked(identityLookup.findIdentity).mockResolvedValue([]);
       insertQueue.push([{ id: librarianId }]);
 
@@ -106,11 +106,13 @@ describe('UsersService (AUTH-4, Directory, Profile, Deactivation, Role Promotion
       expect(result.role).toBe('LIBRARIAN');
       expect(result.mustChangePassword).toBe(true);
       expect(result.temporaryPassword).toBeDefined();
+      // oxlint-disable-next-line typescript/unbound-method
       expect(passwordService.hash).toHaveBeenCalled();
       expect(tx.insert).toHaveBeenCalledTimes(2); // user + auditLog
     });
 
     it('rejects duplicate email in the same library', async () => {
+      // oxlint-disable-next-line typescript/unbound-method
       vi.mocked(identityLookup.findIdentity).mockResolvedValue([
         { tenantId, userId: 'existing-id' },
       ]);
@@ -169,6 +171,7 @@ describe('UsersService (AUTH-4, Directory, Profile, Deactivation, Role Promotion
       const result = await service.deactivateOwnAccount(tenantId, memberId);
 
       expect(result.deactivated).toBe(true);
+      // oxlint-disable-next-line typescript/unbound-method
       expect(sessionService.revokeAllUserSessions).toHaveBeenCalledWith(
         tenantId,
         memberId,

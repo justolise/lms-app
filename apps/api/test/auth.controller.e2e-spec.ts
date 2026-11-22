@@ -4,7 +4,7 @@ import {
   UnauthorizedException,
   ValidationPipe,
 } from '@nestjs/common';
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types.js';
 import { vi } from 'vitest';

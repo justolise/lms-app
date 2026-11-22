@@ -26,6 +26,7 @@ function selectChain(result: unknown[]) {
   chain.limit.mockReturnValue(chain);
   chain.offset.mockReturnValue(chain);
   chain.orderBy.mockReturnValue(chain);
+  // oxlint-disable-next-line unicorn/no-thenable -- intentional: makes mock chain awaitable like Drizzle queries
   chain.then = (resolve: (v: unknown) => unknown) => Promise.resolve(resolve(result));
   return chain;
 }
