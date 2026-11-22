@@ -530,7 +530,7 @@ export default function CataloguePage() {
               <select
                 value={formatFilter}
                 onChange={(e) => setFormatFilter(e.target.value)}
-                className="rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-xs font-medium"
+                className="rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm font-medium"
               >
                 <option value="">All Formats</option>
                 {ITEM_FORMATS.map((f) => (
@@ -543,7 +543,7 @@ export default function CataloguePage() {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-xs font-medium"
+                className="rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm font-medium"
               >
                 <option value="">All Categories</option>
                 {categories.map((c) => (
@@ -608,10 +608,10 @@ export default function CataloguePage() {
                             <img
                               src={item.coverUrl}
                               alt={item.title}
-                              className="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0"
+                              className="w-10 h-14 object-cover rounded shadow-sm shrink-0"
                             />
                           ) : (
-                            <div className="w-10 h-14 bg-zinc-200 dark:bg-zinc-800 rounded flex items-center justify-center text-xs font-bold text-zinc-400 flex-shrink-0">
+                            <div className="w-10 h-14 bg-zinc-200 dark:bg-zinc-800 rounded flex items-center justify-center text-xs font-bold text-zinc-400 shrink-0">
                               {item.format === "BOOK" ? "📖" : "📄"}
                             </div>
                           )}
