@@ -10,3 +10,6 @@ ALTER TABLE "public"."tenants"
   ADD COLUMN IF NOT EXISTS "website" varchar(255),
   ADD COLUMN IF NOT EXISTS "description" text,
   ADD COLUMN IF NOT EXISTS "borrowing_rules_summary" text;
+
+GRANT SELECT, UPDATE ON TABLE "public"."tenants" TO lms_app;
+

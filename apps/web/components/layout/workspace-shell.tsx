@@ -34,7 +34,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen h-[100dvh] w-full overflow-hidden bg-background text-foreground">
+    <div className="flex h-dvh w-full overflow-hidden bg-background text-foreground">
       {/* Desktop & Tablet Sidebar */}
       <Sidebar
         isCollapsed={isCollapsed}
@@ -42,7 +42,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
       />
 
       {/* Main Column */}
-      <div className="flex flex-1 flex-col h-screen h-[100dvh] min-w-0 overflow-hidden">
+      <div className="flex flex-1 flex-col h-dvh min-w-0 overflow-hidden">
         {/* Topbar */}
         <Topbar onMenuToggle={() => setMoreMenuOpen(true)} />
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Alert } from "@/components/feedback/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,20 @@ Saturday: 9:00 AM - 1:00 PM
 Sunday & Public Holidays: Closed`;
 
 export default function LibrarySettingsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="py-24 flex justify-center">
+          <Spinner size="lg" />
+        </div>
+      }
+    >
+      <LibrarySettingsContent />
+    </Suspense>
+  );
+}
+
+function LibrarySettingsContent() {
   const { role } = useAuth();
   const isAdmin = role === "ADMIN";
 

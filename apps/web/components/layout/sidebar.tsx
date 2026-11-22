@@ -241,7 +241,7 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "hidden lg:flex flex-col h-screen h-[100dvh] sticky top-0 shrink-0 border-r border-border bg-surface transition-all duration-300 z-30 select-none",
+        "hidden lg:flex flex-col h-dvh sticky top-0 shrink-0 border-r border-border bg-surface transition-all duration-300 z-30 select-none",
         isCollapsed ? "w-20" : "w-64",
       )}
     >
