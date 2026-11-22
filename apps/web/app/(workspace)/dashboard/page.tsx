@@ -76,7 +76,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Welcome Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-forest-800 to-forest-700 p-6 sm:p-8 text-white shadow-sm">
+      <div className="rounded-2xl bg-linear-to-r from-forest-800 to-forest-700 p-6 sm:p-8 text-white shadow-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-forest-900/50 px-3 py-1 text-xs font-semibold text-amber-400 mb-2">
@@ -388,7 +388,7 @@ export default function DashboardPage() {
                     className="py-3 flex items-center justify-between gap-3 text-xs"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-surface-raised flex items-center justify-center font-bold text-muted-foreground text-[11px]">
+                      <span className="shrink-0 w-6 h-6 rounded-full bg-surface-raised flex items-center justify-center font-bold text-muted-foreground text-[11px]">
                         {idx + 1}
                       </span>
                       {book.coverUrl ? (
@@ -396,10 +396,10 @@ export default function DashboardPage() {
                         <img
                           src={book.coverUrl}
                           alt={book.title}
-                          className="w-8 h-10 object-cover rounded shadow-xs flex-shrink-0"
+                          className="w-8 h-10 object-cover rounded shadow-xs shrink-0"
                         />
                       ) : (
-                        <div className="w-8 h-10 rounded bg-forest-50 dark:bg-forest-900/40 flex items-center justify-center text-primary flex-shrink-0">
+                        <div className="w-8 h-10 rounded bg-forest-50 dark:bg-forest-900/40 flex items-center justify-center text-primary shrink-0">
                           <svg
                             className="w-4 h-4"
                             fill="none"
@@ -428,7 +428,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       <Badge
                         variant="default"
                         className="text-[11px] font-medium"
@@ -479,7 +479,7 @@ export default function DashboardPage() {
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div
-                        className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
+                        className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${
                           item.type === "RETURN"
                             ? "bg-forest-50 dark:bg-forest-900/40 text-primary"
                             : "bg-amber-500/10 text-amber-500"
@@ -525,7 +525,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       <span className="text-[11px] text-muted-foreground">
                         {formatDate(item.timestamp, true)}
                       </span>
