@@ -2,67 +2,92 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { RateLimit } from '../common/decorators/rate-limit.decorator.js';
+import { RateLimitGuard } from '../common/guards/rate-limit.guard.js';
 import { PublicService } from './public.service.js';
 import {
   MembershipEnquiryDto,
+  PublicCatalogueQueryDto,
   PublicSearchDto,
+  SubmitMembershipEnquiryDto,
 } from './dto/public.dto.js';
 
 /**
- * Public endpoints — no authentication required.
+ * Public tenant-specific endpoints — no authentication required.
  *
- * Per DECISIONS.md:
- *   "GUEST is anonymous — public catalogue search and availability do not require authentication."
- *   "No public self-registration; accounts are provisioned by authorised staff."
- *
- * The membership enquiry form collects patron contact info for staff review.
+ * Per DECISIONS.md & Master Requirements:
+ * - Public catalogue browsing is isolated per tenant by library slug.
+ * - Visitors can search by title, author, ISBN, and paginate through results.
+ * - Approved availability labels: 'Available', 'On loan', or hidden.
+ * - Confidential copy identifiers (barcodes, copy IDs, notes, loan histories) are never exposed.
+ * - Membership enquiry submissions are tenant-scoped, assigned 'PENDING' status, and rate-limited.
  */
-@Controller('public')
+@Controller(['public', 'api/public'])
 export class PublicController {
   constructor(private readonly publicService: PublicService) {}
 
-  // ─── Libraries list ───────────────────────────────────────────────────────
+  // ─── Public Libraries Directory ───────────────────────────────────────────
 
-  /**
-   * GET /public/libraries
-   * List active library branches/tenants for public selection.
-   */
   @Get('libraries')
   async listLibraries() {
     return this.publicService.listLibraries();
   }
 
-  // ─── Catalogue ────────────────────────────────────────────────────────────
+  @Get('libraries/:slug')
+  async getLibraryInfo(@Param('slug') slug: string) {
+    return this.publicService.getLibraryInfo(slug);
+  }
 
-  /**
-   * GET /public/catalogue?libraryCode=SCHOOL-01&q=...
-   * Public catalogue browse — no auth guard.
-   */
+  // ─── Tenant-Specific Public Catalogue ─────────────────────────────────────
+
+  @Get('libraries/:slug/catalogue')
+  async getTenantCatalogue(
+    @Param('slug') slug: string,
+    @Query() query: PublicCatalogueQueryDto,
+  ) {
+    return this.publicService.getPublicCatalogue(slug, query);
+  }
+
+  @Get('libraries/:slug/catalogue/:bookId')
+  async getTenantBookDetail(
+    @Param('slug') slug: string,
+    @Param('bookId') bookId: string,
+  ) {
+    return this.publicService.getPublicBookDetail(slug, bookId);
+  }
+
+  // ─── Tenant-Specific Public Membership Enquiry ────────────────────────────
+
+  @Post('libraries/:slug/membership-requests')
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ keyPrefix: 'public-enquiry', limit: 5, windowMs: 60_000 })
+  async submitTenantEnquiry(
+    @Param('slug') slug: string,
+    @Body() dto: SubmitMembershipEnquiryDto,
+  ) {
+    return this.publicService.submitMembershipEnquiry(slug, dto);
+  }
+
+  // ─── Compatibility Endpoints ──────────────────────────────────────────────
+
   @Get('catalogue')
   async search(@Query() query: PublicSearchDto) {
     return this.publicService.search(query);
   }
 
-  /**
-   * GET /public/catalogue/list?libraryCode=SCHOOL-01
-   * Full catalogue list for a library — no auth guard.
-   */
   @Get('catalogue/list')
-  async list(@Query('libraryCode') libraryCode: string) {
+  async list(@Query('libraryCode') libraryCode?: string) {
     return this.publicService.list(libraryCode);
   }
 
-  // ─── Membership enquiry ───────────────────────────────────────────────────
-
-  /**
-   * POST /public/membership-enquiry
-   * Accepts patron contact details for staff review.
-   * Rate-limited: 3 submissions per minute per IP.
-   */
   @Post('membership-enquiry')
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ keyPrefix: 'public-enquiry-compat', limit: 5, windowMs: 60_000 })
   async submitEnquiry(@Body() dto: MembershipEnquiryDto) {
     return this.publicService.submitEnquiry(dto);
   }

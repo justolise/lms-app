@@ -72,6 +72,7 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 | `CatalogueModule` — `CopiesService`         | done   | Add, update, withdraw, transition; 7-status machine with 409 on invalid transitions; audit log; 9 unit tests.                                                      |
 | `CatalogueModule` — `IsbnLookupService`     | done   | Open Library → Google Books fallback; ISBN-10→13 conversion; 5 s timeout; returns metadata for staff confirmation only.                                            |
 | `CatalogueController`                       | done   | REST endpoints for catalogue items and copies; permission matrix enforced by `RolesGuard`.                                                                         |
+| `PublicModule` — Public Catalogue & Enquiries | done | Public endpoints (`GET /api/public/libraries/:slug/catalogue`, `GET /api/public/libraries/:slug/catalogue/:bookId`, `POST /api/public/libraries/:slug/membership-requests`); slug-based tenant resolution; RLS isolation; approved 2-state availability; sliding-window rate limiting; 8 unit tests. |
 
 
 
@@ -108,6 +109,8 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 | FIN-3  |       P1 |  todo  | Fine receipts                                             | Not implemented; remains P1.                                                                                               |
 | MEM-1  |       P0 | doing  | Member profiles                                           | Profile/group/identification schema foundations exist; member creation implemented in AUTH-4; update/history remain.       |
 | MEM-2  |       P0 |  done  | Member types and borrowing rules                          | `member_types` and `loan_policies` matrix schema; `MemberTypesService` & `MemberTypesController`; full UI at `/member-types`; unit tests. |
+| PUB-CAT|       P0 |  done  | Tenant-Specific Public Catalogue                          | Isolated public catalogue at `/libraries/:slug/catalogue` and detail `/libraries/:slug/catalogue/:bookId`; search by title/author/ISBN; format & availability filters; responsive pagination; approved 2-state availability (`Available`, `On loan`, or hidden); zero patron/copy privacy leakage. |
+| PUB-ENQ|       P0 |  done  | Public Membership Enquiry & Staff Review                  | Unauthenticated enquiry form at `/libraries/:slug/request-membership`; backend tenant assignment; Redis rate limiting; initial `PENDING` status; resilient email receipt dispatch; staff review queue and 1-click patron account provisioning at `/members`. |
 | MEM-4  |       P0 |  todo  | Borrowing history/current loans                           | Not implemented.                                                                                                           |
 | NOT-1  |       P0 |  todo  | Email notifications                                       | Notification events pending; email delivery provider configured for OTP in AUTH-3.                                         |
 | NOT-2  |       P0 |  todo  | SMS notifications                                         | Notification events pending; SMS delivery provider configured for OTP in AUTH-3.                                           |

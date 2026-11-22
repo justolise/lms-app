@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
-import { and, eq } from 'drizzle-orm';
+import { and, desc, eq } from 'drizzle-orm';
 
 import { DatabaseService } from '../database/database.service.js';
 import {
@@ -13,6 +13,7 @@ import {
   groups,
   memberProfiles,
   memberTypes,
+  membershipEnquiries,
   users,
 } from '../database/schema.js';
 import { IdentityLookupService } from '../auth/identity/identity-lookup.service.js';
@@ -225,6 +226,74 @@ export class MembersService {
         })
         .from(memberTypes)
         .where(eq(memberTypes.tenantId, tenantId));
+    });
+  }
+
+  // ─── Staff Membership Enquiry Review Desk (Approved Decision 2.4 & 8) ──────
+
+  async listEnquiries(tenantId: string, status?: string) {
+    return this.database.withTenant(tenantId, async (tx) => {
+      const conditions = [eq(membershipEnquiries.tenantId, tenantId)];
+      if (status) {
+        conditions.push(eq(membershipEnquiries.status, status));
+      }
+
+      return tx
+        .select()
+        .from(membershipEnquiries)
+        .where(and(...conditions))
+        .orderBy(desc(membershipEnquiries.createdAt));
+    });
+  }
+
+  async getEnquiryById(tenantId: string, enquiryId: string) {
+    return this.database.withTenant(tenantId, async (tx) => {
+      const rows = await tx
+        .select()
+        .from(membershipEnquiries)
+        .where(
+          and(
+            eq(membershipEnquiries.tenantId, tenantId),
+            eq(membershipEnquiries.id, enquiryId),
+          ),
+        )
+        .limit(1);
+
+      if (rows.length === 0) {
+        throw new NotFoundException(`Enquiry not found`);
+      }
+
+      return rows[0];
+    });
+  }
+
+  async reviewEnquiry(
+    tenantId: string,
+    actorId: string,
+    enquiryId: string,
+    status: 'REVIEWED' | 'APPROVED' | 'REJECTED' = 'REVIEWED',
+  ) {
+    return this.database.withTenant(tenantId, async (tx) => {
+      const rows = await tx
+        .update(membershipEnquiries)
+        .set({
+          status,
+          reviewedAt: new Date(),
+          reviewedBy: actorId,
+        })
+        .where(
+          and(
+            eq(membershipEnquiries.tenantId, tenantId),
+            eq(membershipEnquiries.id, enquiryId),
+          ),
+        )
+        .returning();
+
+      if (rows.length === 0) {
+        throw new NotFoundException(`Enquiry not found`);
+      }
+
+      return rows[0];
     });
   }
 }

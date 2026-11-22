@@ -74,6 +74,19 @@ This file records product-owner-approved decisions and material technical decisi
 - Dashboard access is ADMIN/LIBRARIAN.
 - Audit-sensitive operations include waivers, deletions, role changes and checkout overrides.
 
+## Approved public catalogue and membership enquiry decisions
+
+- Each library operates its own isolated public catalogue identified by URL slug (`/libraries/:slug/catalogue`).
+- Anonymous public catalogue access does not require registration, login, or guest JWT credentials.
+- Public catalogue search supports title, author, ISBN full-text search, item format filtering, and server-side pagination (`page`, `limit`, `totalPages`).
+- Public availability status follows strict two-label logic: `Available` (at least 1 circulating copy available) or `On loan` (circulating copies exist, none available).
+- If no circulating copies exist, or if all copies are lost, damaged, withdrawn, or in repair, the availability label is hidden completely (`null`).
+- Public responses strictly exclude copy barcodes, copy internal IDs, borrower/member names, borrowing histories, and staff-only notes.
+- Membership enquiries are tenant-scoped via URL slug (`/libraries/:slug/request-membership`), stored with initial status `PENDING`, and rate-limited.
+- Enquiry submission does not automatically create member accounts or credentials; account creation remains a manual, authorized staff desk action.
+- Resilient email confirmation acknowledges receipt without promising approval; email transport failures do not abort enquiry persistence.
+- Staff enquiry review queue is restricted to `ADMIN` and `LIBRARIAN` within the enquiry's tenant, with direct handoff to the existing `CreateMemberModal`.
+
 ## Approved business-rule decisions
 
 - Timezone: `Africa/Nairobi`; timestamps stored in UTC.

@@ -14,4 +14,17 @@ export const membersService = {
     const data = await apiClient.get<MemberTypeOption[]>("/api/members/types");
     return Array.isArray(data) ? data : [];
   },
+
+  async listEnquiries(status?: string): Promise<any[]> {
+    const query = status ? `?status=${status}` : "";
+    const data = await apiClient.get<any[]>(`/api/members/enquiries${query}`);
+    return Array.isArray(data) ? data : [];
+  },
+
+  async reviewEnquiry(
+    id: string,
+    status: "REVIEWED" | "APPROVED" | "REJECTED" = "REVIEWED",
+  ): Promise<any> {
+    return apiClient.patch(`/api/members/enquiries/${id}/review`, { status });
+  },
 };

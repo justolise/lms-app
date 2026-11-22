@@ -17,19 +17,19 @@ import {
   type ItemFormat,
 } from '../../catalogue/dto/catalogue-item.dto.js';
 
-// ─── Public catalogue query ───────────────────────────────────────────────────
+// ─── Public Library Info ──────────────────────────────────────────────────────
 
-export class PublicSearchDto {
-  /** Library code, e.g. TEST-LIB. Optional; defaults to the primary active library. */
-  @IsOptional()
-  @IsString()
-  @MinLength(1)
-  @MaxLength(40)
-  @Matches(/^[A-Z0-9-]+$/, {
-    message: 'libraryCode must contain only uppercase letters, digits and hyphens',
-  })
-  libraryCode?: string;
+export interface PublicLibraryDto {
+  id: string;
+  name: string;
+  slug: string;
+  libraryCode: string;
+  status: string;
+}
 
+// ─── Public Catalogue Search & Pagination Query ───────────────────────────────
+
+export class PublicCatalogueQueryDto {
   @IsOptional()
   @IsString()
   q?: string;
@@ -62,73 +62,70 @@ export class PublicSearchDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(100)
-  limit?: number = 20;
+  page?: number = 1;
 
   @IsOptional()
   @Type(() => Number)
   @IsInt()
-  @Min(0)
-  offset?: number = 0;
+  @Min(1)
+  @Max(100)
+  limit?: number = 24;
 }
 
-// ─── Public catalogue item detail ─────────────────────────────────────────────
+// ─── Public Book Summary DTO (Strict Whitelist, No Confidential Fields) ───────
 
-export class PublicItemParamDto {
-  @IsString()
-  @MinLength(1)
-  @MaxLength(40)
-  @Matches(/^[A-Z0-9-]+$/, {
-    message: 'libraryCode must contain only uppercase letters, digits and hyphens',
-  })
-  libraryCode!: string;
-
-  @IsString()
-  itemId!: string;
+export interface PublicBookSummaryDto {
+  id: string;
+  title: string;
+  subtitle?: string | null;
+  authors: string[];
+  isbn13?: string | null;
+  publisher?: string | null;
+  publishedYear?: number | null;
+  language: string;
+  format: string;
+  coverUrl?: string | null;
+  callNumber?: string | null;
+  shelfLocation?: string | null;
+  subjects: string[];
+  /** Approved availability: 'AVAILABLE' | 'ON_LOAN' | null (null means hide label) */
+  availabilityStatus: 'AVAILABLE' | 'ON_LOAN' | null;
 }
 
-// ─── Membership enquiry ───────────────────────────────────────────────────────
+// ─── Public Catalogue Paginated Response ──────────────────────────────────────
 
-export type MemberTypeEnquiry =
-  | 'STUDENT'
-  | 'TEACHER'
-  | 'COMMUNITY'
-  | 'STAFF'
-  | 'OTHER';
+export interface PublicCatalogueResponseDto {
+  items: PublicBookSummaryDto[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
-export class MembershipEnquiryDto {
-  /**
-   * Library code that the patron is enquiring about.
-   * Optional; defaults to the primary active library.
-   */
-  @IsOptional()
+// ─── Public Book Detail DTO ───────────────────────────────────────────────────
+
+export interface PublicBookDetailDto extends PublicBookSummaryDto {
+  description?: string | null;
+  isbn10?: string | null;
+  categoryName?: string | null;
+}
+
+// ─── Public Membership Enquiry Request DTO ────────────────────────────────────
+
+export class SubmitMembershipEnquiryDto {
   @IsString()
-  @MinLength(1)
-  @MaxLength(40)
-  @Matches(/^[A-Z0-9-]+$/, {
-    message: 'libraryCode must contain only uppercase letters, digits and hyphens',
-  })
-  libraryCode?: string;
-
-  @IsString()
-  @MinLength(1)
+  @MinLength(2)
   @MaxLength(200)
   fullName!: string;
 
-  @IsOptional()
   @IsEmail()
   @MaxLength(254)
-  email?: string;
+  email!: string;
 
   @IsString()
-  @MinLength(7)
-  @MaxLength(30)
+  @MinLength(9)
+  @MaxLength(20)
   phone!: string;
-
-  @IsString()
-  @MinLength(1)
-  @MaxLength(50)
-  idNumber!: string;
 
   @IsOptional()
   @IsString()
@@ -137,11 +134,37 @@ export class MembershipEnquiryDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(300)
+  @MaxLength(200)
   organization?: string;
 
   @IsOptional()
   @IsString()
   @MaxLength(1000)
   notes?: string;
+}
+
+// ─── Legacy/Compatibility DTOs ────────────────────────────────────────────────
+
+export class PublicSearchDto extends PublicCatalogueQueryDto {
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(40)
+  libraryCode?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  offset?: number = 0;
+}
+
+export class MembershipEnquiryDto extends SubmitMembershipEnquiryDto {
+  @IsOptional()
+  @IsString()
+  libraryCode?: string;
+
+  @IsOptional()
+  @IsString()
+  idNumber?: string;
 }

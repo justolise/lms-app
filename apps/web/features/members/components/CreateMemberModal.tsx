@@ -16,12 +16,18 @@ interface CreateMemberModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  initialValues?: {
+    fullName?: string;
+    email?: string;
+    phone?: string;
+  };
 }
 
 export function CreateMemberModal({
   isOpen,
   onClose,
   onSuccess,
+  initialValues,
 }: CreateMemberModalProps) {
   const [memberTypes, setMemberTypes] = useState<MemberTypeOption[]>([]);
   const [fullName, setFullName] = useState("");
@@ -38,6 +44,11 @@ export function CreateMemberModal({
 
   useEffect(() => {
     if (isOpen) {
+      if (initialValues) {
+        if (initialValues.fullName) setFullName(initialValues.fullName);
+        if (initialValues.email) setEmail(initialValues.email);
+        if (initialValues.phone) setPhone(initialValues.phone);
+      }
       membersService.listMemberTypes().then((types) => {
         setMemberTypes(types);
         if (types.length > 0 && !memberTypeId) {
@@ -45,7 +56,7 @@ export function CreateMemberModal({
         }
       });
     }
-  }, [isOpen, memberTypeId]);
+  }, [isOpen, memberTypeId, initialValues]);
 
   function reset() {
     setFullName("");

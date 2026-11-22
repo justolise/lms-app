@@ -1149,7 +1149,7 @@ export const membershipEnquiries = pgTable(
 
     phone: varchar('phone', { length: 30 }).notNull(),
 
-    idNumber: varchar('id_number', { length: 50 }).notNull(),
+    idNumber: varchar('id_number', { length: 50 }),
 
     memberType: varchar('member_type', { length: 50 }),
 
