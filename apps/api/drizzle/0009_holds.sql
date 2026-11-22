@@ -50,31 +50,43 @@ CREATE INDEX IF NOT EXISTS holds_tenant_copy_status_idx
   ON public.holds (tenant_id, copy_id, status);
 
 -- 5. Foreign key constraints
-ALTER TABLE public.holds
-  ADD CONSTRAINT holds_tenant_user_fk
-    FOREIGN KEY (tenant_id, user_id)
-    REFERENCES public.users (tenant_id, id)
-    ON DELETE RESTRICT;
+DO $$ BEGIN
+  ALTER TABLE public.holds
+    ADD CONSTRAINT holds_tenant_user_fk
+      FOREIGN KEY (tenant_id, user_id)
+      REFERENCES public.users (tenant_id, id)
+      ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-ALTER TABLE public.holds
-  ADD CONSTRAINT holds_tenant_catalogue_item_fk
-    FOREIGN KEY (tenant_id, catalogue_item_id)
-    REFERENCES public.catalogue_items (tenant_id, id)
-    ON DELETE RESTRICT;
+DO $$ BEGIN
+  ALTER TABLE public.holds
+    ADD CONSTRAINT holds_tenant_catalogue_item_fk
+      FOREIGN KEY (tenant_id, catalogue_item_id)
+      REFERENCES public.catalogue_items (tenant_id, id)
+      ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-ALTER TABLE public.holds
-  ADD CONSTRAINT holds_tenant_copy_fk
-    FOREIGN KEY (tenant_id, copy_id)
-    REFERENCES public.copies (tenant_id, id)
-    ON DELETE SET NULL;
+DO $$ BEGIN
+  ALTER TABLE public.holds
+    ADD CONSTRAINT holds_tenant_copy_fk
+      FOREIGN KEY (tenant_id, copy_id)
+      REFERENCES public.copies (tenant_id, id)
+      ON DELETE SET NULL;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- 6. Row-Level Security (fail-closed like all tenant tables)
 ALTER TABLE public.holds ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.holds FORCE ROW LEVEL SECURITY;
 
-CREATE POLICY holds_tenant_isolation
-  ON public.holds
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY holds_tenant_isolation
+    ON public.holds
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- 7. Grants (SELECT, INSERT, UPDATE, DELETE for queue management)
 GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.holds TO lms_app;

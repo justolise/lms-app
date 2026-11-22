@@ -63,25 +63,34 @@ CREATE INDEX IF NOT EXISTS loans_tenant_catalogue_item_idx
   ON public.loans (tenant_id, catalogue_item_id);
 
 -- 5. Foreign key constraints
-ALTER TABLE public.loans
-  ADD CONSTRAINT loans_tenant_user_fk
-    FOREIGN KEY (tenant_id, user_id)
-    REFERENCES public.users (tenant_id, id)
-    ON DELETE RESTRICT;
+DO $$ BEGIN
+  ALTER TABLE public.loans
+    ADD CONSTRAINT loans_tenant_user_fk
+      FOREIGN KEY (tenant_id, user_id)
+      REFERENCES public.users (tenant_id, id)
+      ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
-ALTER TABLE public.loans
-  ADD CONSTRAINT loans_tenant_copy_fk
-    FOREIGN KEY (tenant_id, copy_id)
-    REFERENCES public.copies (tenant_id, id)
-    ON DELETE RESTRICT;
+DO $$ BEGIN
+  ALTER TABLE public.loans
+    ADD CONSTRAINT loans_tenant_copy_fk
+      FOREIGN KEY (tenant_id, copy_id)
+      REFERENCES public.copies (tenant_id, id)
+      ON DELETE RESTRICT;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- 6. Row-Level Security (fail-closed like all tenant tables)
 ALTER TABLE public.loans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.loans FORCE ROW LEVEL SECURITY;
 
-CREATE POLICY loans_tenant_isolation
-  ON public.loans
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+DO $$ BEGIN
+  CREATE POLICY loans_tenant_isolation
+    ON public.loans
+    USING (tenant_id = current_setting('app.tenant_id', true)::uuid);
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- 7. Grants (no DELETE — loans are immutable records)
 GRANT SELECT, INSERT, UPDATE ON TABLE public.loans TO lms_app;

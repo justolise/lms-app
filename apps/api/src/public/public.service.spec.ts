@@ -275,7 +275,7 @@ describe('PublicService', () => {
         values: vi.fn().mockReturnThis(),
         returning: vi.fn().mockResolvedValue([{ id: 'new-enquiry-uuid' }]),
       };
-      mockDatabaseService.db.insert.mockReturnValue(insertChain);
+      mockTx.insert.mockReturnValue(insertChain);
 
       const result = await service.submitMembershipEnquiry('kisumu-public', {
         fullName: 'Grace Ochieng',

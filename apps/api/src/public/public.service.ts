@@ -388,21 +388,23 @@ export class PublicService {
   }> {
     const tenant = await this.resolveTenantBySlug(slug);
 
-    // Insert enquiry with tenantId assigned strictly on backend
-    const rows = await this.database.db
-      .insert(membershipEnquiries)
-      .values({
-        tenantId: tenant.id,
-        fullName: dto.fullName.trim(),
-        email: dto.email.trim().toLowerCase(),
-        phone: dto.phone.trim(),
-        idNumber: (dto as any).idNumber?.trim() || null,
-        memberType: dto.memberType?.trim() || null,
-        organization: dto.organization?.trim() || null,
-        notes: dto.notes?.trim() || null,
-        status: 'PENDING',
-      })
-      .returning({ id: membershipEnquiries.id });
+    // Insert enquiry with tenant context established via withTenant for RLS enforcement
+    const rows = await this.database.withTenant(tenant.id, async (tx) => {
+      return tx
+        .insert(membershipEnquiries)
+        .values({
+          tenantId: tenant.id,
+          fullName: dto.fullName.trim(),
+          email: dto.email.trim().toLowerCase(),
+          phone: dto.phone.trim(),
+          idNumber: (dto as any).idNumber?.trim() || null,
+          memberType: dto.memberType?.trim() || null,
+          organization: dto.organization?.trim() || null,
+          notes: dto.notes?.trim() || null,
+          status: 'PENDING',
+        })
+        .returning({ id: membershipEnquiries.id });
+    });
 
     const enquiryId = rows[0].id;
 
