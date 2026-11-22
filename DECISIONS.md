@@ -226,6 +226,20 @@ The following records describe completed foundation work, not completed function
 - **Payload Denial-of-Service Defense**: Restricted Express body parser payloads to 1MB (`express.json({ limit: '1mb' })` and `express.urlencoded({ limit: '1mb' })`).
 - **Redis Caching Architecture**: Implemented typed caching primitives (`get<T>`, `set`, `del`, `delByPattern`, `has`) in `RedisService`. Applied tenant-scoped caching (`cache:member-types:${tenantId}`) with automatic cache invalidation on member type and policy mutations. Non-blocking error handling ensures database fallbacks if Redis cache operations fail.
 
+#### 12. Core Circulation Engine (CIR-1 through CIR-5, SRC-1, SRC-2)
+
+- **Atomic Transactions & Cache Invalidation**: Checkout and return operations run inside transaction-local tenant context, automatically updating copy statuses (`AVAILABLE` <-> `ON_LOAN`) and evicting tenant-scoped Redis catalogue caches (`cache:catalogue:${tenantId}:*`).
+- **Fine Calculation in Minor Units**: Returned loans calculate overdue days minus format grace period, computing fine minor units capped at the policy max fine.
+- **Renewals**: Protected against maximum renewal limits and overdue blocks.
+- **Full-Text Search & Multi-Criteria Filtering**: Search operates via PostgreSQL GIN tsvector with ranking and format/category/availability filters.
+
+#### 13. Modular Feature-First Frontend Architecture, Tailwind CSS v4 Tokens & RBAC
+
+- **Architecture**: Separated monolithic pages into encapsulated feature directories (`features/auth`, `features/catalogue`, `features/categories`, `features/circulation`, `features/member-types`, `features/users`) with thin Next.js route wrappers in `app/`.
+- **Tailwind CSS v4 Theming**: Centrally configured semantic CSS tokens (`--primary`, `--surface`, `--border`, `--muted`, `--danger`, etc.) via `@theme inline` in `app/globals.css`, eliminating hardcoded color utilities across components.
+- **Declarative RBAC**: Centralized `PERMISSIONS` constants, `ROLE_PERMISSIONS` matrix for all 6 roles (`ADMIN`, `LIBRARIAN`, `TEACHER`, `MEMBER`, `PARENT`, `GUEST`), and `<Can>` / `<RequirePermission>` components. Enforced "hide if no permission; disable with explanation if permitted but blocked by business rules".
+- **Feedback & Boundaries**: Standardized on `useToast()` notifications, accessible alerts, React `ErrorBoundary` wrappers, and Next.js root `error.tsx` / `not-found.tsx` fallbacks.
+
 ## Open decisions / operational confirmations
 
 1. Confirm production hosting, PostgreSQL version, backup/restore arrangements and cross-border data-transfer implications before production use with real member data.
