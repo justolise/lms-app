@@ -163,7 +163,7 @@ describe('AuthController', () => {
         'selection-token',
         expect.objectContaining({
           httpOnly: true,
-          path: '/auth/select-membership',
+          path: '/',
         }),
       );
 

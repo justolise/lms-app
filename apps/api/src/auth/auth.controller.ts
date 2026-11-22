@@ -80,7 +80,7 @@ export class AuthController {
 
       response.cookie(SELECTION_COOKIE, selectionToken, {
         ...this.cookieOptions,
-        path: '/auth/select-membership',
+        path: '/',
         maxAge: SELECTION_COOKIE_MAX_AGE_MS,
       });
 
@@ -112,7 +112,7 @@ export class AuthController {
 
     response.clearCookie(SELECTION_COOKIE, {
       ...this.cookieOptions,
-      path: '/auth/select-membership',
+      path: '/',
     });
 
     return {
@@ -183,7 +183,7 @@ export class AuthController {
 
     response.clearCookie(SELECTION_COOKIE, {
       ...this.cookieOptions,
-      path: '/auth/select-membership',
+      path: '/',
     });
 
     return {
@@ -301,12 +301,12 @@ export class AuthController {
 
     response.clearCookie(REFRESH_COOKIE, {
       ...this.cookieOptions,
-      path: '/auth',
+      path: '/',
     });
 
     response.clearCookie(SELECTION_COOKIE, {
       ...this.cookieOptions,
-      path: '/auth/select-membership',
+      path: '/',
     });
 
     return { authenticated: false };
@@ -348,7 +348,7 @@ export class AuthController {
 
     response.cookie(REFRESH_COOKIE, session.refreshToken, {
       ...this.cookieOptions,
-      path: '/auth',
+      path: '/',
       maxAge: REFRESH_COOKIE_MAX_AGE_MS,
     });
   }

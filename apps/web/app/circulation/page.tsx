@@ -121,8 +121,7 @@ function BarcodeScanner({
   // Cleanup on unmount
   useEffect(() => () => stopScanner(), [stopScanner]);
 
-  const handleManualSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleManualSubmit = () => {
     const val = manualInput.trim();
     if (val) {
       setManualInput("");
@@ -175,23 +174,30 @@ function BarcodeScanner({
         </button>
       )}
 
-      {/* Manual barcode entry — always visible */}
-      <form onSubmit={handleManualSubmit} className="flex gap-2">
+      {/* Manual barcode entry — div with key/click handling to avoid nested forms */}
+      <div className="flex gap-2">
         <input
           type="text"
           value={manualInput}
           onChange={(e) => setManualInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              handleManualSubmit();
+            }
+          }}
           placeholder="Or enter barcode manually…"
           className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
-          type="submit"
+          type="button"
+          onClick={handleManualSubmit}
           disabled={!manualInput.trim()}
           className="px-4 py-2 bg-gray-700 text-white text-sm font-medium rounded-md hover:bg-gray-800 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           Use
         </button>
-      </form>
+      </div>
     </div>
   );
 }
