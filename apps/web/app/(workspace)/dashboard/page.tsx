@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Alert } from "@/components/feedback/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner";
+import { LoansLedger } from "@/features/circulation/components/LoansLedger";
+import { MyHoldsList } from "@/features/holds/components/MyHoldsList";
 import { reportsService } from "@/features/reports/services/reports.service";
 import type {
   DashboardReportResponse,
@@ -40,7 +42,23 @@ const initialStats: DashboardStats = {
 };
 
 export default function DashboardPage() {
-  const { user, role, hasPermission } = useAuth();
+  return (
+    <Suspense
+      fallback={
+        <div className="py-24 flex justify-center">
+          <Spinner size="lg" />
+        </div>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
+function DashboardContent() {
+  const { user, role, isLoading: authLoading, hasPermission } = useAuth();
+  const isStaff = role === "ADMIN" || role === "LIBRARIAN";
+
   const [stats, setStats] = useState<DashboardStats>(initialStats);
   const [popularTitles, setPopularTitles] = useState<PopularTitleItem[]>([]);
   const [recentActivity, setRecentActivity] = useState<RecentActivityItem[]>(
@@ -50,6 +68,14 @@ export default function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (authLoading) return;
+
+    // Patrons (MEMBER, TEACHER, PARENT) do not have permission for staff KPI reports
+    if (!isStaff) {
+      setLoading(false);
+      return;
+    }
+
     async function loadDashboard() {
       try {
         setLoading(true);
@@ -71,7 +97,210 @@ export default function DashboardPage() {
     }
 
     loadDashboard();
-  }, []);
+  }, [authLoading, isStaff]);
+
+  if (authLoading) {
+    return (
+      <div className="py-24 flex justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  // Patron / Member view
+  if (!isStaff) {
+    return (
+      <div className="space-y-6">
+        {/* Welcome Banner for Patrons */}
+        <div className="rounded-2xl bg-linear-to-r from-forest-800 to-forest-700 p-6 sm:p-8 text-white shadow-sm">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-forest-900/50 px-3 py-1 text-xs font-semibold text-amber-400 mb-2">
+                <span>{role || "MEMBER"} PORTAL</span>
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+                Welcome back, {user?.fullName || "Member"}
+              </h1>
+              <p className="mt-1 text-sm text-forest-100 max-w-xl">
+                {user?.tenantName
+                  ? `${user.tenantName} — browse books, manage your loans, and check reservation status.`
+                  : "Browse books, manage your loans, and check reservation status."}
+              </p>
+              {(user?.tenantOpeningHours ||
+                user?.tenantPhone ||
+                user?.tenantEmail) && (
+                <div className="mt-3 flex flex-wrap items-center gap-2.5 text-xs text-forest-100">
+                  {user.tenantOpeningHours && (
+                    <span className="inline-flex items-center gap-1.5 bg-forest-900/40 px-2.5 py-1 rounded-md border border-forest-600/40">
+                      <span>🕒</span>
+                      <span className="line-clamp-1">
+                        {user.tenantOpeningHours.split("\n")[0]}
+                      </span>
+                    </span>
+                  )}
+                  {user.tenantPhone && (
+                    <span className="inline-flex items-center gap-1.5 bg-forest-900/40 px-2.5 py-1 rounded-md border border-forest-600/40">
+                      <span>📞</span>
+                      <span>{user.tenantPhone}</span>
+                    </span>
+                  )}
+                  {user.tenantEmail && (
+                    <span className="inline-flex items-center gap-1.5 bg-forest-900/40 px-2.5 py-1 rounded-md border border-forest-600/40">
+                      <span>✉️</span>
+                      <span>{user.tenantEmail}</span>
+                    </span>
+                  )}
+                  <Link
+                    href="/library-info"
+                    className="text-amber-300 hover:text-amber-200 font-semibold underline underline-offset-2 inline-flex items-center gap-1 ml-1"
+                  >
+                    View library details &rarr;
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <Link href="/catalogue">
+                <Button
+                  size="md"
+                  className="bg-amber-500 hover:bg-amber-600 text-forest-900 font-semibold border-none"
+                >
+                  Browse Catalogue
+                </Button>
+              </Link>
+              <Link href="/library-info">
+                <Button
+                  size="md"
+                  variant="outline"
+                  className="text-white border-forest-500 hover:bg-forest-600/50"
+                >
+                  About Library
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Patron Quick Navigation Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Link href="/catalogue" className="block group">
+            <Card className="h-full transition-shadow hover:shadow-md border-border group-hover:border-primary/40">
+              <CardContent className="p-5 flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-forest-50 dark:bg-forest-900/40 text-primary">
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground text-sm">
+                    Library Catalogue
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Search titles, check availability, and place holds
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/profile" className="block group">
+            <Card className="h-full transition-shadow hover:shadow-md border-border group-hover:border-primary/40">
+              <CardContent className="p-5 flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground text-sm">
+                    My Active Holds
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    View queued reservations &amp; collection status
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          <Link href="/library-info" className="block group">
+            <Card className="h-full transition-shadow hover:shadow-md border-border group-hover:border-primary/40">
+              <CardContent className="p-5 flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-forest-50 dark:bg-forest-900/40 text-primary">
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground text-sm">
+                    About This Library
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Operating hours, contacts, and borrowing policy
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
+
+        {/* Patron's Loans Ledger */}
+        <div className="space-y-2">
+          <LoansLedger
+            userId={user?.id}
+            title="My Borrowed Books"
+            description="All active and past book loans issued to your account."
+          />
+        </div>
+
+        {/* Patron's Active Holds */}
+        <div className="space-y-2">
+          <div className="bg-surface rounded-2xl border border-border p-6 shadow-sm space-y-4">
+            <div>
+              <h2 className="text-lg font-bold text-foreground">
+                My Active Reservations
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Manage your held items and monitor pickup notifications.
+              </p>
+            </div>
+            <MyHoldsList />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

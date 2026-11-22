@@ -4,8 +4,10 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Alert } from "@/components/feedback/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { authService } from "../services/auth.service";
+import { PasswordMatchBar } from "./PasswordMatchBar";
+import { PasswordRequirements } from "./PasswordRequirements";
 
 export function ChangePasswordForm() {
   const router = useRouter();
@@ -24,6 +26,19 @@ export function ChangePasswordForm() {
 
     if (newPassword.length < 8) {
       setError("Password must be at least 8 characters long.");
+      return;
+    }
+
+    const hasComplexity =
+      /[a-z]/.test(newPassword) &&
+      /[A-Z]/.test(newPassword) &&
+      /\d/.test(newPassword) &&
+      /[^a-zA-Z\d]/.test(newPassword);
+
+    if (!hasComplexity) {
+      setError(
+        "Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.",
+      );
       return;
     }
 
@@ -61,9 +76,8 @@ export function ChangePasswordForm() {
       {error && <Alert variant="error">{error}</Alert>}
 
       {!isFirstLogin && (
-        <Input
+        <PasswordInput
           label="Current Password"
-          type="password"
           required
           autoComplete="current-password"
           value={currentPassword}
@@ -72,25 +86,32 @@ export function ChangePasswordForm() {
         />
       )}
 
-      <Input
-        label="New Password"
-        type="password"
-        required
-        autoComplete="new-password"
-        value={newPassword}
-        onChange={(e) => setNewPassword(e.target.value)}
-        placeholder="Min. 8 characters"
-      />
+      <div className="space-y-2">
+        <PasswordInput
+          label="New Password"
+          required
+          autoComplete="new-password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          placeholder="Min. 8 characters"
+        />
+        {newPassword && <PasswordRequirements password={newPassword} />}
+      </div>
 
-      <Input
-        label="Confirm New Password"
-        type="password"
-        required
-        autoComplete="new-password"
-        value={confirmPassword}
-        onChange={(e) => setConfirmPassword(e.target.value)}
-        placeholder="••••••••"
-      />
+      <div className="space-y-2">
+        <PasswordInput
+          label="Confirm New Password"
+          required
+          autoComplete="new-password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder="••••••••"
+        />
+        <PasswordMatchBar
+          password={newPassword}
+          confirmPassword={confirmPassword}
+        />
+      </div>
 
       <Button
         type="submit"

@@ -4,6 +4,7 @@ export * from "./card";
 export * from "./empty-state";
 export * from "./input";
 export * from "./modal";
+export * from "./password-input";
 export * from "./select";
 export * from "./skeleton";
 export * from "./spinner";

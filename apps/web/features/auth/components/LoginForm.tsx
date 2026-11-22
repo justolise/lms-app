@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
+import { PasswordInput } from "@/components/ui/password-input";
 import { useAuth } from "@/lib/auth/auth-context";
 import { authService } from "../services/auth.service";
 import type { IdentifierType, LibraryMembership } from "../types/auth.types";
@@ -162,8 +163,7 @@ export function LoginForm() {
               Forgot password?
             </Link>
           </div>
-          <Input
-            type="password"
+          <PasswordInput
             required
             autoComplete="current-password"
             placeholder="••••••••"
