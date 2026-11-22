@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { Can } from "@/components/auth/can";
 import { Alert } from "@/components/feedback/alert";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { BookModal } from "@/features/catalogue/components/BookModal";
 import { CatalogueFilters } from "@/features/catalogue/components/CatalogueFilters";
 import { CatalogueTable } from "@/features/catalogue/components/CatalogueTable";
@@ -19,11 +20,28 @@ import type { Hold } from "@/features/holds/types/holds.types";
 import { PERMISSIONS } from "@/lib/auth/permissions";
 
 export default function CataloguePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="py-24 flex justify-center">
+          <Spinner size="lg" />
+        </div>
+      }
+    >
+      <CatalogueContent />
+    </Suspense>
+  );
+}
+
+function CatalogueContent() {
   const [items, setItems] = useState<CatalogueItem[]>([]);
   const [categories, setCategories] = useState<CategoryOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
+
+  // Layout View Mode: default to "grid" (cards) as requested
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Filters
   const [searchQuery, setSearchQuery] = useState("");
@@ -112,24 +130,27 @@ export default function CataloguePage() {
 
       {error && <Alert variant="error">{error}</Alert>}
 
-      {/* Filter Toolbar */}
+      {/* Filter Toolbar with View Mode Toggle */}
       <CatalogueFilters
         searchQuery={searchQuery}
         formatFilter={formatFilter}
         categoryFilter={categoryFilter}
         availableOnly={availableOnly}
         categories={categories}
+        viewMode={viewMode}
         onSearchChange={setSearchQuery}
         onFormatChange={setFormatFilter}
         onCategoryChange={setCategoryFilter}
         onAvailableOnlyChange={setAvailableOnly}
+        onViewModeChange={setViewMode}
       />
 
-      {/* Catalogue Grid / Table */}
+      {/* Catalogue Cards / Table */}
       <CatalogueTable
         items={items}
         categories={categories}
         loading={loading}
+        viewMode={viewMode}
         onEditItem={(item: CatalogueItem) => setEditingItem(item)}
         onManageCopies={(item: CatalogueItem) => setSelectedItemForCopies(item)}
         onArchiveItem={handleArchive}
