@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.10.0](https://github.com/justolise/lms-app/compare/v0.9.0...v0.10.0) (2026-11-22)
+
+
+### Features
+
+* **reports,dashboard:** implement RPT-1 circulation and executive dashboard ([ec3f309](https://github.com/justolise/lms-app/commit/ec3f309fdb8eb357eafa39586b400df555f5ad60))
+
+
+### Bug Fixes
+
+* **env:** update REDIS_URL to include devpassword matching compose.yaml ([1e4860a](https://github.com/justolise/lms-app/commit/1e4860a01cdfa2169b1b824fd5c3b273903b77b9))
+* **reports:** provide TokenModule and SessionModule dependencies for AccessTokenGuard in ReportsModule ([bbda3b4](https://github.com/justolise/lms-app/commit/bbda3b4c8515c3193639d7af0e761d87296cc949))
+* **web:** set Next.js dev port to 3001 to prevent EADDRINUSE conflict with API ([8b29b3d](https://github.com/justolise/lms-app/commit/8b29b3dea82506143e8fd15bf5ee944c696ae6ca))
+
 ## [0.9.0](https://github.com/justolise/lms-app/compare/v0.8.0...v0.9.0) (2026-11-22)
 
 
