@@ -42,6 +42,39 @@ export class MembersController {
     return this.membersService.create(tenantId, userId, dto);
   }
 
+  // ─── Staff Enquiry Review Desk Endpoints ─────────────────────────────────
+
+  @Get('enquiries')
+  @Roles('ADMIN', 'LIBRARIAN')
+  async listEnquiries(
+    @Req() request: AuthenticatedRequest,
+    @Query('status') status?: string,
+  ) {
+    const { tenantId } = request.user;
+    return this.membersService.listEnquiries(tenantId, status);
+  }
+
+  @Get('enquiries/:id')
+  @Roles('ADMIN', 'LIBRARIAN')
+  async getEnquiry(
+    @Req() request: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
+    const { tenantId } = request.user;
+    return this.membersService.getEnquiryById(tenantId, id);
+  }
+
+  @Patch('enquiries/:id/review')
+  @Roles('ADMIN', 'LIBRARIAN')
+  async reviewEnquiry(
+    @Req() request: AuthenticatedRequest,
+    @Param('id') id: string,
+    @Body('status') status?: 'REVIEWED' | 'APPROVED' | 'REJECTED',
+  ) {
+    const { tenantId, userId } = request.user;
+    return this.membersService.reviewEnquiry(tenantId, userId, id, status);
+  }
+
   // ─── MEM-1: Member Directory, Detail & Profile Update ─────────────────────
 
   @Get()
@@ -89,38 +122,5 @@ export class MembersController {
   ) {
     const { tenantId, userId, role } = request.user;
     return this.membersService.getBorrowingHistory(tenantId, id, userId, role);
-  }
-
-  // ─── Staff Enquiry Review Desk Endpoints ─────────────────────────────────
-
-  @Get('enquiries')
-  @Roles('ADMIN', 'LIBRARIAN')
-  async listEnquiries(
-    @Req() request: AuthenticatedRequest,
-    @Query('status') status?: string,
-  ) {
-    const { tenantId } = request.user;
-    return this.membersService.listEnquiries(tenantId, status);
-  }
-
-  @Get('enquiries/:id')
-  @Roles('ADMIN', 'LIBRARIAN')
-  async getEnquiry(
-    @Req() request: AuthenticatedRequest,
-    @Param('id') id: string,
-  ) {
-    const { tenantId } = request.user;
-    return this.membersService.getEnquiryById(tenantId, id);
-  }
-
-  @Patch('enquiries/:id/review')
-  @Roles('ADMIN', 'LIBRARIAN')
-  async reviewEnquiry(
-    @Req() request: AuthenticatedRequest,
-    @Param('id') id: string,
-    @Body('status') status?: 'REVIEWED' | 'APPROVED' | 'REJECTED',
-  ) {
-    const { tenantId, userId } = request.user;
-    return this.membersService.reviewEnquiry(tenantId, userId, id, status);
   }
 }

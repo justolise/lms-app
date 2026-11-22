@@ -602,7 +602,7 @@ export class MembersService {
           copyBarcode: copies.barcode,
           catalogueItemId: loans.catalogueItemId,
           bookTitle: catalogueItems.title,
-          bookAuthor: sql<string>`array_to_string(${catalogueItems.authors}, ', ')`,
+          bookAuthor: sql<string>`(SELECT string_agg(val, ', ') FROM jsonb_array_elements_text(case when jsonb_typeof(${catalogueItems.authors}) = 'array' then ${catalogueItems.authors} else '[]'::jsonb end) AS t(val))`,
           bookFormat: catalogueItems.format,
           loanDurationDays: loans.loanDurationDays,
           maxRenewals: loans.maxRenewals,
