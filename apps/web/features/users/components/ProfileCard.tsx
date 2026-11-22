@@ -64,6 +64,20 @@ export function ProfileCard({
           <p className="text-xs text-muted-foreground">
             Member since {formatDate(profile.createdAt)}
           </p>
+          {profile.tenantName && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
+              <span>🏛️</span>
+              <span className="font-medium text-foreground">
+                {profile.tenantName}
+              </span>
+              <Link
+                href="/library-info"
+                className="text-primary hover:underline ml-1"
+              >
+                (View Library Details)
+              </Link>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="primary">{profile.role}</Badge>

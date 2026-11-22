@@ -90,6 +90,38 @@ export default function DashboardPage() {
                 ? `${user.tenantName} — manage circulation, titles, patron memberships, and loan policies.`
                 : "Manage circulation, titles, patron memberships, and loan policies."}
             </p>
+            {(user?.tenantOpeningHours ||
+              user?.tenantPhone ||
+              user?.tenantEmail) && (
+              <div className="mt-3 flex flex-wrap items-center gap-2.5 text-xs text-forest-100">
+                {user.tenantOpeningHours && (
+                  <span className="inline-flex items-center gap-1.5 bg-forest-900/40 px-2.5 py-1 rounded-md border border-forest-600/40">
+                    <span>🕒</span>
+                    <span className="line-clamp-1">
+                      {user.tenantOpeningHours.split("\n")[0]}
+                    </span>
+                  </span>
+                )}
+                {user.tenantPhone && (
+                  <span className="inline-flex items-center gap-1.5 bg-forest-900/40 px-2.5 py-1 rounded-md border border-forest-600/40">
+                    <span>📞</span>
+                    <span>{user.tenantPhone}</span>
+                  </span>
+                )}
+                {user.tenantEmail && (
+                  <span className="inline-flex items-center gap-1.5 bg-forest-900/40 px-2.5 py-1 rounded-md border border-forest-600/40">
+                    <span>✉️</span>
+                    <span>{user.tenantEmail}</span>
+                  </span>
+                )}
+                <Link
+                  href="/library-info"
+                  className="text-amber-300 hover:text-amber-200 font-semibold underline underline-offset-2 inline-flex items-center gap-1 ml-1"
+                >
+                  View library details &rarr;
+                </Link>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-2">

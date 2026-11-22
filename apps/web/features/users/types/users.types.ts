@@ -26,6 +26,15 @@ export interface UserProfile {
   role: string;
   status: string;
   createdAt: string;
+  tenantId?: string;
+  tenantName?: string;
+  tenantLogoUrl?: string;
+  tenantEmail?: string;
+  tenantPhone?: string;
+  tenantAddress?: string;
+  tenantOpeningHours?: string;
+  tenantWebsite?: string;
+  tenantBorrowingRulesSummary?: string;
   profile?: {
     admissionNumber?: string;
     memberType?: string;

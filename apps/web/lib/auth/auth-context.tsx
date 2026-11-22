@@ -29,6 +29,7 @@ export interface AuthUser {
   tenantAddress?: string;
   tenantOpeningHours?: string;
   tenantWebsite?: string;
+  tenantBorrowingRulesSummary?: string;
 }
 
 interface AuthContextValue {

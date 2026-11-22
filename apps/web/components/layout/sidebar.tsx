@@ -134,6 +134,25 @@ const DESK_NAV_ITEMS: NavEntry[] = [
       </svg>
     ),
   },
+  {
+    label: "About Library",
+    href: "/library-info",
+    icon: ({ className }) => (
+      <svg
+        className={className}
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+        />
+      </svg>
+    ),
+  },
 ];
 
 const ADMIN_NAV_ITEMS: NavEntry[] = [
@@ -270,7 +289,7 @@ export function Sidebar({
             </div>
           )}
           {!isCollapsed && (
-            <div className="flex flex-col min-w-0">
+            <div className="flex flex-col min-w-0 flex-1">
               <span className="text-sm font-bold tracking-tight text-foreground line-clamp-1">
                 {user?.tenantName ?? "Library"}
               </span>
@@ -280,6 +299,28 @@ export function Sidebar({
             </div>
           )}
         </Link>
+        {/* Library info shortcut */}
+        {!isCollapsed && (
+          <Link
+            href="/library-info"
+            title="About this library"
+            className="p-1.5 rounded-lg text-muted-foreground hover:bg-surface-hover hover:text-primary transition-colors shrink-0"
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </Link>
+        )}
         {onToggleCollapse && (
           <button
             type="button"

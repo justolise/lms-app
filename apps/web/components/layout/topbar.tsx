@@ -18,6 +18,7 @@ const TITLE_MAP: Record<string, string> = {
   "/settings": "Library Profile & Settings",
   "/profile": "Personal Profile",
   "/change-password": "Change Password",
+  "/library-info": "About This Library",
 };
 
 export function Topbar({ onMenuToggle }: { onMenuToggle?: () => void }) {
