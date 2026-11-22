@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert } from "@/components/feedback/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/modal";
 import { Select } from "@/components/ui/select";
 import { catalogueService } from "../services/catalogue.service";
 import {
+  type CatalogueItem,
   type CategoryOption,
   type CreateCatalogueItemInput,
   ITEM_FORMATS,
@@ -18,6 +19,7 @@ interface BookModalProps {
   onClose: () => void;
   onSuccess: () => void;
   categories: CategoryOption[];
+  editingItem?: CatalogueItem | null;
 }
 
 export function BookModal({
@@ -25,6 +27,7 @@ export function BookModal({
   onClose,
   onSuccess,
   categories,
+  editingItem,
 }: BookModalProps) {
   const [isbnLookupInput, setIsbnLookupInput] = useState("");
   const [lookingUpIsbn, setLookingUpIsbn] = useState(false);
@@ -48,6 +51,28 @@ export function BookModal({
   const [coverUrl, setCoverUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (editingItem) {
+      setTitle(editingItem.title || "");
+      setSubtitle(editingItem.subtitle || "");
+      setAuthors(editingItem.authors ? editingItem.authors.join(", ") : "");
+      setIsbn13(editingItem.isbn13 || "");
+      setIsbn10(editingItem.isbn10 || "");
+      setPublisher(editingItem.publisher || "");
+      setPublishedYear(editingItem.publishedYear || "");
+      setLanguage(editingItem.language || "en");
+      setFormat(editingItem.format || "BOOK");
+      setCallNumber(editingItem.callNumber || "");
+      setShelfLocation(editingItem.shelfLocation || "");
+      setCategoryId(editingItem.categoryId || "");
+      setSubjects(editingItem.subjects ? editingItem.subjects.join(", ") : "");
+      setCoverUrl(editingItem.coverUrl || "");
+    } else {
+      resetForm();
+    }
+    setError(null);
+  }, [editingItem, isOpen]);
 
   function resetForm() {
     setIsbnLookupInput("");
@@ -137,7 +162,11 @@ export function BookModal({
         isbn10: isbn10.trim() || undefined,
       };
 
-      await catalogueService.create(payload);
+      if (editingItem) {
+        await catalogueService.update(editingItem.id, payload);
+      } else {
+        await catalogueService.create(payload);
+      }
       resetForm();
       onSuccess();
       onClose();
@@ -151,35 +180,43 @@ export function BookModal({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add New Title to Catalogue">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={
+        editingItem ? "Edit Catalogue Title" : "Add New Title to Catalogue"
+      }
+    >
       <div className="space-y-4">
         {error && <Alert variant="error">{error}</Alert>}
         {lookupMessage && <Alert variant="success">{lookupMessage}</Alert>}
         {lookupError && <Alert variant="warning">{lookupError}</Alert>}
 
-        {/* ISBN Auto-fill Section */}
-        <div className="bg-surface-raised rounded-xl p-3 border border-border space-y-2">
-          <label className="block text-xs font-semibold text-foreground">
-            Auto-populate from ISBN (Google Books / OpenLibrary)
-          </label>
-          <div className="flex gap-2">
-            <Input
-              placeholder="e.g. 9780132350884"
-              value={isbnLookupInput}
-              onChange={(e) => setIsbnLookupInput(e.target.value)}
-              className="text-xs"
-            />
-            <Button
-              type="button"
-              size="sm"
-              variant="secondary"
-              isLoading={lookingUpIsbn}
-              onClick={handleIsbnLookup}
-            >
-              Lookup
-            </Button>
+        {/* ISBN Auto-fill Section (Create mode only) */}
+        {!editingItem && (
+          <div className="bg-surface-raised rounded-xl p-3 border border-border space-y-2">
+            <label className="block text-xs font-semibold text-foreground">
+              Auto-populate from ISBN (Google Books / OpenLibrary)
+            </label>
+            <div className="flex gap-2">
+              <Input
+                placeholder="e.g. 9780132350884"
+                value={isbnLookupInput}
+                onChange={(e) => setIsbnLookupInput(e.target.value)}
+                className="text-xs"
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                isLoading={lookingUpIsbn}
+                onClick={handleIsbnLookup}
+              >
+                Lookup
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -307,7 +344,7 @@ export function BookModal({
               Cancel
             </Button>
             <Button type="submit" isLoading={saving}>
-              Save Title
+              {editingItem ? "Save Changes" : "Save Title"}
             </Button>
           </div>
         </form>

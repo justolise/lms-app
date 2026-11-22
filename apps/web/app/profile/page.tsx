@@ -5,8 +5,10 @@ import { Alert } from "@/components/feedback/alert";
 import { Container } from "@/components/layout/container";
 import { Navbar } from "@/components/layout/navbar";
 import { Spinner } from "@/components/ui/spinner";
+import { LoansLedger } from "@/features/circulation/components/LoansLedger";
 import { DeactivateModal } from "@/features/users/components/DeactivateModal";
 import { ProfileCard } from "@/features/users/components/ProfileCard";
+import { SessionsList } from "@/features/users/components/SessionsList";
 import { usersService } from "@/features/users/services/users.service";
 import type { UserProfile } from "@/features/users/types/users.types";
 
@@ -41,10 +43,11 @@ export default function ProfilePage() {
         <Container className="max-w-2xl space-y-6">
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              User Profile
+              User Profile &amp; Settings
             </h1>
             <p className="mt-1 text-sm text-muted-foreground">
-              Manage your personal account details, credentials, and settings.
+              Manage your personal credentials, view your borrowed books, and
+              monitor active sessions.
             </p>
           </div>
 
@@ -58,18 +61,25 @@ export default function ProfilePage() {
               </span>
             </div>
           ) : profile ? (
-            <>
+            <div className="space-y-6">
               <ProfileCard
                 profile={profile}
                 onProfileUpdated={(updated) => setProfile(updated)}
                 onDeactivateClick={() => setShowDeactivateModal(true)}
               />
 
+              <LoansLedger
+                title="My Borrowed Books"
+                description="List of books currently or previously checked out under your account."
+              />
+
+              <SessionsList />
+
               <DeactivateModal
                 isOpen={showDeactivateModal}
                 onClose={() => setShowDeactivateModal(false)}
               />
-            </>
+            </div>
           ) : null}
         </Container>
       </main>

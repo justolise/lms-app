@@ -47,6 +47,10 @@ export const catalogueService = {
     return apiClient.patch<CatalogueItem>(`/api/catalogue/${id}`, payload);
   },
 
+  async archive(id: string): Promise<void> {
+    await apiClient.delete(`/api/catalogue/${id}`);
+  },
+
   async lookupIsbn(isbn: string): Promise<IsbnLookupResult> {
     return apiClient.post<IsbnLookupResult>("/api/catalogue/isbn-lookup", {
       isbn,

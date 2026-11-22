@@ -28,3 +28,11 @@ export interface PasswordResetResponse {
   success: boolean;
   message: string;
 }
+
+export interface UserSession {
+  id: string;
+  deviceName: string | null;
+  lastUsedAt: string | null;
+  expiresAt: string;
+  createdAt: string;
+}

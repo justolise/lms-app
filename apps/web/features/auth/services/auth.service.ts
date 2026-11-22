@@ -3,6 +3,7 @@ import type {
   IdentifierType,
   LoginResponse,
   PasswordResetResponse,
+  UserSession,
 } from "../types/auth.types";
 
 export const authService = {
@@ -42,6 +43,17 @@ export const authService = {
         newPassword,
         ...(currentPassword ? { currentPassword } : {}),
       },
+    );
+  },
+
+  async listSessions(): Promise<UserSession[]> {
+    const data = await apiClient.get<UserSession[]>("/api/auth/sessions");
+    return Array.isArray(data) ? data : [];
+  },
+
+  async revokeSession(sessionId: string): Promise<{ revoked: boolean }> {
+    return apiClient.delete<{ revoked: boolean }>(
+      `/api/auth/sessions/${sessionId}`,
     );
   },
 };

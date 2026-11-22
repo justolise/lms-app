@@ -8,6 +8,7 @@ import { Container } from "@/components/layout/container";
 import { Navbar } from "@/components/layout/navbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CreateMemberModal } from "@/features/members/components/CreateMemberModal";
 import { LibrarianModal } from "@/features/users/components/LibrarianModal";
 import { UserDirectoryTable } from "@/features/users/components/UserDirectoryTable";
 import { usersService } from "@/features/users/services/users.service";
@@ -26,6 +27,7 @@ export default function UsersDirectoryPage() {
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const [showLibrarianModal, setShowLibrarianModal] = useState(false);
+  const [showMemberModal, setShowMemberModal] = useState(false);
 
   async function loadDirectory(targetPage = 1, searchQuery = "") {
     setLoading(true);
@@ -90,11 +92,21 @@ export default function UsersDirectoryPage() {
                   access.
                 </p>
               </div>
-              <Can permission={PERMISSIONS.USERS_INVITE_LIBRARIAN}>
-                <Button onClick={() => setShowLibrarianModal(true)}>
-                  + Add Librarian
-                </Button>
-              </Can>
+              <div className="flex gap-2">
+                <Can permission={PERMISSIONS.MEMBERS_CREATE}>
+                  <Button onClick={() => setShowMemberModal(true)}>
+                    + Register Member
+                  </Button>
+                </Can>
+                <Can permission={PERMISSIONS.USERS_INVITE_LIBRARIAN}>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setShowLibrarianModal(true)}
+                  >
+                    + Add Librarian
+                  </Button>
+                </Can>
+              </div>
             </div>
 
             {actionMessage && <Alert variant="success">{actionMessage}</Alert>}
@@ -135,6 +147,14 @@ export default function UsersDirectoryPage() {
             <LibrarianModal
               isOpen={showLibrarianModal}
               onClose={() => setShowLibrarianModal(false)}
+              onSuccess={() => {
+                loadDirectory(1, search);
+              }}
+            />
+
+            <CreateMemberModal
+              isOpen={showMemberModal}
+              onClose={() => setShowMemberModal(false)}
               onSuccess={() => {
                 loadDirectory(1, search);
               }}

@@ -12,6 +12,8 @@ interface CatalogueTableProps {
   categories: CategoryOption[];
   loading: boolean;
   onManageCopies: (item: CatalogueItem) => void;
+  onEditItem?: (item: CatalogueItem) => void;
+  onArchiveItem?: (item: CatalogueItem) => void;
 }
 
 export function CatalogueTable({
@@ -19,6 +21,8 @@ export function CatalogueTable({
   categories,
   loading,
   onManageCopies,
+  onEditItem,
+  onArchiveItem,
 }: CatalogueTableProps) {
   const categoryMap = new Map<string, string>();
   for (const c of categories) {
@@ -101,15 +105,42 @@ export function CatalogueTable({
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Can permission={PERMISSIONS.COPIES_MANAGE}>
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => onManageCopies(item)}
-                      >
-                        Copies ({item.totalCopies})
-                      </Button>
-                    </Can>
+                    <div className="inline-flex items-center gap-1.5">
+                      <Can permission={PERMISSIONS.COPIES_MANAGE}>
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          onClick={() => onManageCopies(item)}
+                        >
+                          Copies ({item.totalCopies})
+                        </Button>
+                      </Can>
+
+                      {onEditItem && (
+                        <Can permission={PERMISSIONS.CATALOGUE_EDIT}>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => onEditItem(item)}
+                          >
+                            Edit
+                          </Button>
+                        </Can>
+                      )}
+
+                      {onArchiveItem && (
+                        <Can permission={PERMISSIONS.CATALOGUE_ARCHIVE}>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => onArchiveItem(item)}
+                            className="text-danger hover:text-danger hover:bg-danger/10"
+                          >
+                            Archive
+                          </Button>
+                        </Can>
+                      )}
+                    </div>
                   </td>
                 </tr>
               );

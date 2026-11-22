@@ -19,10 +19,18 @@ export const circulationService = {
     return apiClient.post<Loan>(`/api/circulation/renew/${loanId}`);
   },
 
-  getActiveLoans(userId?: string) {
-    return apiClient.get<Loan[]>("/api/circulation/loans", {
-      status: "ACTIVE",
-      ...(userId ? { userId } : {}),
-    });
+  async getActiveLoans(userId?: string): Promise<Loan[]> {
+    return this.listLoans("ACTIVE", userId);
+  },
+
+  async listLoans(status?: string, userId?: string): Promise<Loan[]> {
+    const params = new URLSearchParams();
+    if (status) params.set("status", status);
+    if (userId) params.set("userId", userId);
+    const endpoint = params.toString()
+      ? `/api/circulation/loans?${params.toString()}`
+      : "/api/circulation/loans";
+    const data = await apiClient.get<Loan[]>(endpoint);
+    return Array.isArray(data) ? data : [];
   },
 };

@@ -34,6 +34,7 @@ export default function CataloguePage() {
 
   // Modals
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingItem, setEditingItem] = useState<CatalogueItem | null>(null);
   const [selectedItemForCopies, setSelectedItemForCopies] =
     useState<CatalogueItem | null>(null);
 
@@ -75,6 +76,22 @@ export default function CataloguePage() {
     return () => clearTimeout(handler);
   }, [searchQuery, formatFilter, categoryFilter, availableOnly]);
 
+  async function handleArchive(item: CatalogueItem) {
+    if (!confirm(`Are you sure you want to archive title "${item.title}"?`)) {
+      return;
+    }
+
+    try {
+      await catalogueService.archive(item.id);
+      setActionMessage(`"${item.title}" has been archived.`);
+      loadCatalogue();
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to archive catalogue item",
+      );
+    }
+  }
+
   return (
     <div className="min-h-screen bg-surface-raised flex flex-col">
       <Navbar />
@@ -93,7 +110,12 @@ export default function CataloguePage() {
                 </p>
               </div>
               <Can permission={PERMISSIONS.CATALOGUE_CREATE}>
-                <Button onClick={() => setShowAddModal(true)}>
+                <Button
+                  onClick={() => {
+                    setEditingItem(null);
+                    setShowAddModal(true);
+                  }}
+                >
                   + Add Title
                 </Button>
               </Can>
@@ -119,16 +141,29 @@ export default function CataloguePage() {
               categories={categories}
               loading={loading}
               onManageCopies={(item) => setSelectedItemForCopies(item)}
+              onEditItem={(item) => {
+                setEditingItem(item);
+                setShowAddModal(true);
+              }}
+              onArchiveItem={handleArchive}
             />
 
             <BookModal
               isOpen={showAddModal}
-              onClose={() => setShowAddModal(false)}
+              onClose={() => {
+                setEditingItem(null);
+                setShowAddModal(false);
+              }}
               onSuccess={() => {
-                setActionMessage("Title added to catalogue successfully.");
+                setActionMessage(
+                  editingItem
+                    ? "Title updated successfully."
+                    : "Title added to catalogue successfully.",
+                );
                 loadCatalogue();
               }}
               categories={categories}
+              editingItem={editingItem}
             />
 
             <CopiesModal
