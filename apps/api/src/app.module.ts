@@ -11,6 +11,7 @@ import { MemberTypesModule } from "./member-types/member-types.module.js";
 import { MembersModule } from "./members/members.module.js";
 import { PublicModule } from "./public/public.module.js";
 import { RedisModule } from "./redis/redis.module.js";
+import { ReportsModule } from "./reports/reports.module.js";
 import { UsersModule } from "./users/users.module.js";
 
 @Module({
@@ -26,6 +27,7 @@ import { UsersModule } from "./users/users.module.js";
 		FinesModule,
 		HoldsModule,
 		PublicModule,
+		ReportsModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

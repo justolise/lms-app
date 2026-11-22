@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Alert } from "@/components/feedback/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,56 +12,65 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { apiClient } from "@/lib/api/client";
+import { Spinner } from "@/components/ui/spinner";
+import { reportsService } from "@/features/reports/services/reports.service";
+import type {
+  DashboardReportResponse,
+  DashboardStats,
+  PopularTitleItem,
+  RecentActivityItem,
+} from "@/features/reports/types/reports.types";
 import { useAuth } from "@/lib/auth/auth-context";
 import { PERMISSIONS } from "@/lib/auth/permissions";
+import { formatKes } from "@/utils/currency";
+import { formatDate } from "@/utils/date";
 
-interface DashboardStats {
-  activeLoansCount: number;
-  overdueLoansCount: number;
-  activeHoldsCount: number;
-  totalCatalogueTitles: number;
-}
+const initialStats: DashboardStats = {
+  activeLoansCount: 0,
+  overdueLoansCount: 0,
+  activeHoldsCount: 0,
+  totalCatalogueTitles: 0,
+  totalCopiesCount: 0,
+  availableCopiesCount: 0,
+  newMembersThisMonth: 0,
+  outstandingFinesMinorUnits: 0,
+  collectedMonthMinorUnits: 0,
+  outstandingFinesKes: 0,
+  collectedFinesThisMonthKes: 0,
+};
 
 export default function DashboardPage() {
   const { user, role, hasPermission } = useAuth();
-  const [stats, setStats] = useState<DashboardStats>({
-    activeLoansCount: 0,
-    overdueLoansCount: 0,
-    activeHoldsCount: 0,
-    totalCatalogueTitles: 0,
-  });
+  const [stats, setStats] = useState<DashboardStats>(initialStats);
+  const [popularTitles, setPopularTitles] = useState<PopularTitleItem[]>([]);
+  const [recentActivity, setRecentActivity] = useState<RecentActivityItem[]>(
+    [],
+  );
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    async function fetchStats() {
+    async function loadDashboard() {
       try {
-        // Fetch active loans and holds counts
-        const loans = await apiClient
-          .get<any[]>("/api/circulation/loans?status=ACTIVE")
-          .catch(() => []);
-        const overdue = await apiClient
-          .get<any[]>("/api/circulation/loans?status=OVERDUE")
-          .catch(() => []);
-        const holds = await apiClient.get<any[]>("/api/holds").catch(() => []);
-        const catalogue = await apiClient
-          .get<any[]>("/api/catalogue")
-          .catch(() => []);
-
-        setStats({
-          activeLoansCount: Array.isArray(loans) ? loans.length : 0,
-          overdueLoansCount: Array.isArray(overdue) ? overdue.length : 0,
-          activeHoldsCount: Array.isArray(holds) ? holds.length : 0,
-          totalCatalogueTitles: Array.isArray(catalogue) ? catalogue.length : 0,
-        });
-      } catch {
-        // Fallback gracefully
+        setLoading(true);
+        setError(null);
+        const data: DashboardReportResponse =
+          await reportsService.getDashboard();
+        setStats(data.stats);
+        setPopularTitles(data.popularTitles || []);
+        setRecentActivity(data.recentActivity || []);
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load dashboard metrics",
+        );
       } finally {
         setLoading(false);
       }
     }
 
-    fetchStats();
+    loadDashboard();
   }, []);
 
   return (
@@ -106,129 +117,423 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {error && <Alert variant="error">{error}</Alert>}
+
+      {/* Primary KPI Metrics Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        {/* Active Loans */}
+        <Link href="/circulation" className="block group">
+          <Card className="h-full transition-shadow hover:shadow-md border-border group-hover:border-primary/40">
+            <CardContent className="p-4 flex flex-col justify-between h-full">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Active Loans
+                </p>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-forest-50 dark:bg-forest-900/40 text-primary">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div className="mt-2">
+                <h3 className="text-2xl font-bold text-foreground">
+                  {loading ? "..." : stats.activeLoansCount}
+                </h3>
+                <span className="text-xs text-muted-foreground mt-0.5 inline-block">
+                  Checked out
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Overdue Loans */}
+        <Link href="/circulation" className="block group">
+          <Card
+            className={`h-full transition-shadow hover:shadow-md border-border ${
+              stats.overdueLoansCount > 0
+                ? "border-danger/30 bg-danger/5"
+                : "group-hover:border-primary/40"
+            }`}
+          >
+            <CardContent className="p-4 flex flex-col justify-between h-full">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Overdue
+                </p>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-danger/10 text-danger">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div className="mt-2">
+                <h3
+                  className={`text-2xl font-bold ${
+                    stats.overdueLoansCount > 0
+                      ? "text-danger"
+                      : "text-foreground"
+                  }`}
+                >
+                  {loading ? "..." : stats.overdueLoansCount}
+                </h3>
+                <span className="text-xs text-muted-foreground mt-0.5 inline-block">
+                  Needs return
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Holds in Queue */}
+        <Link href="/holds" className="block group">
+          <Card className="h-full transition-shadow hover:shadow-md border-border group-hover:border-primary/40">
+            <CardContent className="p-4 flex flex-col justify-between h-full">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Holds Queue
+                </p>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div className="mt-2">
+                <h3 className="text-2xl font-bold text-foreground">
+                  {loading ? "..." : stats.activeHoldsCount}
+                </h3>
+                <span className="text-xs text-muted-foreground mt-0.5 inline-block">
+                  Waiting on copies
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Titles & Copies Inventory */}
+        <Link href="/catalogue" className="block group">
+          <Card className="h-full transition-shadow hover:shadow-md border-border group-hover:border-primary/40">
+            <CardContent className="p-4 flex flex-col justify-between h-full">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Collection
+                </p>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-forest-50 dark:bg-forest-900/40 text-primary">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div className="mt-2">
+                <h3 className="text-2xl font-bold text-foreground">
+                  {loading ? "..." : stats.totalCatalogueTitles}
+                </h3>
+                <span className="text-xs text-muted-foreground mt-0.5 inline-block">
+                  {loading
+                    ? "..."
+                    : `${stats.availableCopiesCount}/${stats.totalCopiesCount} available`}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* New Members This Month */}
+        <Link href="/members" className="block group">
+          <Card className="h-full transition-shadow hover:shadow-md border-border group-hover:border-primary/40">
+            <CardContent className="p-4 flex flex-col justify-between h-full">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  New Patrons
+                </p>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-forest-50 dark:bg-forest-900/40 text-primary">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div className="mt-2">
+                <h3 className="text-2xl font-bold text-foreground">
+                  {loading ? "..." : stats.newMembersThisMonth}
+                </h3>
+                <span className="text-xs text-muted-foreground mt-0.5 inline-block">
+                  This month
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        {/* Fines Ledger */}
+        <Link href="/fines" className="block group">
+          <Card className="h-full transition-shadow hover:shadow-md border-border group-hover:border-primary/40">
+            <CardContent className="p-4 flex flex-col justify-between h-full">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  Fines Ledger
+                </p>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 text-amber-500">
+                  <svg
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <div className="mt-2">
+                <h3 className="text-sm font-bold text-foreground">
+                  {loading ? "..." : formatKes(stats.collectedMonthMinorUnits)}
+                </h3>
+                <span className="text-[11px] text-muted-foreground mt-0.5 inline-block">
+                  {loading
+                    ? "..."
+                    : `Unpaid: ${formatKes(stats.outstandingFinesMinorUnits)}`}
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+
+      {/* Middle Section: Popular Titles & Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Popular Titles (Top Borrowed Works) */}
         <Card>
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Active Loans
-              </p>
-              <h3 className="text-2xl font-bold text-foreground mt-1">
-                {loading ? "..." : stats.activeLoansCount}
-              </h3>
-              <span className="text-xs text-muted-foreground mt-0.5 inline-block">
-                Currently checked out
-              </span>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Popular Titles</CardTitle>
+                <CardDescription>
+                  Most checked-out books and resources in this library
+                </CardDescription>
+              </div>
+              <Badge variant="primary" className="text-xs">
+                Top 5
+              </Badge>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-forest-50 dark:bg-forest-900/40 text-primary">
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                />
-              </svg>
-            </div>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <Spinner size="md" />
+              </div>
+            ) : popularTitles.length === 0 ? (
+              <div className="p-6 text-center text-xs text-muted-foreground border border-dashed border-border rounded-xl">
+                No borrowing activity recorded yet.
+              </div>
+            ) : (
+              <div className="divide-y divide-border">
+                {popularTitles.map((book, idx) => (
+                  <div
+                    key={book.id}
+                    className="py-3 flex items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="flex-shrink-0 w-6 h-6 rounded-full bg-surface-raised flex items-center justify-center font-bold text-muted-foreground text-[11px]">
+                        {idx + 1}
+                      </span>
+                      {book.coverUrl ? (
+                        // biome-ignore lint/performance/noImgElement: dynamic external cover URL
+                        <img
+                          src={book.coverUrl}
+                          alt={book.title}
+                          className="w-8 h-10 object-cover rounded shadow-xs flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-8 h-10 rounded bg-forest-50 dark:bg-forest-900/40 flex items-center justify-center text-primary flex-shrink-0">
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                      <div className="truncate">
+                        <Link
+                          href={`/catalogue?search=${encodeURIComponent(book.title)}`}
+                          className="font-semibold text-foreground hover:text-primary transition-colors truncate block"
+                        >
+                          {book.title}
+                        </Link>
+                        <p className="text-muted-foreground text-[11px] truncate">
+                          {book.author || "Unknown author"} · {book.format}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <Badge
+                        variant="default"
+                        className="text-[11px] font-medium"
+                      >
+                        {book.borrowCount}{" "}
+                        {book.borrowCount === 1 ? "loan" : "loans"}
+                      </Badge>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
+        {/* Recent Circulation Activity */}
         <Card>
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Overdue Loans
-              </p>
-              <h3 className="text-2xl font-bold text-danger mt-1">
-                {loading ? "..." : stats.overdueLoansCount}
-              </h3>
-              <span className="text-xs text-muted-foreground mt-0.5 inline-block">
-                Requiring follow-up
-              </span>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>
+                  Latest checkouts and returns across the circulation desks
+                </CardDescription>
+              </div>
+              <Link href="/circulation">
+                <Button size="sm" variant="outline" className="text-xs">
+                  Desk &rarr;
+                </Button>
+              </Link>
             </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-danger/10 text-danger">
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-            </div>
-          </CardContent>
-        </Card>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex justify-center py-8">
+                <Spinner size="md" />
+              </div>
+            ) : recentActivity.length === 0 ? (
+              <div className="p-6 text-center text-xs text-muted-foreground border border-dashed border-border rounded-xl">
+                No recent transactions recorded.
+              </div>
+            ) : (
+              <div className="divide-y divide-border">
+                {recentActivity.map((item) => (
+                  <div
+                    key={item.id}
+                    className="py-3 flex items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div
+                        className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          item.type === "RETURN"
+                            ? "bg-forest-50 dark:bg-forest-900/40 text-primary"
+                            : "bg-amber-500/10 text-amber-500"
+                        }`}
+                      >
+                        {item.type === "RETURN" ? (
+                          <svg
+                            className="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M5 13l4 4L19 7"
+                            />
+                          </svg>
+                        ) : (
+                          <svg
+                            className="w-3.5 h-3.5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="truncate">
+                        <p className="font-semibold text-foreground truncate">
+                          {item.description}
+                        </p>
+                        <p className="text-muted-foreground text-[11px] truncate">
+                          Patron: {item.patronName}
+                        </p>
+                      </div>
+                    </div>
 
-        <Card>
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Holds in Queue
-              </p>
-              <h3 className="text-2xl font-bold text-amber-500 mt-1">
-                {loading ? "..." : stats.activeHoldsCount}
-              </h3>
-              <span className="text-xs text-muted-foreground mt-0.5 inline-block">
-                Waiting on copy return
-              </span>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/10 text-amber-500">
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"
-                />
-              </svg>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-5 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Catalogue Titles
-              </p>
-              <h3 className="text-2xl font-bold text-foreground mt-1">
-                {loading ? "..." : stats.totalCatalogueTitles}
-              </h3>
-              <span className="text-xs text-muted-foreground mt-0.5 inline-block">
-                Active catalogued works
-              </span>
-            </div>
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-forest-50 dark:bg-forest-900/40 text-primary">
-              <svg
-                className="h-6 w-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-            </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <span className="text-[11px] text-muted-foreground">
+                        {formatDate(item.timestamp, true)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
