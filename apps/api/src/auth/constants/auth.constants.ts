@@ -3,7 +3,7 @@
  * authentication-specific constants shared across AuthController and guards.
  */
 
-/** Cookie name for the short-lived access JWT (15 minutes). */
+/** Cookie name for the short-lived access JWT (24 hours). */
 export const ACCESS_COOKIE = 'access_token';
 
 /** Cookie name for the long-lived refresh token (7 days). */
@@ -12,8 +12,8 @@ export const REFRESH_COOKIE = 'refresh_token';
 /** Cookie name for the multi-library selection token (5 minutes). */
 export const SELECTION_COOKIE = 'library_selection_token';
 
-/** Access cookie max-age in milliseconds: 15 minutes. */
-export const ACCESS_COOKIE_MAX_AGE_MS = 15 * 60 * 1000;
+/** Access cookie max-age in milliseconds: 24 hours. */
+export const ACCESS_COOKIE_MAX_AGE_MS = 24 * 60 * 60 * 1000;
 
 /** Refresh cookie max-age in milliseconds: 7 days. */
 export const REFRESH_COOKIE_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;

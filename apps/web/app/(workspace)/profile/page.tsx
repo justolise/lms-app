@@ -7,7 +7,6 @@ import { LoansLedger } from "@/features/circulation/components/LoansLedger";
 import { MyHoldsList } from "@/features/holds/components/MyHoldsList";
 import { DeactivateModal } from "@/features/users/components/DeactivateModal";
 import { ProfileCard } from "@/features/users/components/ProfileCard";
-import { SessionsList } from "@/features/users/components/SessionsList";
 import { usersService } from "@/features/users/services/users.service";
 import type { UserProfile } from "@/features/users/types/users.types";
 
@@ -41,8 +40,7 @@ export default function ProfilePage() {
           User Profile &amp; Settings
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Manage your credentials, view borrowed items, and revoke active
-          sessions.
+          Manage your credentials, view borrowed items, and view active holds.
         </p>
       </div>
 
@@ -59,8 +57,6 @@ export default function ProfilePage() {
             onProfileUpdated={(updated) => setProfile(updated)}
             onDeactivateClick={() => setShowDeactivateModal(true)}
           />
-
-          <SessionsList />
 
           <div className="space-y-2 pt-4">
             <h2 className="text-lg font-bold text-foreground">

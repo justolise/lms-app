@@ -14,6 +14,8 @@ interface RequestOptions {
  * Enforces credentials: "include" and parses standard NestJS JSON responses.
  */
 class ApiClient {
+  private refreshPromise: Promise<boolean> | null = null;
+
   private normalizePath(path: string): string {
     if (path.startsWith("http://") || path.startsWith("https://")) {
       return path;
@@ -64,6 +66,48 @@ class ApiClient {
     });
 
     if (!res.ok) {
+      if (res.status === 401 && !path.includes("/auth/")) {
+        // Attempt silent session refresh once
+        if (!this.refreshPromise) {
+          this.refreshPromise = (async () => {
+            try {
+              const refreshRes = await fetch("/api/auth/refresh", {
+                method: "POST",
+                credentials: "include",
+              });
+              return refreshRes.ok;
+            } catch {
+              return false;
+            } finally {
+              this.refreshPromise = null;
+            }
+          })();
+        }
+
+        const refreshed = await this.refreshPromise;
+        if (refreshed) {
+          // Retry original request with freshly refreshed access token
+          return this.request<T>(path, options);
+        }
+
+        // If refresh failed and we are running in browser on a protected route, redirect to login
+        if (typeof window !== "undefined") {
+          const pathname = window.location.pathname;
+          const isPublic =
+            pathname === "/" ||
+            pathname.startsWith("/login") ||
+            pathname.startsWith("/forgot-password") ||
+            pathname.startsWith("/reset-password") ||
+            pathname.startsWith("/libraries") ||
+            pathname.startsWith("/browse") ||
+            pathname.startsWith("/request-membership");
+
+          if (!isPublic) {
+            window.location.href = "/login";
+          }
+        }
+      }
+
       let errorData: {
         message?: string | string[];
         error?: string;
