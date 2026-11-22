@@ -164,14 +164,15 @@ function makeMockTx(sequences: {
   let idx = 0;
 
   function queryChain(result: unknown[]) {
-    // Create a chainable object; limit/orderBy return a promise to result
+    // Create a chainable object that can be awaited at any point
     const q: Record<string, unknown> = {
       from: () => q,
       leftJoin: () => q,
       where: () => q,
-      limit: () => Promise.resolve(result),
-      orderBy: () => Promise.resolve(result),
-      // Allow `await` directly on the chain (for cases without .limit())
+      limit: () => q,
+      orderBy: () => q,
+      for: () => q,
+      // Allow `await` directly on the chain
       then: (resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) =>
         Promise.resolve(result).then(resolve, reject),
     };
@@ -186,7 +187,7 @@ function makeMockTx(sequences: {
     update: vi.fn(() => ({
       set: vi.fn(() => ({
         where: vi.fn(() => ({
-          returning: vi.fn().mockResolvedValue(sequences.update ?? []),
+          returning: vi.fn().mockResolvedValue(sequences.update ?? [{ id: 'copy-1' }]),
         })),
       })),
     })),

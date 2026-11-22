@@ -130,9 +130,8 @@ describe('RateLimitGuard', () => {
     expect(firstKey).not.toBe(secondKey);
   });
 
-  it('extracts client IP from x-forwarded-for header when behind a proxy', async () => {
-    request.ip = '127.0.0.1';
-    request.headers = { 'x-forwarded-for': '203.0.113.195, 70.41.3.18' };
+  it('extracts client IP from request.ip when behind a trusted proxy', async () => {
+    request.ip = '203.0.113.195';
 
     await guard.canActivate(context as never);
 

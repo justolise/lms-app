@@ -987,7 +987,12 @@ export const loans = pgTable(
       table.status,
     ),
 
-    index('loans_tenant_copy_idx').on(table.tenantId, table.copyId),
+    uniqueIndex('loans_tenant_copy_idx').on(table.tenantId, table.copyId),
+
+    // Prevent multiple active loans on the identical physical copy concurrently
+    uniqueIndex('loans_tenant_copy_active_unique')
+      .on(table.tenantId, table.copyId)
+      .where(sql`${table.status} = 'ACTIVE'`),
 
     index('loans_tenant_catalogue_item_idx').on(
       table.tenantId,

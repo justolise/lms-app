@@ -5,6 +5,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express';
 import helmet from 'helmet';
 import express from 'express';
 import { AppModule } from './app.module.js';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 
 if (process.env.NODE_ENV !== 'production') {
   config({
@@ -116,6 +117,9 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  // Global exception filter for secure error handling and logging
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   app.enableShutdownHooks();
 

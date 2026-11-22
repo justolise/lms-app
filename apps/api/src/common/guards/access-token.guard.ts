@@ -62,7 +62,7 @@ export class AccessTokenGuard implements CanActivate {
     if (payload.mustChangePassword) {
       const rawPath = (request.originalUrl || request.url || '').split('?')[0];
       const isAllowed = MUST_CHANGE_PASSWORD_ALLOWED_ENDPOINTS.some(
-        (allowed) => rawPath.endsWith(allowed) || rawPath.includes(allowed),
+        (allowed) => rawPath === allowed || rawPath.startsWith(`${allowed}/`),
       );
 
       if (!isAllowed) {

@@ -4,6 +4,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  Logger,
   ServiceUnavailableException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
@@ -33,6 +34,8 @@ interface HttpResponse {
  */
 @Injectable()
 export class RateLimitGuard implements CanActivate {
+  private readonly logger = new Logger(RateLimitGuard.name);
+
   constructor(
     private readonly reflector: Reflector,
     private readonly redisService: RedisService,
@@ -51,14 +54,9 @@ export class RateLimitGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<HttpRequest>();
     const response = context.switchToHttp().getResponse<HttpResponse>();
 
-    const rawForwarded = request.headers?.['x-forwarded-for'];
-    const forwardedIp = Array.isArray(rawForwarded)
-      ? rawForwarded[0]
-      : typeof rawForwarded === 'string'
-        ? rawForwarded.split(',')[0]?.trim()
-        : undefined;
-
-    const ip = forwardedIp || request.ip || request.socket?.remoteAddress;
+    // In Express with 'trust proxy', request.ip is populated by Express using
+    // trusted reverse proxy configuration, preventing client-spoofed X-Forwarded-For injection.
+    const ip = request.ip || request.socket?.remoteAddress;
 
     if (!ip) {
       throw new ServiceUnavailableException(
@@ -80,6 +78,10 @@ export class RateLimitGuard implements CanActivate {
     }
 
     if (result.count > options.limit) {
+      this.logger.warn(
+        `Rate limit exceeded: [prefix=${options.keyPrefix}] [ipHash=${ipHash}] [count=${result.count}/${options.limit}]`,
+      );
+
       const retryAfterSeconds = Math.max(1, Math.ceil(result.ttlMs / 1000));
 
       response.setHeader('Retry-After', String(retryAfterSeconds));

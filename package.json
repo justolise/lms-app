@@ -12,5 +12,8 @@
     "typecheck": "pnpm -r --if-present typecheck",
     "lint": "pnpm -r --if-present lint",
     "seed": "pnpm --filter @lms/api seed"
+  },
+  "overrides": {
+    "esbuild": ">=0.25.0"
   }
 }

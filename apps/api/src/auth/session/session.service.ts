@@ -318,11 +318,19 @@ export class SessionService {
       const rows = await tx
         .select({ id: sessions.id })
         .from(sessions)
+        .innerJoin(
+          users,
+          and(
+            eq(users.id, sessions.userId),
+            eq(users.tenantId, sessions.tenantId),
+          ),
+        )
         .where(
           and(
             eq(sessions.tenantId, tenantId),
             eq(sessions.userId, userId),
             eq(sessions.id, sessionId),
+            eq(users.status, 'ACTIVE'),
             isNull(sessions.revokedAt),
             gt(sessions.expiresAt, new Date()),
           ),

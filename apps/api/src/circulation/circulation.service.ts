@@ -1,11 +1,12 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
   Optional,
   UnprocessableEntityException,
 } from '@nestjs/common';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 
 import type { DatabaseService } from '../database/database.service.js';
 import {
@@ -128,7 +129,8 @@ export class CirculationService {
         .where(
           and(eq(copies.tenantId, tenantId), eq(copies.barcode, dto.barcode)),
         )
-        .limit(1);
+        .limit(1)
+        .for('update');
 
       if (!copy) throw new NotFoundException('Copy not found');
 
@@ -162,7 +164,7 @@ export class CirculationService {
             eq(users.tenantId, tenantId),
             sql`(
               ${users.id}::text = ${dto.memberIdentifier}
-              OR ${users.email} = ${dto.memberIdentifier}
+              OR lower(${users.email}) = lower(${dto.memberIdentifier})
               OR ${memberProfiles.admissionNumber} = ${dto.memberIdentifier}
             )`,
           ),
@@ -304,12 +306,23 @@ export class CirculationService {
         .returning();
 
       // ── Update copy status ──────────────────────────────────
-      await tx
+      const updatedCopies = await tx
         .update(copies)
         .set({ status: 'ON_LOAN', updatedAt: now })
         .where(
-          and(eq(copies.tenantId, tenantId), eq(copies.id, copy.id)),
+          and(
+            eq(copies.tenantId, tenantId),
+            eq(copies.id, copy.id),
+            inArray(copies.status, ['AVAILABLE', 'RESERVED']),
+          ),
+        )
+        .returning({ id: copies.id });
+
+      if (updatedCopies.length === 0) {
+        throw new ConflictException(
+          'Copy status changed concurrently; checkout cannot proceed',
         );
+      }
 
       // ── Fulfill hold if copy was claimed (HLD-1) ─────────────
       if (claimedHoldId && this.holdsService) {
@@ -386,7 +399,8 @@ export class CirculationService {
             eq(loans.status, 'ACTIVE'),
           ),
         )
-        .limit(1);
+        .limit(1)
+        .for('update');
 
       if (!loan) {
         throw new NotFoundException(
@@ -485,7 +499,8 @@ export class CirculationService {
             eq(loans.status, 'ACTIVE'),
           ),
         )
-        .limit(1);
+        .limit(1)
+        .for('update');
 
       if (!loan) throw new NotFoundException('Active loan not found');
 

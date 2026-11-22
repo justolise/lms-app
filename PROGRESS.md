@@ -133,9 +133,18 @@ Current verification run completed on **22 November 2026**:
 - **pnpm typecheck**: Passed across all workspace projects (0 TypeScript errors).
 - **pnpm test (Unit Tests)**: 22 test files, 220 tests passed, 0 failed.
 - **Controller E2E Tests**: 2 test files, 27 tests passed, 0 failed (`test/auth.controller.e2e-spec.ts`, `test/users.controller.e2e-spec.ts`).
-- **Live Database Interactive Verification**: Full end-to-end walkthrough verified against local PostgreSQL & Redis (login, profile, staff provisioning, first-login password change gate, frictionless first-time password change without temporary password requirement, min 8 char validation rejection & acceptance, subsequent password change requiring current password, promotion, OTP forgot/reset password, sessions listing, soft account deactivation protection, device logout, member types & borrowing policies matrix, and cross-tenant RLS isolation).
-- **Security Hardening & Cleanup**: Helmet security headers (CSP, HSTS preload, frameguard: deny, noSniff, xssFilter) active; global `Cache-Control: no-store` on API responses; Redis caching with tenant key isolation and mutation invalidation (`MemberTypesService`, `CatalogueService`); rate-limiting decoupled from `src/redis/` into `src/common/guards/` and `src/common/decorators/`; proxy-aware client IP extraction (`x-forwarded-for`); 1MB payload limits; CORS configured.
-- **Phase 2 Catalogue & Holds**: `CategoriesModule`, `CatalogueModule`, `CirculationModule`, and `HoldsModule` added; 49 unit tests across catalogue, copies, circulation, and holds; `0007_catalogue.sql`, `0008_circulation.sql`, `0009_holds.sql` migrations with RLS, indexes, and FIFO queue ordering.
+- **Comprehensive Security Audit & Hardening**:
+  - Critical concurrency hardening in checkout/return/renew with pessimistic `.for('update')`, copy status optimistic guards, and `0010_circulation_concurrency.sql` partial unique index `loans_tenant_copy_active_unique`.
+  - Rate limiting IP spoofing defense using Express proxy-validated `request.ip`.
+  - Scoped cookie path for refresh token (`/api/auth`) and selection token (`/api/auth/select-membership`).
+  - Active user status verification in `SessionService.isSessionActive`.
+  - Password complexity regex enforcement (uppercase, lowercase, number, symbol) in `ChangePasswordDto` and `ResetPasswordDto`.
+  - HTTPS protocol enforcement for profile `photoUrl`.
+  - Strict Content-Security-Policy (CSP) and Permissions-Policy (`camera=(self)`) configured in Next.js web application.
+  - Centralized NestJS `HttpExceptionFilter` preventing internal error stack leaks.
+  - Supply-chain remediation: pnpm overrides applied; `pnpm audit` reports 0 vulnerabilities.
+  - Comprehensive documentation suite delivered across 15 documents in `docs/security/`.
+- **Phase 2 Catalogue & Holds**: `CategoriesModule`, `CatalogueModule`, `CirculationModule`, and `HoldsModule` added; 49 unit tests across catalogue, copies, circulation, and holds; `0007_catalogue.sql`, `0008_circulation.sql`, `0009_holds.sql`, and `0010_circulation_concurrency.sql` migrations with RLS, indexes, and FIFO queue ordering.
 - **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 11 prerendered static routes).
 
 Verification commands:
