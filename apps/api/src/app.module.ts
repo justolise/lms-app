@@ -8,6 +8,7 @@ import { MemberTypesModule } from './member-types/member-types.module.js';
 import { UsersModule } from './users/users.module.js';
 import { CatalogueModule } from './catalogue/catalogue.module.js';
 import { CategoriesModule } from './categories/categories.module.js';
+import { CirculationModule } from './circulation/circulation.module.js';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { CategoriesModule } from './categories/categories.module.js';
     UsersModule,
     CatalogueModule,
     CategoriesModule,
+    CirculationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

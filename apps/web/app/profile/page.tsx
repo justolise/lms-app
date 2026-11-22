@@ -179,6 +179,15 @@ export default function ProfilePage() {
                   Staff Directory
                 </Link>
               )}
+            {profile &&
+              (profile.role === "ADMIN" || profile.role === "LIBRARIAN") && (
+                <Link
+                  href="/circulation"
+                  className="text-sm font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
+                >
+                  Circulation
+                </Link>
+              )}
             {profile && profile.role === "ADMIN" && (
               <Link
                 href="/member-types"

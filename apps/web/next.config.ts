@@ -17,6 +17,14 @@ const nextConfig: NextConfig = {
   experimental: {
     agentFeedback: true,
   },
+  webpack(config) {
+    // Enable async WebAssembly for zxing-wasm (CIR-6)
+    config.experiments = {
+      ...config.experiments,
+      asyncWebAssembly: true,
+    };
+    return config;
+  },
   cacheComponents: true,
   partialPrefetching: true,
   async rewrites() {

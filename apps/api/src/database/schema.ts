@@ -903,3 +903,109 @@ export const copies = pgTable(
     }).onDelete('restrict'),
   ],
 );
+
+// ─── CIR-1 through CIR-5: Loans / Circulation ───────────────────────────────
+
+export const loanStatusEnum = pgEnum('loan_status', [
+  'ACTIVE',
+  'RETURNED',
+  'OVERDUE',
+  'LOST',
+  'DAMAGED',
+]);
+
+export const loans = pgTable(
+  'loans',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'restrict' }),
+
+    // Borrower — composite FK to users(tenant_id, id)
+    userId: uuid('user_id').notNull(),
+
+    // Physical copy being loaned
+    copyId: uuid('copy_id').notNull(),
+
+    // Denormalised for quick title lookup without joining
+    catalogueItemId: uuid('catalogue_item_id').notNull(),
+
+    // ── Policy snapshot at checkout (CIR-4) ──────────────────
+    // Stored so policy changes don't retroactively affect active loans.
+    loanDurationDays: integer('loan_duration_days').notNull(),
+    maxRenewals: integer('max_renewals').notNull(),
+    gracePeriodDays: integer('grace_period_days').notNull().default(0),
+    dailyFineMinorUnits: integer('daily_fine_minor_units').notNull().default(0),
+    maxFineMinorUnits: integer('max_fine_minor_units').notNull().default(0),
+
+    // ── Timestamps (UTC stored; Africa/Nairobi logical) ───────
+    checkedOutAt: timestamp('checked_out_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    // End of local due date in Africa/Nairobi (UTC+3)
+    dueAt: timestamp('due_at', { withTimezone: true }).notNull(),
+
+    returnedAt: timestamp('returned_at', { withTimezone: true }),
+
+    status: loanStatusEnum('status').notNull().default('ACTIVE'),
+
+    renewalCount: integer('renewal_count').notNull().default(0),
+
+    // Fine computed at return/lost marking (minor units = cents/fils/etc.)
+    fineMinorUnits: integer('fine_minor_units'),
+
+    // ── CIR-5: librarian override audit ──────────────────────
+    overrideReason: text('override_reason'),
+    overrideActorId: uuid('override_actor_id'),
+
+    // ── Idempotency ───────────────────────────────────────────
+    idempotencyKey: varchar('idempotency_key', { length: 128 }),
+
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('loans_tenant_id_id_unique').on(table.tenantId, table.id),
+
+    // Idempotency key must be unique per tenant (nullable — only enforced when provided)
+    uniqueIndex('loans_idempotency_unique').on(
+      table.tenantId,
+      table.idempotencyKey,
+    ),
+
+    index('loans_tenant_user_status_idx').on(
+      table.tenantId,
+      table.userId,
+      table.status,
+    ),
+
+    index('loans_tenant_copy_idx').on(table.tenantId, table.copyId),
+
+    index('loans_tenant_catalogue_item_idx').on(
+      table.tenantId,
+      table.catalogueItemId,
+    ),
+
+    // Borrower must belong to the same tenant
+    foreignKey({
+      name: 'loans_tenant_user_fk',
+      columns: [table.tenantId, table.userId],
+      foreignColumns: [users.tenantId, users.id],
+    }).onDelete('restrict'),
+
+    // Copy must belong to the same tenant
+    foreignKey({
+      name: 'loans_tenant_copy_fk',
+      columns: [table.tenantId, table.copyId],
+      foreignColumns: [copies.tenantId, copies.id],
+    }).onDelete('restrict'),
+  ],
+);
