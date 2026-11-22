@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { Alert } from "@/components/feedback/alert";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,6 @@ interface PublicLibrary {
 }
 
 function RequestMembershipForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   const [libraries, setLibraries] = useState<PublicLibrary[]>([]);
@@ -54,9 +53,7 @@ function RequestMembershipForm() {
 
           if (data.length > 0) {
             const queryTarget =
-              searchParams?.get("library") ||
-              searchParams?.get("slug") ||
-              "";
+              searchParams?.get("library") || searchParams?.get("slug") || "";
             const match = data.find(
               (lib) =>
                 lib.slug.toLowerCase() === queryTarget.toLowerCase() ||
@@ -76,7 +73,9 @@ function RequestMembershipForm() {
   }, [searchParams]);
 
   const selectedLibrary = libraries.find(
-    (lib) => lib.slug === selectedSlug || lib.libraryCode.toLowerCase() === selectedSlug,
+    (lib) =>
+      lib.slug === selectedSlug ||
+      lib.libraryCode.toLowerCase() === selectedSlug,
   );
   const libraryName = selectedLibrary?.name || "Library";
   const libraryCode = selectedLibrary?.libraryCode || "";
@@ -227,8 +226,8 @@ function RequestMembershipForm() {
             </div>
 
             <div className="p-3 bg-muted/30 rounded-lg text-xs text-muted-foreground text-left">
-              <strong>Notice:</strong> This confirms receipt of your enquiry only;
-              it does not constitute membership approval. Please visit{" "}
+              <strong>Notice:</strong> This confirms receipt of your enquiry
+              only; it does not constitute membership approval. Please visit{" "}
               {libraryName}&apos;s front desk with your national identification
               to complete your registration.
             </div>
@@ -236,7 +235,9 @@ function RequestMembershipForm() {
             <div className="pt-2 flex flex-wrap justify-center gap-3">
               {selectedSlug && (
                 <Link href={`/libraries/${selectedSlug}/catalogue`}>
-                  <Button variant="primary">Browse {libraryName} Catalogue</Button>
+                  <Button variant="primary">
+                    Browse {libraryName} Catalogue
+                  </Button>
                 </Link>
               )}
               <Link href="/">
@@ -250,8 +251,8 @@ function RequestMembershipForm() {
           <CardHeader>
             <CardTitle>Membership Application Form</CardTitle>
             <CardDescription>
-              Protected under the Kenya Data Protection Act 2019. We collect your
-              details strictly to process your library membership.
+              Protected under the Kenya Data Protection Act 2019. We collect
+              your details strictly to process your library membership.
             </CardDescription>
           </CardHeader>
           <CardContent>

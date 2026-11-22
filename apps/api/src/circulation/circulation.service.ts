@@ -13,6 +13,7 @@ import {
   auditLogs,
   catalogueItems,
   copies,
+  fineEntries,
   loanPolicies,
   loans,
   memberProfiles,
@@ -249,6 +250,31 @@ export class CirculationService {
         softBlocks.push('Membership has expired');
       }
 
+      // Check outstanding fine balance against policy threshold (CIR-5)
+      const [fineSum] = await tx
+        .select({
+          charges: sql<number>`coalesce(sum(case when ${fineEntries.entryType} = 'CHARGE' then ${fineEntries.amountMinorUnits} else 0 end), 0)`,
+          credits: sql<number>`coalesce(sum(case when ${fineEntries.entryType} in ('PAYMENT', 'WAIVER') then ${fineEntries.amountMinorUnits} else 0 end), 0)`,
+        })
+        .from(fineEntries)
+        .where(
+          and(
+            eq(fineEntries.tenantId, tenantId),
+            eq(fineEntries.userId, member.userId),
+          ),
+        );
+
+      const fineBalance =
+        (Number(fineSum?.charges) || 0) - (Number(fineSum?.credits) || 0);
+      const fineThreshold =
+        policy.maxFineMinorUnits > 0 ? policy.maxFineMinorUnits : 0;
+
+      if (fineThreshold > 0 && fineBalance >= fineThreshold) {
+        softBlocks.push(
+          `Outstanding fine balance of KES ${(fineBalance / 100).toFixed(2)} exceeds threshold of KES ${(fineThreshold / 100).toFixed(2)}`,
+        );
+      }
+
       if (softBlocks.length > 0) {
         if (!isLibrarian) {
           throw new ForbiddenException(softBlocks.join('; '));
@@ -436,6 +462,18 @@ export class CirculationService {
           ),
         )
         .returning();
+
+      // ── Post fine charge to ledger (FIN-1, FIN-2) ───────────
+      if (fineMinorUnits > 0) {
+        await tx.insert(fineEntries).values({
+          tenantId,
+          userId: loan.userId,
+          loanId: loan.id,
+          entryType: 'CHARGE',
+          amountMinorUnits: fineMinorUnits,
+          notes: `Overdue return fine (${overdueDays} days late, ${loan.gracePeriodDays} days grace)`,
+        });
+      }
 
       // ── Process holds or update copy status (HLD-2) ─────────
       let holdResult: FulfillHoldResult = { holdFulfilled: false };

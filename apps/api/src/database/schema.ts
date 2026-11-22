@@ -1181,3 +1181,81 @@ export const membershipEnquiries = pgTable(
 export type MembershipEnquiry = typeof membershipEnquiries.$inferSelect;
 export type NewMembershipEnquiry = typeof membershipEnquiries.$inferInsert;
 
+// ─── FIN-1, FIN-2, FIN-3: Fine Ledger & Payments ──────────────────────────────
+
+export const fineEntryTypeEnum = pgEnum('fine_entry_type', [
+  'CHARGE',
+  'PAYMENT',
+  'WAIVER',
+]);
+
+export const finePaymentMethodEnum = pgEnum('fine_payment_method', [
+  'CASH',
+  'MPESA',
+  'CARD',
+]);
+
+export const fineEntries = pgTable(
+  'fine_entries',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'restrict' }),
+
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'restrict' }),
+
+    loanId: uuid('loan_id')
+      .references(() => loans.id, { onDelete: 'set null' }),
+
+    entryType: fineEntryTypeEnum('entry_type').notNull(),
+
+    amountMinorUnits: integer('amount_minor_units').notNull(),
+
+    paymentMethod: finePaymentMethodEnum('payment_method'),
+
+    paymentReference: varchar('payment_reference', { length: 128 }),
+
+    receiptNumber: varchar('receipt_number', { length: 64 }),
+
+    waiverReason: text('waiver_reason'),
+
+    actorId: uuid('actor_id')
+      .references(() => users.id, { onDelete: 'set null' }),
+
+    notes: text('notes'),
+
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index('fine_entries_tenant_user_idx').on(
+      table.tenantId,
+      table.userId,
+      table.createdAt,
+    ),
+    index('fine_entries_tenant_loan_idx').on(table.tenantId, table.loanId),
+    index('fine_entries_tenant_type_idx').on(
+      table.tenantId,
+      table.entryType,
+      table.createdAt,
+    ),
+    uniqueIndex('fine_entries_tenant_receipt_unique').on(
+      table.tenantId,
+      table.receiptNumber,
+    ),
+    check(
+      'fine_entries_amount_positive',
+      sql`${table.amountMinorUnits} > 0`,
+    ),
+  ],
+);
+
+export type FineEntry = typeof fineEntries.$inferSelect;
+export type NewFineEntry = typeof fineEntries.$inferInsert;
+
+

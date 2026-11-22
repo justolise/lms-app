@@ -205,7 +205,8 @@ function MembershipRequestForm() {
               ) : (
                 <p className="text-amber-700 dark:text-amber-400">
                   Note: Email confirmation delivery was skipped, but your
-                  enquiry was successfully stored for {libraryName} staff review.
+                  enquiry was successfully stored for {libraryName} staff
+                  review.
                 </p>
               )}
             </div>

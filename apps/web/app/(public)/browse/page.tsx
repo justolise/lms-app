@@ -66,7 +66,7 @@ function BookCard({ book }: { book: PublicBook }) {
         {/* Cover placeholder */}
         <div className="aspect-2/3 w-full max-w-30 mx-auto rounded-md bg-forest-50 dark:bg-forest-900/40 border border-border flex items-center justify-center overflow-hidden shrink-0">
           {book.coverUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
+            // biome-ignore lint/performance/noImgElement: External dynamic book cover URL
             <img
               src={book.coverUrl}
               alt={book.title}

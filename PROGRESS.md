@@ -104,9 +104,9 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 | HLD-1  |       P0 |  done  | FIFO holds on checked-out titles                          | Hold placement on titles with zero available copies; duplicate check; pickup window resolution; verified in HoldsService and CirculationService checkout integration; unit tests. |
 | HLD-2  |       P0 |  done  | Ready notification and configurable expiry                | Return desk fulfillment (`fulfillNextHoldOnReturn`) reserving copy to `RESERVED` and setting pickup countdown; verification on checkout; unit tests. |
 | HLD-3  |       P0 |  done  | Hold cancellation and queue management                    | Hold cancellation (patron own or staff any) with copy release if ready; queue re-indexing; full staff queue table and patron My Holds UI. |
-| FIN-1  |       P0 |  todo  | Configurable fine rules                                   | Not implemented.                                                                                                           |
-| FIN-2  |       P0 |  todo  | Fine ledger, payment and waiver                           | Not implemented.                                                                                                           |
-| FIN-3  |       P1 |  todo  | Fine receipts                                             | Not implemented; remains P1.                                                                                               |
+| FIN-1  |       P0 |  done  | Configurable fine rules                                   | Daily fine, grace days, and ceiling cap per loan policy; boundary conditions verified in unit tests (zero, exactly grace, grace+1, exactly cap, exceeding cap, unlimited). |
+| FIN-2  |       P0 |  done  | Fine ledger, payment and waiver                           | Append-only `fine_entries` with database mutation trigger prevention; automatic charge posting on overdue return; payment recording (`POST /api/fines/payments`); waiver recording (`POST /api/fines/waivers`) with mandatory audit reason; checkout soft blocks (CIR-5); interactive desk at `/fines`. |
+| FIN-3  |       P1 |  done  | Fine receipts                                             | Tamper-proof receipt numbering (`RCP-YYYYMMDD-XXXX`), receipt modal, and printable receipt layout at `/fines`. |
 | MEM-1  |       P0 | doing  | Member profiles                                           | Profile/group/identification schema foundations exist; member creation implemented in AUTH-4; update/history remain.       |
 | MEM-2  |       P0 |  done  | Member types and borrowing rules                          | `member_types` and `loan_policies` matrix schema; `MemberTypesService` & `MemberTypesController`; full UI at `/member-types`; unit tests. |
 | PUB-CAT|       P0 |  done  | Tenant-Specific Public Catalogue                          | Isolated public catalogue at `/libraries/:slug/catalogue` and detail `/libraries/:slug/catalogue/:bookId`; search by title/author/ISBN; format & availability filters; responsive pagination; approved 2-state availability (`Available`, `On loan`, or hidden); zero patron/copy privacy leakage. |
@@ -134,7 +134,8 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 Current verification run completed on **22 November 2026**:
 
 - **pnpm typecheck**: Passed across all workspace projects (0 TypeScript errors).
-- **pnpm test (Unit Tests)**: 23 test files, 228 tests passed, 0 failed.
+- **pnpm -r --if-present lint**: Passed across all workspace projects (0 errors in Biome and Oxlint).
+- **pnpm test (Unit Tests)**: 24 test files, 244 tests passed, 0 failed.
 - **Controller E2E Tests**: 2 test files, 27 tests passed, 0 failed (`test/auth.controller.e2e-spec.ts`, `test/users.controller.e2e-spec.ts`).
 - **Comprehensive Security Audit & Hardening**:
   - Critical concurrency hardening in checkout/return/renew with pessimistic `.for('update')`, copy status optimistic guards, and `0010_circulation_concurrency.sql` partial unique index `loans_tenant_copy_active_unique`.
@@ -147,7 +148,7 @@ Current verification run completed on **22 November 2026**:
   - Centralized NestJS `HttpExceptionFilter` preventing internal error stack leaks.
   - Supply-chain remediation: pnpm overrides applied; `pnpm audit` reports 0 vulnerabilities.
   - Comprehensive documentation suite delivered across 15 documents in `docs/security/`.
-- **Phase 2 Catalogue & Holds & Public Enquiries**: `CategoriesModule`, `CatalogueModule`, `CirculationModule`, `HoldsModule`, and `PublicModule` active; 57 unit tests across catalogue, copies, circulation, holds, and public services; 11 migration files (`0000` through `0011_slice_6_membership_enquiries.sql`) with idempotent RLS, indexes, FIFO queue ordering, and `app.tenant_id` context enforcement.
+- **Phase 2 Circulation, Holds, Fines & Public Module**: `CategoriesModule`, `CatalogueModule`, `CirculationModule`, `HoldsModule`, `FinesModule`, and `PublicModule` active; 71 unit tests across circulation, holds, fines, catalogue, and public modules; 12 migration files (`0000` through `0012_fine_ledger.sql`) with idempotent RLS, indexes, FIFO queue ordering, append-only trigger enforcement, and `app.tenant_id` context enforcement.
 - **Multi-Tenant SaaS Hardening**: Removed all hardcoded library codes/fallbacks from public catalogue and enquiry pages; dynamic tenant branch selection on `/request-membership` and `/libraries/:slug/request-membership`; relative `/api/public/...` routing through Next.js proxy.
 - **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 23 prerendered routes).
 

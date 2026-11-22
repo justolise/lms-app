@@ -227,7 +227,7 @@ function TenantPublicBookDetailContent() {
             <div className="md:col-span-1 flex flex-col items-center">
               <div className="aspect-2/3 w-full max-w-60 rounded-xl bg-forest-50 dark:bg-forest-900/30 border border-border shadow-sm flex items-center justify-center overflow-hidden">
                 {book.coverUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
+                  // biome-ignore lint/performance/noImgElement: External dynamic book cover URL
                   <img
                     src={book.coverUrl}
                     alt={book.title}

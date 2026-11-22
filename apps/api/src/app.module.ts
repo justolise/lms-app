@@ -5,6 +5,7 @@ import { AuthModule } from "./auth/auth.module.js";
 import { CatalogueModule } from "./catalogue/catalogue.module.js";
 import { CategoriesModule } from "./categories/categories.module.js";
 import { CirculationModule } from "./circulation/circulation.module.js";
+import { FinesModule } from "./fines/fines.module.js";
 import { HoldsModule } from "./holds/holds.module.js";
 import { MemberTypesModule } from "./member-types/member-types.module.js";
 import { MembersModule } from "./members/members.module.js";
@@ -22,6 +23,7 @@ import { UsersModule } from "./users/users.module.js";
 		CatalogueModule,
 		CategoriesModule,
 		CirculationModule,
+		FinesModule,
 		HoldsModule,
 		PublicModule,
 	],

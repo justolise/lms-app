@@ -224,6 +224,7 @@ describe('CirculationService.checkout', () => {
         [mockMember],         // member lookup (uses leftJoin)
         [{ format: 'BOOK' }], // catalogue item
         [mockPolicy],         // loan policy
+        [{ charges: 0, credits: 0 }], // fine balance check (CIR-5)
         [{ activeCount: 0 }], // active loans count
       ],
       update: [mockCopy],
@@ -292,6 +293,7 @@ describe('CirculationService.checkout', () => {
         [{ ...mockMember, status: 'SUSPENDED' }],
         [{ format: 'BOOK' }],
         [mockPolicy],
+        [{ charges: 0, credits: 0 }],
         [{ activeCount: 0 }],
       ],
     });
@@ -314,6 +316,7 @@ describe('CirculationService.checkout', () => {
         [{ ...mockMember, status: 'SUSPENDED' }],
         [{ format: 'BOOK' }],
         [mockPolicy],
+        [{ charges: 0, credits: 0 }],
         [{ activeCount: 0 }],
       ],
       update: [mockCopy],
@@ -325,6 +328,51 @@ describe('CirculationService.checkout', () => {
       barcode: 'BC001',
       memberIdentifier: USER_ID,
       overrideReason: 'Approved by head librarian',
+    });
+
+    expect(result).toMatchObject({ status: 'ACTIVE' });
+  });
+
+  it('throws ForbiddenException when member fine balance exceeds policy ceiling without override', async () => {
+    const db = makeDb({
+      selects: [
+        [mockCopy],
+        [mockMember],
+        [{ format: 'BOOK' }],
+        [mockPolicy], // maxFineMinorUnits: 50000
+        [{ charges: 60000, credits: 0 }], // fine balance 60000 > 50000 ceiling
+        [{ activeCount: 0 }],
+      ],
+    });
+
+    const svc = new CirculationService(db);
+    await expect(
+      svc.checkout(TENANT, ACTOR, 'LIBRARIAN', {
+        barcode: 'BC001',
+        memberIdentifier: USER_ID,
+      }),
+    ).rejects.toThrow(ForbiddenException);
+  });
+
+  it('succeeds when member fine balance exceeds threshold but LIBRARIAN provides override reason', async () => {
+    const db = makeDb({
+      selects: [
+        [mockCopy],
+        [mockMember],
+        [{ format: 'BOOK' }],
+        [mockPolicy],
+        [{ charges: 60000, credits: 0 }],
+        [{ activeCount: 0 }],
+      ],
+      update: [mockCopy],
+      insert: [{ ...mockLoan, overrideReason: 'Fee payment plan agreed' }],
+    });
+
+    const svc = new CirculationService(db);
+    const result = await svc.checkout(TENANT, ACTOR, 'LIBRARIAN', {
+      barcode: 'BC001',
+      memberIdentifier: USER_ID,
+      overrideReason: 'Fee payment plan agreed',
     });
 
     expect(result).toMatchObject({ status: 'ACTIVE' });
@@ -358,6 +406,7 @@ describe('CirculationService.checkout', () => {
         [mockMember],
         [{ format: 'BOOK' }],
         [mockPolicy],
+        [{ charges: 0, credits: 0 }],
         [{ activeCount: 5 }], // at the limit
       ],
     });
