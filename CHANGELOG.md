@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0](https://github.com/justolise/lms-app/compare/v0.5.0...v0.6.0) (2026-11-22)
+
+
+### Features
+
+* **holds:** implement holds & reservations (HLD-1, HLD-2, HLD-3) with checkout/return integration and UI ([67a9b74](https://github.com/justolise/lms-app/commit/67a9b74cd0788b4e8fe87d0a3f7c4146da5efe87))
+* **web:** complete frontend integration for all backend features (members, sessions, loans ledger, catalogue edit/archive) ([2fa0f70](https://github.com/justolise/lms-app/commit/2fa0f70463c92f0aa8414c66c09e189ec34d0871))
+* **web:** modular frontend architecture with Tailwind v4 tokens, RBAC, toasts, and error boundaries ([b9b8198](https://github.com/justolise/lms-app/commit/b9b819833c3451ff71b00015aec27b512bd561c5))
+
+
+### Bug Fixes
+
+* **auth,web:** scope selection cookie to / and remove nested form in circulation page ([ecd940b](https://github.com/justolise/lms-app/commit/ecd940b9cbfd88fcf276eb95ed715fdece41fda0))
+
 ## [0.5.0](https://github.com/justolise/lms-app/compare/v0.4.0...v0.5.0) (2026-11-22)
 
 
