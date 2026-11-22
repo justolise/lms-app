@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.11.0](https://github.com/justolise/lms-app/compare/v0.10.0...v0.11.0) (2026-11-22)
+
+
+### Features
+
+* **admin:** implement ADM-1 library profile, relocate theme to user settings, and sticky sidebar/topbar layout ([a027c19](https://github.com/justolise/lms-app/commit/a027c19a509059834cda04188474a7ca723ce33f))
+* **auth,dashboard:** add password visibility toggle, matching bar, complexity meter & role-aware patron dashboard ([805faba](https://github.com/justolise/lms-app/commit/805faba431177f5a9786a3837c9bac646b07a342))
+* **catalogue:** add card/grid view and list view with visible book covers ([0b33403](https://github.com/justolise/lms-app/commit/0b33403fd43900ab211e602804b0afc17b6e1415))
+* **catalogue:** auto-retrieve book covers from Open Library via ISBN ([371f027](https://github.com/justolise/lms-app/commit/371f0272869935f9136c035cdc8a52e6d2196d5c))
+* **catalogue:** implement INV-2 lost, damaged, and withdrawn copy tracking with reasons ([f60d9fa](https://github.com/justolise/lms-app/commit/f60d9fab41df9193241c2a7e6fd81d15dabc8d08))
+* **ui:** add dedicated library info views and dashboard quick-info badges ([630b1a1](https://github.com/justolise/lms-app/commit/630b1a11e01a932b349922a81243b9d6fd9c2198))
+* **workspace:** show library name and branding for logged-in users ([d8f1899](https://github.com/justolise/lms-app/commit/d8f189990a774d483ca74e7e7b553c695ef95d43))
+
+
+### Bug Fixes
+
+* **settings:** resolve build errors, apply migration, refine shell layout ([8905b06](https://github.com/justolise/lms-app/commit/8905b066779031da948cd164b4ebf35a9c33a6d0))
+
 ## [0.10.0](https://github.com/justolise/lms-app/compare/v0.9.0...v0.10.0) (2026-11-22)
 
 
