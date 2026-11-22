@@ -72,6 +72,14 @@ function AvailabilityBadge({
 }
 
 function BookCard({ book, slug }: { book: PublicBook; slug: string }) {
+  const [imgError, setImgError] = useState(false);
+  const cleanIsbn = book.isbn13?.replace(/[-\s]/g, "").trim();
+  const effectiveCoverUrl =
+    book.coverUrl ||
+    (cleanIsbn
+      ? `https://covers.openlibrary.org/b/isbn/${cleanIsbn}-L.jpg?default=false`
+      : null);
+
   return (
     <Link
       href={`/libraries/${slug}/catalogue/${book.id}`}
@@ -81,12 +89,13 @@ function BookCard({ book, slug }: { book: PublicBook; slug: string }) {
         <CardContent className="flex flex-col h-full p-4 gap-3">
           {/* Cover placeholder / Image */}
           <div className="aspect-2/3 w-full max-w-30 mx-auto rounded-md bg-forest-50 dark:bg-forest-900/40 border border-border flex items-center justify-center overflow-hidden shrink-0">
-            {book.coverUrl ? (
+            {effectiveCoverUrl && !imgError ? (
               // biome-ignore lint/performance/noImgElement: External dynamic book cover URL
               <img
-                src={book.coverUrl}
+                src={effectiveCoverUrl}
                 alt={book.title}
                 className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-200"
+                onError={() => setImgError(true)}
               />
             ) : (
               <svg

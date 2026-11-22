@@ -23,16 +23,26 @@ interface CatalogueTableProps {
 
 function BookCoverThumbnail({
   coverUrl,
+  isbn,
   title,
   size = "md",
 }: {
   coverUrl?: string | null;
+  isbn?: string | null;
   title: string;
   size?: "md" | "lg";
 }) {
   const [error, setError] = useState(false);
 
-  if (coverUrl && !error) {
+  // Fallback to Open Library Covers API if no coverUrl was explicitly entered
+  const cleanIsbn = isbn?.replace(/[-\s]/g, "").trim();
+  const effectiveCoverUrl =
+    coverUrl ||
+    (cleanIsbn
+      ? `https://covers.openlibrary.org/b/isbn/${cleanIsbn}-${size === "lg" ? "L" : "M"}.jpg?default=false`
+      : null);
+
+  if (effectiveCoverUrl && !error) {
     return (
       <div
         className={cn(
@@ -42,7 +52,7 @@ function BookCoverThumbnail({
       >
         {/* biome-ignore lint/performance/noImgElement: External dynamic book cover URL */}
         <img
-          src={coverUrl}
+          src={effectiveCoverUrl}
           alt={title}
           className="w-full h-full object-cover"
           onError={() => setError(true)}
@@ -141,6 +151,7 @@ export function CatalogueTable({
               <div className="relative p-3 bg-surface-raised flex items-center justify-center border-b border-border">
                 <BookCoverThumbnail
                   coverUrl={item.coverUrl}
+                  isbn={item.isbn13 || item.isbn10}
                   title={item.title}
                   size="lg"
                 />
@@ -294,6 +305,7 @@ export function CatalogueTable({
                     <div className="flex items-center gap-3">
                       <BookCoverThumbnail
                         coverUrl={item.coverUrl}
+                        isbn={item.isbn13 || item.isbn10}
                         title={item.title}
                         size="md"
                       />

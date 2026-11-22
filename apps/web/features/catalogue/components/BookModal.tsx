@@ -114,7 +114,11 @@ export function BookModal({
       if (data.publisher) setPublisher(data.publisher);
       if (data.publishedYear) setPublishedYear(Number(data.publishedYear));
       if (data.description) setDescription(data.description);
-      if (data.coverUrl) setCoverUrl(data.coverUrl);
+      if (data.coverUrl) {
+        setCoverUrl(data.coverUrl);
+      } else if (cleanIsbn) {
+        setCoverUrl(`https://covers.openlibrary.org/b/isbn/${cleanIsbn}-L.jpg`);
+      }
       if (data.isbn13) setIsbn13(data.isbn13);
       if (data.isbn10) setIsbn10(data.isbn10);
       setLookupMessage(`Auto-filled metadata for "${data.title}" via ISBN.`);
@@ -336,6 +340,58 @@ export function BookModal({
                 onChange={(e) => setIsbn13(e.target.value)}
                 placeholder="9780132350884"
               />
+            </div>
+
+            <div className="sm:col-span-2 space-y-1.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-medium text-foreground">
+                  Cover Image URL
+                </label>
+                {(isbn13 || isbn10 || isbnLookupInput) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const isbn = (isbn13 || isbn10 || isbnLookupInput)
+                        .replace(/[-\s]/g, "")
+                        .trim();
+                      if (isbn) {
+                        setCoverUrl(
+                          `https://covers.openlibrary.org/b/isbn/${isbn}-L.jpg`,
+                        );
+                      }
+                    }}
+                    className="text-xs text-primary hover:underline font-medium inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>🖼️</span>
+                    <span>Fetch from Open Library</span>
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-3 items-center">
+                <Input
+                  value={coverUrl}
+                  onChange={(e) => setCoverUrl(e.target.value)}
+                  placeholder="https://covers.openlibrary.org/... or leave empty to auto-load via ISBN"
+                  className="flex-1"
+                />
+                {coverUrl && (
+                  <div className="h-10 w-8 shrink-0 rounded overflow-hidden border border-border bg-muted">
+                    {/* biome-ignore lint/performance/noImgElement: User preview cover */}
+                    <img
+                      src={coverUrl}
+                      alt="Preview"
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                If left blank, the system automatically retrieves the cover from
+                Open Library using the book's ISBN.
+              </p>
             </div>
           </div>
 
