@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -9,12 +10,12 @@ import { and, eq } from 'drizzle-orm';
 import { DatabaseService } from '../database/database.service.js';
 import { RedisService } from '../redis/redis.service.js';
 import { copies, catalogueItems, auditLogs } from '../database/schema.js';
-import { CreateCopyDto, UpdateCopyDto } from './dto/copy.dto.js';
+import { CreateCopyDto, UpdateCopyDto, UpdateCopyStatusDto } from './dto/copy.dto.js';
 
-// Allowed copy status transitions (CAT-4).
+// Allowed copy status transitions (CAT-4, INV-2).
 // Key = current status; value = set of allowed next statuses.
 const ALLOWED_TRANSITIONS: Record<string, Set<string>> = {
-  AVAILABLE:  new Set(['ON_LOAN', 'RESERVED', 'DAMAGED', 'WITHDRAWN']),
+  AVAILABLE:  new Set(['ON_LOAN', 'RESERVED', 'LOST', 'DAMAGED', 'WITHDRAWN']),
   ON_LOAN:    new Set(['AVAILABLE', 'LOST', 'DAMAGED']),
   RESERVED:   new Set(['ON_LOAN', 'AVAILABLE']),
   IN_TRANSIT: new Set(['AVAILABLE']),
@@ -199,6 +200,7 @@ export class CopiesService {
     actorId: string,
     itemId: string,
     copyId: string,
+    reason?: string,
   ) {
     const result = await this.database.withTenant(tenantId, async (tx) => {
       const existing = await tx
@@ -224,9 +226,18 @@ export class CopiesService {
         );
       }
 
+      const withdrawReason = reason?.trim() || 'Withdrawn from circulation';
+      const existingNotes = existing[0].notes ? `${existing[0].notes}\n` : '';
+      const timestamp = new Date().toISOString().split('T')[0];
+      const updatedNotes = `${existingNotes}[${timestamp}] WITHDRAWN: ${withdrawReason}`;
+
       const [row] = await tx
         .update(copies)
-        .set({ status: 'WITHDRAWN', updatedAt: new Date() })
+        .set({
+          status: 'WITHDRAWN',
+          notes: updatedNotes,
+          updatedAt: new Date(),
+        })
         .where(
           and(
             eq(copies.tenantId, tenantId),
@@ -241,7 +252,99 @@ export class CopiesService {
         action: 'copy.withdrawn',
         entityType: 'copy',
         entityId: copyId,
-        metadata: { previousStatus: current },
+        metadata: {
+          previousStatus: current,
+          newStatus: 'WITHDRAWN',
+          reason: withdrawReason,
+          barcode: existing[0].barcode,
+        },
+      });
+
+      return row;
+    });
+
+    await this.invalidateCache(tenantId);
+    return result;
+  }
+
+  /**
+   * INV-2: Update copy status (LOST, DAMAGED, WITHDRAWN, or restored to AVAILABLE)
+   * with mandatory audit reason logging.
+   */
+  async updateStatus(
+    tenantId: string,
+    actorId: string,
+    itemId: string,
+    copyId: string,
+    dto: UpdateCopyStatusDto,
+  ) {
+    const reason = dto.reason.trim();
+    if (!reason) {
+      throw new BadRequestException(
+        'A reason is mandatory when changing copy status',
+      );
+    }
+
+    const result = await this.database.withTenant(tenantId, async (tx) => {
+      const existing = await tx
+        .select()
+        .from(copies)
+        .where(
+          and(
+            eq(copies.tenantId, tenantId),
+            eq(copies.id, copyId),
+            eq(copies.catalogueItemId, itemId),
+          ),
+        )
+        .limit(1);
+
+      if (existing.length === 0) throw new NotFoundException('Copy not found');
+
+      const current = existing[0].status;
+      const targetStatus = dto.status;
+
+      if (current === targetStatus) {
+        return existing[0];
+      }
+
+      const allowed = ALLOWED_TRANSITIONS[current];
+      if (!allowed?.has(targetStatus)) {
+        throw new ConflictException(
+          `Cannot transition copy from "${current}" to "${targetStatus}"`,
+        );
+      }
+
+      const existingNotes = existing[0].notes ? `${existing[0].notes}\n` : '';
+      const timestamp = new Date().toISOString().split('T')[0];
+      const updatedNotes = `${existingNotes}[${timestamp}] ${targetStatus}: ${reason}`;
+
+      const [row] = await tx
+        .update(copies)
+        .set({
+          status: targetStatus as typeof copies.$inferSelect['status'],
+          notes: updatedNotes,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(copies.tenantId, tenantId),
+            eq(copies.id, copyId),
+          ),
+        )
+        .returning();
+
+      await tx.insert(auditLogs).values({
+        tenantId,
+        actorId,
+        action: `copy.${targetStatus.toLowerCase()}`,
+        entityType: 'copy',
+        entityId: copyId,
+        metadata: {
+          previousStatus: current,
+          newStatus: targetStatus,
+          reason,
+          barcode: existing[0].barcode,
+        },
       });
 
       return row;

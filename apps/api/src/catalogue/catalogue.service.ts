@@ -218,6 +218,7 @@ export class CatalogueService {
           status: copies.status,
           shelfLocation: copies.shelfLocation,
           acquiredAt: copies.acquiredAt,
+          notes: copies.notes,
         })
         .from(copies)
         .where(

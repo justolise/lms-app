@@ -26,6 +26,16 @@ export const COPY_CONDITIONS: CopyCondition[] = [
   'DAMAGED',
 ];
 
+export const COPY_STATUSES: CopyStatus[] = [
+  'AVAILABLE',
+  'ON_LOAN',
+  'RESERVED',
+  'IN_TRANSIT',
+  'LOST',
+  'DAMAGED',
+  'WITHDRAWN',
+];
+
 export class CreateCopyDto {
   @IsString()
   @MinLength(1)
@@ -75,4 +85,25 @@ export class CopyIdParamDto {
 
   @IsUUID()
   copyId!: string;
+}
+
+// ─── INV-2: Lost, Damaged, and Withdrawn Copy Status Update DTOs ──────────────
+
+export class UpdateCopyStatusDto {
+  @IsEnum(COPY_STATUSES, {
+    message: 'Status must be one of: AVAILABLE, ON_LOAN, RESERVED, IN_TRANSIT, LOST, DAMAGED, WITHDRAWN',
+  })
+  status!: CopyStatus;
+
+  @IsString()
+  @MinLength(3, { message: 'Reason must be at least 3 characters long' })
+  @MaxLength(500, { message: 'Reason must not exceed 500 characters' })
+  reason!: string;
+}
+
+export class WithdrawCopyQueryDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  reason?: string;
 }

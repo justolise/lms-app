@@ -25,7 +25,13 @@ import {
   SearchCatalogueDto,
   UpdateCatalogueItemDto,
 } from './dto/catalogue-item.dto.js';
-import { CopyIdParamDto, CreateCopyDto, UpdateCopyDto } from './dto/copy.dto.js';
+import {
+  CopyIdParamDto,
+  CreateCopyDto,
+  UpdateCopyDto,
+  UpdateCopyStatusDto,
+  WithdrawCopyQueryDto,
+} from './dto/copy.dto.js';
 
 @Controller(['catalogue', 'api/catalogue'])
 @UseGuards(AccessTokenGuard, RolesGuard)
@@ -155,10 +161,27 @@ export class CatalogueController {
     );
   }
 
+  @Patch(':itemId/copies/:copyId/status')
+  @Roles('ADMIN', 'LIBRARIAN')
+  async updateCopyStatus(
+    @Param() params: CopyIdParamDto,
+    @Body() dto: UpdateCopyStatusDto,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.copiesService.updateStatus(
+      req.user.tenantId,
+      req.user.userId,
+      params.itemId,
+      params.copyId,
+      dto,
+    );
+  }
+
   @Delete(':itemId/copies/:copyId')
   @Roles('ADMIN')
   async withdrawCopy(
     @Param() params: CopyIdParamDto,
+    @Query() query: WithdrawCopyQueryDto,
     @Req() req: AuthenticatedRequest,
   ) {
     return this.copiesService.withdraw(
@@ -166,6 +189,7 @@ export class CatalogueController {
       req.user.userId,
       params.itemId,
       params.copyId,
+      query.reason,
     );
   }
 }

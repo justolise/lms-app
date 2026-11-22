@@ -71,18 +71,27 @@ export const catalogueService = {
     catalogueItemId: string,
     copyId: string,
     status: string,
+    reason: string,
   ): Promise<CopyItem> {
     return apiClient.patch<CopyItem>(
-      `/api/catalogue/${catalogueItemId}/copies/${copyId}`,
+      `/api/catalogue/${catalogueItemId}/copies/${copyId}/status`,
       {
         status,
+        reason,
       },
     );
   },
 
-  async withdrawCopy(catalogueItemId: string, copyId: string): Promise<void> {
+  async withdrawCopy(
+    catalogueItemId: string,
+    copyId: string,
+    reason?: string,
+  ): Promise<void> {
+    const query = reason?.trim()
+      ? `?reason=${encodeURIComponent(reason.trim())}`
+      : "";
     await apiClient.delete(
-      `/api/catalogue/${catalogueItemId}/copies/${copyId}`,
+      `/api/catalogue/${catalogueItemId}/copies/${copyId}${query}`,
     );
   },
 };

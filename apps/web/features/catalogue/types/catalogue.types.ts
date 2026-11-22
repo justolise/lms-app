@@ -8,8 +8,8 @@ export type CopyCondition = "NEW" | "GOOD" | "FAIR" | "POOR";
 export type CopyStatus =
   | "AVAILABLE"
   | "ON_LOAN"
-  | "ON_HOLD"
-  | "MAINTENANCE"
+  | "RESERVED"
+  | "IN_TRANSIT"
   | "LOST"
   | "DAMAGED"
   | "WITHDRAWN";
@@ -21,6 +21,7 @@ export interface CopyItem {
   status: CopyStatus;
   shelfLocation: string | null;
   acquiredAt: string | null;
+  notes?: string | null;
 }
 
 export interface CatalogueItem {
@@ -104,8 +105,8 @@ export const COPY_CONDITIONS: CopyCondition[] = ["NEW", "GOOD", "FAIR", "POOR"];
 export const COPY_STATUSES: CopyStatus[] = [
   "AVAILABLE",
   "ON_LOAN",
-  "ON_HOLD",
-  "MAINTENANCE",
+  "RESERVED",
+  "IN_TRANSIT",
   "LOST",
   "DAMAGED",
   "WITHDRAWN",
