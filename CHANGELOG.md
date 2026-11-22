@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/justolise/lms-app/compare/v0.6.0...v0.7.0) (2026-11-22)
+
+
+### Features
+
+* **ui:** complete UI architecture, forest theme, route groups, and public module ([a259826](https://github.com/justolise/lms-app/commit/a2598268e53a04d67f31ca8e29a41eb57a93289c))
+
 ## [0.6.0](https://github.com/justolise/lms-app/compare/v0.5.0...v0.6.0) (2026-11-22)
 
 
