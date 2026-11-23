@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.12.0](https://github.com/justolise/lms-app/compare/v0.11.0...v0.12.0) (2026-11-23)
+
+
+### Features
+
+* **auth:** unified smart email/phone login with auto-detection ([395f33d](https://github.com/justolise/lms-app/commit/395f33d88fef4803e61b985f288570bcaf0078f1))
+* **notifications:** implement NOT-1 email and NOT-2 SMS notifications ([8ef95f8](https://github.com/justolise/lms-app/commit/8ef95f8e67e6eee5b352a0785c655ade38eee7a2))
+
+
+### Documentation
+
+* update PROGRESS.md with unified login auto-detection and 286 tests ([7aa7f51](https://github.com/justolise/lms-app/commit/7aa7f512cc972096600dd93a9d4d92127da79084))
+
 ## [0.11.0](https://github.com/justolise/lms-app/compare/v0.10.0...v0.11.0) (2026-11-22)
 
 
