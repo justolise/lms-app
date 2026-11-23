@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 import type {
   LibraryProfile,
   UpdateLibraryProfileInput,
@@ -6,12 +7,12 @@ import type {
 
 export const adminService = {
   async getProfile(): Promise<LibraryProfile> {
-    return apiClient.get<LibraryProfile>("/api/admin/profile");
+    return apiClient.get<LibraryProfile>(ENDPOINTS.admin.profile);
   },
 
   async updateProfile(
     payload: UpdateLibraryProfileInput,
   ): Promise<LibraryProfile> {
-    return apiClient.patch<LibraryProfile>("/api/admin/profile", payload);
+    return apiClient.patch<LibraryProfile>(ENDPOINTS.admin.profile, payload);
   },
 };

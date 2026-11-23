@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 import type {
   FineEntry,
   MemberFineBalance,
@@ -20,24 +21,26 @@ export const finesService = {
     if (params?.offset) searchParams.set("offset", String(params.offset));
 
     const qs = searchParams.toString();
-    const url = `/api/fines/ledger${qs ? `?${qs}` : ""}`;
+    const url = qs
+      ? `${ENDPOINTS.fines.ledger}?${qs}`
+      : ENDPOINTS.fines.ledger;
     return apiClient.get<FineEntry[]>(url);
   },
 
   async getMemberBalance(userId: string): Promise<MemberFineBalance> {
-    return apiClient.get<MemberFineBalance>(`/api/fines/balance/${userId}`);
+    return apiClient.get<MemberFineBalance>(ENDPOINTS.fines.balance(userId));
   },
 
   async recordPayment(
     payload: RecordPaymentPayload,
   ): Promise<FineEntry & { receiptNumber: string }> {
     return apiClient.post<FineEntry & { receiptNumber: string }>(
-      "/api/fines/payments",
+      ENDPOINTS.fines.payments,
       payload,
     );
   },
 
   async waiveFine(payload: WaiveFinePayload): Promise<FineEntry> {
-    return apiClient.post<FineEntry>("/api/fines/waivers", payload);
+    return apiClient.post<FineEntry>(ENDPOINTS.fines.waivers, payload);
   },
 };

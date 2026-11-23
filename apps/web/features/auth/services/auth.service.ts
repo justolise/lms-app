@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 import type {
   IdentifierType,
   LoginResponse,
@@ -26,7 +27,7 @@ export const authService = {
       type = identifier.includes("@") ? "EMAIL" : "PHONE";
     }
 
-    return apiClient.post<LoginResponse>("/api/auth/login", {
+    return apiClient.post<LoginResponse>(ENDPOINTS.auth.login, {
       type,
       identifier: identifier.trim(),
       password,
@@ -34,7 +35,7 @@ export const authService = {
   },
 
   selectMembership(tenantId: string) {
-    return apiClient.post<LoginResponse>("/api/auth/select-membership", {
+    return apiClient.post<LoginResponse>(ENDPOINTS.auth.selectMembership, {
       tenantId,
     });
   },
@@ -51,7 +52,7 @@ export const authService = {
       type = identifier.includes("@") ? "EMAIL" : "PHONE";
     }
 
-    return apiClient.post<PasswordResetResponse>("/api/auth/forgot-password", {
+    return apiClient.post<PasswordResetResponse>(ENDPOINTS.auth.forgotPassword, {
       type,
       identifier: identifier.trim(),
     });
@@ -64,7 +65,7 @@ export const authService = {
     maybeType?: IdentifierType,
   ) {
     const type = maybeType ?? (identifier.includes("@") ? "EMAIL" : "PHONE");
-    return apiClient.post<PasswordResetResponse>("/api/auth/reset-password", {
+    return apiClient.post<PasswordResetResponse>(ENDPOINTS.auth.resetPassword, {
       type,
       identifier: identifier.trim(),
       code: otp.trim(),
@@ -74,7 +75,7 @@ export const authService = {
 
   changePassword(newPassword: string, currentPassword?: string) {
     return apiClient.post<{ success: boolean; message: string }>(
-      "/api/auth/change-password",
+      ENDPOINTS.auth.changePassword,
       {
         newPassword,
         ...(currentPassword ? { currentPassword } : {}),
@@ -83,13 +84,13 @@ export const authService = {
   },
 
   async listSessions(): Promise<UserSession[]> {
-    const data = await apiClient.get<UserSession[]>("/api/auth/sessions");
+    const data = await apiClient.get<UserSession[]>(ENDPOINTS.auth.sessions);
     return Array.isArray(data) ? data : [];
   },
 
   async revokeSession(sessionId: string): Promise<{ revoked: boolean }> {
     return apiClient.delete<{ revoked: boolean }>(
-      `/api/auth/sessions/${sessionId}`,
+      ENDPOINTS.auth.session(sessionId),
     );
   },
 };

@@ -1,4 +1,5 @@
 import { ApiError } from "./errors";
+import { ENDPOINTS } from "./endpoints";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -71,7 +72,7 @@ class ApiClient {
         if (!this.refreshPromise) {
           this.refreshPromise = (async () => {
             try {
-              const refreshRes = await fetch("/api/auth/refresh", {
+              const refreshRes = await fetch(ENDPOINTS.auth.refresh, {
                 method: "POST",
                 credentials: "include",
               });

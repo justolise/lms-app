@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { Alert } from "@/components/feedback/alert";
 import { Button } from "@/components/ui/button";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 import {
   Card,
   CardContent,
@@ -47,14 +48,14 @@ function MembershipRequestForm() {
     async function loadData() {
       try {
         // Load libraries list for selector
-        const libsRes = await fetch("/api/public/libraries");
+        const libsRes = await fetch(ENDPOINTS.public.libraries);
         if (libsRes.ok) {
           const allLibs: PublicLibrary[] = await libsRes.json();
           setLibraries(allLibs);
         }
 
         // Load specific library info
-        const res = await fetch(`/api/public/libraries/${slug}`);
+        const res = await fetch(ENDPOINTS.public.library(slug));
         if (res.ok) {
           const data = await res.json();
           setLibrary(data);
@@ -88,7 +89,7 @@ function MembershipRequestForm() {
     setIsSubmitting(true);
     try {
       const res = await fetch(
-        `/api/public/libraries/${slug}/membership-requests`,
+        ENDPOINTS.public.membershipRequest(slug),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

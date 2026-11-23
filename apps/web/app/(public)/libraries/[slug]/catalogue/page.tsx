@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 
 interface PublicBook {
   id: string;
@@ -198,7 +199,7 @@ function TenantPublicCatalogueContent() {
     if (!slug) return;
     async function loadLibrary() {
       try {
-        const res = await fetch(`/api/public/libraries/${slug}`);
+        const res = await fetch(ENDPOINTS.public.library(slug));
         if (res.ok) {
           const data = await res.json();
           setLibrary(data);
@@ -230,7 +231,7 @@ function TenantPublicCatalogueContent() {
         if (availOnly) searchParams.set("availableOnly", "true");
 
         const res = await fetch(
-          `/api/public/libraries/${slug}/catalogue?${searchParams.toString()}`,
+          `${ENDPOINTS.public.catalogue(slug)}?${searchParams.toString()}`,
         );
 
         if (!res.ok) {

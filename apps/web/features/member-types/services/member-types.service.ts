@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 import type {
   CreateMemberTypeInput,
   LoanPolicy,
@@ -10,16 +11,21 @@ import type {
 
 export const memberTypesService = {
   async list(): Promise<MemberTypeSummary[]> {
-    const data = await apiClient.get<MemberTypeSummary[]>("/api/member-types");
+    const data = await apiClient.get<MemberTypeSummary[]>(
+      ENDPOINTS.memberTypes.list,
+    );
     return Array.isArray(data) ? data : [];
   },
 
   async getById(id: string): Promise<MemberTypeDetail> {
-    return apiClient.get<MemberTypeDetail>(`/api/member-types/${id}`);
+    return apiClient.get<MemberTypeDetail>(ENDPOINTS.memberTypes.get(id));
   },
 
   async create(payload: CreateMemberTypeInput): Promise<MemberTypeSummary> {
-    return apiClient.post<MemberTypeSummary>("/api/member-types", payload);
+    return apiClient.post<MemberTypeSummary>(
+      ENDPOINTS.memberTypes.create,
+      payload,
+    );
   },
 
   async update(
@@ -27,7 +33,7 @@ export const memberTypesService = {
     payload: UpdateMemberTypeInput,
   ): Promise<MemberTypeSummary> {
     return apiClient.patch<MemberTypeSummary>(
-      `/api/member-types/${id}`,
+      ENDPOINTS.memberTypes.update(id),
       payload,
     );
   },
@@ -39,12 +45,12 @@ export const memberTypesService = {
   ): Promise<LoanPolicy> {
     if (policyId) {
       return apiClient.patch<LoanPolicy>(
-        `/api/member-types/${typeId}/policies/${policyId}`,
+        ENDPOINTS.memberTypes.policy(typeId, policyId),
         payload,
       );
     }
     return apiClient.post<LoanPolicy>(
-      `/api/member-types/${typeId}/policies`,
+      ENDPOINTS.memberTypes.policies(typeId),
       payload,
     );
   },

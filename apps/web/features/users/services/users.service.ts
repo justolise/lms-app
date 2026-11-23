@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 import type {
   DirectoryResponse,
   InviteLibrarianInput,
@@ -21,31 +22,33 @@ export const usersService = {
       params.set("search", search.trim());
     }
 
-    return apiClient.get<DirectoryResponse>(`/api/users?${params.toString()}`);
+    return apiClient.get<DirectoryResponse>(
+      `${ENDPOINTS.users.list}?${params.toString()}`,
+    );
   },
 
   async inviteLibrarian(
     payload: InviteLibrarianInput,
   ): Promise<InviteLibrarianResult> {
     return apiClient.post<InviteLibrarianResult>(
-      "/api/users/librarians",
+      ENDPOINTS.users.librarians,
       payload,
     );
   },
 
   async promoteUser(userId: string): Promise<void> {
-    await apiClient.post(`/api/users/${userId}/promote`, {});
+    await apiClient.post(ENDPOINTS.users.promote(userId), {});
   },
 
   async getProfile(): Promise<UserProfile> {
-    return apiClient.get<UserProfile>("/api/profile");
+    return apiClient.get<UserProfile>(ENDPOINTS.profile.get);
   },
 
   async updateProfile(payload: UpdateProfileInput): Promise<UserProfile> {
-    return apiClient.patch<UserProfile>("/api/profile", payload);
+    return apiClient.patch<UserProfile>(ENDPOINTS.profile.update, payload);
   },
 
   async deactivateAccount(): Promise<void> {
-    await apiClient.delete("/api/profile");
+    await apiClient.delete(ENDPOINTS.profile.delete);
   },
 };

@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 import type {
   Category,
   CreateCategoryInput,
@@ -7,19 +8,19 @@ import type {
 
 export const categoriesService = {
   async list(): Promise<Category[]> {
-    const data = await apiClient.get<Category[]>("/api/categories");
+    const data = await apiClient.get<Category[]>(ENDPOINTS.categories.list);
     return Array.isArray(data) ? data : [];
   },
 
   async create(payload: CreateCategoryInput): Promise<Category> {
-    return apiClient.post<Category>("/api/categories", payload);
+    return apiClient.post<Category>(ENDPOINTS.categories.create, payload);
   },
 
   async update(id: string, payload: UpdateCategoryInput): Promise<Category> {
-    return apiClient.patch<Category>(`/api/categories/${id}`, payload);
+    return apiClient.patch<Category>(ENDPOINTS.categories.update(id), payload);
   },
 
   async delete(id: string): Promise<void> {
-    await apiClient.delete(`/api/categories/${id}`);
+    await apiClient.delete(ENDPOINTS.categories.remove(id));
   },
 };
