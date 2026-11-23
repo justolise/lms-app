@@ -63,6 +63,7 @@ export class PublicService {
         .select({
           id: tenants.id,
           name: tenants.name,
+          slug: tenants.slug,
           libraryCode: tenants.libraryCode,
           status: tenants.status,
           logoUrl: tenants.logoUrl,
@@ -76,7 +77,7 @@ export class PublicService {
         })
         .from(tenants)
         .where(
-          sql`lower(${tenants.libraryCode}) = ${cleanSlug} OR lower(replace(${tenants.name}, ' ', '-')) = ${cleanSlug}`,
+          sql`${tenants.slug} = ${cleanSlug} OR lower(${tenants.libraryCode}) = ${cleanSlug} OR lower(replace(${tenants.name}, ' ', '-')) = ${cleanSlug}`,
         )
         .limit(1);
 
@@ -90,7 +91,7 @@ export class PublicService {
         return {
           id: tenant.id,
           name: tenant.name,
-          slug: tenant.libraryCode.toLowerCase(),
+          slug: tenant.slug || tenant.libraryCode.toLowerCase(),
           libraryCode: tenant.libraryCode,
           logoUrl: tenant.logoUrl,
           email: tenant.email,

@@ -21,7 +21,8 @@
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
     "test:integration": "vitest run --config ./vitest.config.e2e.ts test/database.e2e-spec.ts",
     "typecheck": "tsc --noEmit",
-    "seed": "nest build && node --env-file=../../.env dist/database/seed.js"
+    "seed": "nest build && node --env-file=../../.env dist/database/seed.js",
+    "platform:bootstrap": "nest build && node --env-file=../../.env dist/platform/bootstrap/run.js"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",

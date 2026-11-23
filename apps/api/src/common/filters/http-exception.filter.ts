@@ -22,34 +22,39 @@ export class HttpExceptionFilter implements ExceptionFilter {
       ? exception.getStatus()
       : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    let message: string | object = 'Internal server error';
+    const correlationId: string | undefined =
+      (request as any).correlationId ||
+      (request.headers['x-correlation-id'] as string | undefined) ||
+      undefined;
 
-    if (isHttpException) {
-      const res = exception.getResponse();
-      message = typeof res === 'object' ? res : { message: res };
-    } else {
+    // For HttpExceptions, extract the structured response body from NestJS
+    const rawResponse = isHttpException ? exception.getResponse() : undefined;
+
+    if (!isHttpException) {
       // Securely log unexpected runtime exception without leaking stack to client
       const err = exception as Error;
       this.logger.error(
-        `Unhandled exception on ${request.method} ${request.url}: ${err?.message || String(exception)}`,
+        `[corr=${correlationId || 'none'}] Unhandled exception on ${request.method} ${request.url}: ${err?.message || String(exception)}`,
         err?.stack,
       );
     }
 
-    const errorPayload =
-      typeof message === 'object' && message !== null
-        ? {
-            statusCode: status,
-            ...message,
-            timestamp: new Date().toISOString(),
-            path: request.url,
-          }
-        : {
-            statusCode: status,
-            message,
-            timestamp: new Date().toISOString(),
-            path: request.url,
-          };
+    const meta = {
+      statusCode: status,
+      correlationId,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+    };
+
+    let errorPayload: Record<string, unknown>;
+
+    if (typeof rawResponse === 'object' && rawResponse !== null) {
+      errorPayload = { ...meta, ...(rawResponse as Record<string, unknown>) };
+    } else if (typeof rawResponse === 'string') {
+      errorPayload = { ...meta, message: rawResponse };
+    } else {
+      errorPayload = { ...meta, message: 'Internal server error' };
+    }
 
     response.status(status).json(errorPayload);
   }
