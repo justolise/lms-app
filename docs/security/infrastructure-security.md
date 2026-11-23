@@ -10,6 +10,7 @@
 - **Docker Compose Stack (`docker-compose.yml`)**: Coordinates inter-container networking over an isolated bridge network (`lms-network`), with health-check dependency gating (`condition: service_healthy`).
 
 ## Environment Variables & Secret Hygiene
+
 - All environment variables are validated at startup. Missing configuration halts execution before socket binding.
 - Secrets (`ACCESS_TOKEN_SECRET`, `PLATFORM_JWT_SECRET`, `PLATFORM_MFA_ENCRYPTION_KEY`, `IDENTITY_LOOKUP_HMAC_KEY`) are never embedded in container images or committed to Git.
 - Container images in CI/CD are pinned to specific version tags.
