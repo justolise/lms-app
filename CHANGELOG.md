@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.14.0](https://github.com/justolise/lms-app/compare/v0.13.0...v0.14.0) (2026-11-23)
+
+
+### Features
+
+* **INFRA:** Phase 4 — observability, health probes and central API registry ([548481e](https://github.com/justolise/lms-app/commit/548481ec9848175542236111e9a8ce2f67a6ca7f))
+* **v1.0:** implement platform super admin, legal center, docker compose, and full documentation reconciliation ([b43c9d8](https://github.com/justolise/lms-app/commit/b43c9d88d63ee476f084c709d08889f69292ac75))
+* **v1.0:** Platform Super Admin, Legal Center, Docker Stack, and Documentation Reconciliation ([fc6ce9c](https://github.com/justolise/lms-app/commit/fc6ce9ce17dfeedeb87e9f3ef5511eff4adba02c))
+* **v1.0:** Platform Super Admin, Legal Center, Docker Stack, and Documentation Reconciliation ([fc6ce9c](https://github.com/justolise/lms-app/commit/fc6ce9ce17dfeedeb87e9f3ef5511eff4adba02c))
+
+
+### Code Refactoring
+
+* **INFRA:** enforce ENDPOINTS registry across entire frontend — zero hardcoded API strings ([4b7d510](https://github.com/justolise/lms-app/commit/4b7d51086370c86e3ea0a91b11701d36f0e6bc3d))
+
 ## [1.0.0](https://github.com/justolise/lms-app/compare/v0.13.0...v1.0.0) (2026-11-23)
 
 
