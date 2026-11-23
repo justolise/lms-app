@@ -5,6 +5,7 @@ import { RequirePermission } from "@/components/auth/require-permission";
 import { Tabs } from "@/components/ui/tabs";
 import { CheckoutDesk } from "@/features/circulation/components/CheckoutDesk";
 import { LoansLedger } from "@/features/circulation/components/LoansLedger";
+import { LostDamagedDesk } from "@/features/circulation/components/LostDamagedDesk";
 import { RenewDesk } from "@/features/circulation/components/RenewDesk";
 import { ReturnDesk } from "@/features/circulation/components/ReturnDesk";
 import { HoldsQueue } from "@/features/holds/components/HoldsQueue";
@@ -17,6 +18,7 @@ export default function CirculationPage() {
     { id: "checkout", label: "Checkout (Issue)" },
     { id: "return", label: "Return (Discharge)" },
     { id: "renew", label: "Renew Loan" },
+    { id: "lost-damaged", label: "Lost & Damaged (CIR-9)" },
     { id: "loans", label: "Active Loans Ledger" },
     { id: "holds", label: "Holds Queue" },
   ];
@@ -42,6 +44,7 @@ export default function CirculationPage() {
           {activeTab === "checkout" && <CheckoutDesk />}
           {activeTab === "return" && <ReturnDesk />}
           {activeTab === "renew" && <RenewDesk />}
+          {activeTab === "lost-damaged" && <LostDamagedDesk />}
           {activeTab === "loans" && <LoansLedger />}
           {activeTab === "holds" && <HoldsQueue />}
         </div>

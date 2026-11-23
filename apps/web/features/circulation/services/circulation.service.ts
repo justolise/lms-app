@@ -2,6 +2,8 @@ import { apiClient } from "@/lib/api/client";
 import type {
   CheckoutPayload,
   Loan,
+  MarkLostDamagedPayload,
+  MarkLostDamagedResult,
   ReturnLoanResult,
   ReturnPayload,
 } from "../types/circulation.types";
@@ -17,6 +19,13 @@ export const circulationService = {
 
   renew(loanId: string) {
     return apiClient.post<Loan>(`/api/circulation/renew/${loanId}`);
+  },
+
+  markLostDamaged(payload: MarkLostDamagedPayload) {
+    return apiClient.post<MarkLostDamagedResult>(
+      "/api/circulation/lost-damaged",
+      payload,
+    );
   },
 
   async getActiveLoans(userId?: string): Promise<Loan[]> {

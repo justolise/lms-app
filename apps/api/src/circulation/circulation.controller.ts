@@ -15,6 +15,7 @@ import { Roles } from '../common/decorators/roles.decorator.js';
 import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface.js';
 import { CirculationService } from './circulation.service.js';
 import { CheckoutDto } from './dto/checkout.dto.js';
+import { MarkLostDamagedDto } from './dto/mark-lost-damaged.dto.js';
 import { ReturnLoanDto } from './dto/return-loan.dto.js';
 
 @Controller(['circulation', 'api/circulation'])
@@ -68,6 +69,23 @@ export class CirculationController {
       req.user.tenantId,
       req.user.userId,
       loanId,
+    );
+  }
+
+  /**
+   * CIR-9: Mark a loan or copy as LOST or DAMAGED.
+   * Closes active loan, transitions copy, and posts replacement/damage charge to fine ledger.
+   */
+  @Post('lost-damaged')
+  @Roles('ADMIN', 'LIBRARIAN')
+  async markLostDamaged(
+    @Req() req: AuthenticatedRequest,
+    @Body() dto: MarkLostDamagedDto,
+  ) {
+    return this.circulationService.markLostDamaged(
+      req.user.tenantId,
+      req.user.userId,
+      dto,
     );
   }
 

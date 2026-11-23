@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import {
+  BadRequestException,
   ForbiddenException,
   NotFoundException,
   UnprocessableEntityException,
@@ -524,5 +525,133 @@ describe('CirculationService.renew', () => {
 
     const svc = new CirculationService(db);
     await expect(svc.renew(TENANT, ACTOR, LOAN_ID)).rejects.toThrow(NotFoundException);
+  });
+});
+
+describe('CirculationService.markLostDamaged (CIR-9)', () => {
+  it('throws BadRequestException when reason is empty', async () => {
+    const db = makeDb({});
+    const svc = new CirculationService(db);
+    await expect(
+      svc.markLostDamaged(TENANT, ACTOR, {
+        barcode: 'BC001',
+        status: 'LOST',
+        reason: '   ',
+      }),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('throws BadRequestException when neither barcode nor loanId provided', async () => {
+    const db = makeDb({});
+    const svc = new CirculationService(db);
+    await expect(
+      svc.markLostDamaged(TENANT, ACTOR, {
+        status: 'LOST',
+        reason: 'Lost somewhere',
+      }),
+    ).rejects.toThrow(BadRequestException);
+  });
+
+  it('throws NotFoundException when copy not found', async () => {
+    const db = makeDb({ selects: [[]] });
+    const svc = new CirculationService(db);
+    await expect(
+      svc.markLostDamaged(TENANT, ACTOR, {
+        barcode: 'NON_EXISTENT',
+        status: 'LOST',
+        reason: 'Lost by student',
+      }),
+    ).rejects.toThrow(NotFoundException);
+  });
+
+  it('marks on-loan copy as LOST, closes loan, and posts replacement fee', async () => {
+    const db = makeDb({
+      selects: [
+        [mockCopy],
+        [mockLoan],
+        [{ title: 'Clean Architecture' }],
+      ],
+      update: [{ id: COPY_ID, status: 'LOST' }],
+    });
+
+    const svc = new CirculationService(db);
+    const result = await svc.markLostDamaged(TENANT, ACTOR, {
+      barcode: 'BC001',
+      status: 'LOST',
+      reason: 'Lost in dormitory',
+      feeMinorUnits: 150000,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.feeMinorUnits).toBe(150000);
+    expect(result.feeKes).toBe(1500);
+  });
+
+  it('marks on-loan copy as DAMAGED and posts damage repair fee', async () => {
+    const db = makeDb({
+      selects: [
+        [mockCopy],
+        [mockLoan],
+        [{ title: 'Clean Architecture' }],
+      ],
+      update: [{ id: COPY_ID, status: 'DAMAGED' }],
+    });
+
+    const svc = new CirculationService(db);
+    const result = await svc.markLostDamaged(TENANT, ACTOR, {
+      barcode: 'BC001',
+      status: 'DAMAGED',
+      reason: 'Water spill on cover',
+      feeMinorUnits: 30000,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.feeMinorUnits).toBe(30000);
+    expect(result.feeKes).toBe(300);
+  });
+
+  it('marks copy as LOST by loanId', async () => {
+    const db = makeDb({
+      selects: [
+        [mockLoan],
+        [mockCopy],
+        [{ title: 'Clean Architecture' }],
+      ],
+      update: [{ id: COPY_ID, status: 'LOST' }],
+    });
+
+    const svc = new CirculationService(db);
+    const result = await svc.markLostDamaged(TENANT, ACTOR, {
+      loanId: LOAN_ID,
+      status: 'LOST',
+      reason: 'Unreturned by semester end',
+      feeMinorUnits: 100000,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.feeKes).toBe(1000);
+  });
+
+  it('marks shelf copy as LOST when not currently checked out (0 fee)', async () => {
+    const db = makeDb({
+      selects: [
+        [mockCopy],
+        [],
+        [{ title: 'Clean Architecture' }],
+      ],
+      update: [{ id: COPY_ID, status: 'LOST' }],
+    });
+
+    const svc = new CirculationService(db);
+    const result = await svc.markLostDamaged(TENANT, ACTOR, {
+      barcode: 'BC001',
+      status: 'LOST',
+      reason: 'Missing during inventory audit',
+      feeMinorUnits: 0,
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.loan).toBeUndefined();
+    expect(result.feeMinorUnits).toBe(0);
   });
 });

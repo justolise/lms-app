@@ -42,3 +42,25 @@ export interface ReturnPayload {
   barcode: string;
   idempotencyKey?: string;
 }
+
+export interface MarkLostDamagedPayload {
+  barcode?: string;
+  loanId?: string;
+  status: "LOST" | "DAMAGED";
+  reason: string;
+  feeMinorUnits?: number;
+}
+
+export interface MarkLostDamagedResult {
+  success: boolean;
+  copy: {
+    id: string;
+    barcode: string;
+    status: string;
+    notes?: string | null;
+  };
+  loan?: Loan;
+  feeMinorUnits: number;
+  feeKes: number;
+  bookTitle: string;
+}

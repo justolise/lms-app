@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   ForbiddenException,
   Injectable,
@@ -23,6 +24,7 @@ import { type FulfillHoldResult, HoldsService } from '../holds/holds.service.js'
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { RedisService } from '../redis/redis.service.js';
 import type { CheckoutDto } from './dto/checkout.dto.js';
+import type { MarkLostDamagedDto } from './dto/mark-lost-damaged.dto.js';
 import type { ReturnLoanDto } from './dto/return-loan.dto.js';
 
 // Africa/Nairobi is UTC+3 (no DST)
@@ -656,6 +658,194 @@ export class CirculationService {
 
       return renewed;
     });
+  }
+
+  // ─── CIR-9: Mark Lost or Damaged ──────────────────────────────────────────
+
+  async markLostDamaged(
+    tenantId: string,
+    actorId: string,
+    dto: MarkLostDamagedDto,
+  ) {
+    const reason = dto.reason?.trim();
+    if (!reason) {
+      throw new BadRequestException(
+        'A reason is mandatory when reporting an item lost or damaged',
+      );
+    }
+
+    if (!dto.barcode && !dto.loanId) {
+      throw new BadRequestException(
+        'Either copy barcode or loanId must be provided',
+      );
+    }
+
+    const feeMinorUnits = Math.max(0, Number(dto.feeMinorUnits) || 0);
+    const now = new Date();
+
+    const result = await this.database.withTenant(tenantId, async (tx) => {
+      // 1. Resolve copy and active loan
+      let copy: typeof copies.$inferSelect | undefined;
+      let loan: typeof loans.$inferSelect | undefined;
+
+      if (dto.loanId) {
+        const [foundLoan] = await tx
+          .select()
+          .from(loans)
+          .where(and(eq(loans.tenantId, tenantId), eq(loans.id, dto.loanId)))
+          .limit(1)
+          .for('update');
+        loan = foundLoan;
+        if (!loan) throw new NotFoundException('Loan not found');
+
+        const [foundCopy] = await tx
+          .select()
+          .from(copies)
+          .where(and(eq(copies.tenantId, tenantId), eq(copies.id, loan.copyId)))
+          .limit(1)
+          .for('update');
+        copy = foundCopy;
+      } else if (dto.barcode) {
+        const [foundCopy] = await tx
+          .select()
+          .from(copies)
+          .where(
+            and(
+              eq(copies.tenantId, tenantId),
+              eq(copies.barcode, dto.barcode.trim()),
+            ),
+          )
+          .limit(1)
+          .for('update');
+        copy = foundCopy;
+        if (!copy) throw new NotFoundException('Copy not found');
+
+        // Look for active loan for this copy
+        const [activeLoan] = await tx
+          .select()
+          .from(loans)
+          .where(
+            and(
+              eq(loans.tenantId, tenantId),
+              eq(loans.copyId, copy.id),
+              eq(loans.status, 'ACTIVE'),
+            ),
+          )
+          .limit(1)
+          .for('update');
+        loan = activeLoan;
+      }
+
+      if (!copy) throw new NotFoundException('Copy not found');
+
+      // 2. Resolve book title
+      let bookTitle = 'Library Item';
+      const [catItem] = await tx
+        .select({ title: catalogueItems.title })
+        .from(catalogueItems)
+        .where(
+          and(
+            eq(catalogueItems.tenantId, tenantId),
+            eq(catalogueItems.id, copy.catalogueItemId),
+          ),
+        )
+        .limit(1);
+      if (catItem) bookTitle = catItem.title;
+
+      // 3. Update physical copy status & notes
+      const existingNotes = copy.notes ? `${copy.notes}\n` : '';
+      const dateStr = now.toISOString().split('T')[0];
+      const updatedNotes = `${existingNotes}[${dateStr}] ${dto.status}: ${reason}`;
+
+      const [updatedCopy] = await tx
+        .update(copies)
+        .set({
+          status: dto.status,
+          notes: updatedNotes,
+          updatedAt: now,
+        })
+        .where(and(eq(copies.tenantId, tenantId), eq(copies.id, copy.id)))
+        .returning();
+
+      // 4. If loan exists, close loan with status
+      let updatedLoan: typeof loans.$inferSelect | undefined;
+      if (loan) {
+        const [closedLoan] = await tx
+          .update(loans)
+          .set({
+            status: dto.status,
+            returnedAt: now,
+            fineMinorUnits: feeMinorUnits > 0 ? feeMinorUnits : loan.fineMinorUnits,
+            updatedAt: now,
+          })
+          .where(and(eq(loans.tenantId, tenantId), eq(loans.id, loan.id)))
+          .returning();
+        updatedLoan = closedLoan;
+
+        // 5. Post charge to fine ledger if feeMinorUnits > 0
+        if (feeMinorUnits > 0) {
+          const feeDescription =
+            dto.status === 'LOST'
+              ? `Lost copy replacement charge: ${reason}`
+              : `Damaged copy repair fee: ${reason}`;
+
+          await tx.insert(fineEntries).values({
+            tenantId,
+            userId: loan.userId,
+            loanId: loan.id,
+            entryType: 'CHARGE',
+            amountMinorUnits: feeMinorUnits,
+            notes: feeDescription,
+            actorId,
+          });
+        }
+      }
+
+      // 6. Audit log
+      await tx.insert(auditLogs).values({
+        tenantId,
+        actorId,
+        action: `circulation.mark_${dto.status.toLowerCase()}`,
+        entityType: loan ? 'loan' : 'copy',
+        entityId: loan?.id ?? copy.id,
+        metadata: {
+          copyId: copy.id,
+          barcode: copy.barcode,
+          status: dto.status,
+          reason,
+          feeMinorUnits,
+          feeKes: feeMinorUnits / 100,
+          loanId: loan?.id,
+          userId: loan?.userId,
+        },
+      });
+
+      return {
+        success: true,
+        copy: updatedCopy,
+        loan: updatedLoan,
+        feeMinorUnits,
+        feeKes: feeMinorUnits / 100,
+        bookTitle,
+      };
+    });
+
+    // 7. Dispatch notification outside transaction
+    if (this.notificationsService && result.loan && result.feeMinorUnits > 0) {
+      await this.notificationsService
+        .notifyFinePosted(
+          tenantId,
+          result.loan.userId,
+          result.loan.id,
+          result.bookTitle,
+          result.feeKes,
+        )
+        .catch(() => {});
+      await this.notificationsService.dispatchPending(tenantId).catch(() => {});
+    }
+
+    await this.invalidateCache(tenantId);
+    return result;
   }
 
   // ─── List loans ────────────────────────────────────────────────────────────

@@ -62,6 +62,8 @@ export function LoansLedger({
               { value: "", label: "All Statuses" },
               { value: "ACTIVE", label: "Active Loans" },
               { value: "RETURNED", label: "Returned Loans" },
+              { value: "LOST", label: "Lost Items (CIR-9)" },
+              { value: "DAMAGED", label: "Damaged Items (CIR-9)" },
             ]}
           />
         </div>
@@ -122,9 +124,13 @@ export function LoansLedger({
                         variant={
                           loan.status === "RETURNED"
                             ? "muted"
-                            : isOverdue
+                            : loan.status === "LOST"
                               ? "danger"
-                              : "success"
+                              : loan.status === "DAMAGED"
+                                ? "warning"
+                                : isOverdue
+                                  ? "danger"
+                                  : "success"
                         }
                       >
                         {isOverdue ? "OVERDUE" : loan.status}

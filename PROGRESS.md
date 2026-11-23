@@ -100,7 +100,7 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 | CIR-4  |       P0 |  done  | Loan policies per member type/item type                   | Loan policy resolution cascading by member type and item format with system-safe fallbacks. |
 | CIR-5  |       P0 |  done  | Checkout blocks and librarian/admin override              | Verification of overdue loans, fine ceilings, and membership expiry with staff override audit logging. |
 | CIR-6  |       P0 |  done  | Phone camera barcode/QR scanning                          | In-browser `zxing-wasm` multi-format scanner (QR, Code128, Code39, EAN13) with fallback manual input. |
-| CIR-9  |       P1 |  todo  | Lost/damaged workflow and replacement charge              | Not implemented; remains P1.                                                                                               |
+| CIR-9  |       P1 |  done  | Lost/damaged workflow and replacement charge              | Staff circulation desk workflow (`POST /api/circulation/lost-damaged`), physical copy transition (`LOST`/`DAMAGED`) with mandatory audit reason logging, automated loan closure, and fine ledger debit charge assessment (`fine_entries`); verified in unit tests and Web UI (`/circulation`). |
 | HLD-1  |       P0 |  done  | FIFO holds on checked-out titles                          | Hold placement on titles with zero available copies; duplicate check; pickup window resolution; verified in HoldsService and CirculationService checkout integration; unit tests. |
 | HLD-2  |       P0 |  done  | Ready notification and configurable expiry                | Return desk fulfillment (`fulfillNextHoldOnReturn`) reserving copy to `RESERVED` and setting pickup countdown; verification on checkout; unit tests. |
 | HLD-3  |       P0 |  done  | Hold cancellation and queue management                    | Hold cancellation (patron own or staff any) with copy release if ready; queue re-indexing; full staff queue table and patron My Holds UI. |
@@ -135,8 +135,9 @@ Current verification run completed on **23 November 2026**:
 
 - **pnpm typecheck**: Passed across all workspace projects (0 TypeScript errors).
 - **pnpm -r --if-present lint**: Passed across all workspace projects (0 errors in Biome and Oxlint).
-- **pnpm test (Unit Tests)**: 30 test files, 286 tests passed in `@lms/api`, 12 tests passed in `@lms/web`, 0 failed.
+- **pnpm test (Unit Tests)**: 30 test files, 293 tests passed in `@lms/api`, 12 tests passed in `@lms/web`, 0 failed.
 - **Controller E2E Tests**: 2 test files, 27 tests passed, 0 failed (`test/auth.controller.e2e-spec.ts`, `test/users.controller.e2e-spec.ts`).
+- **Phase 2 Circulation Hardening (CIR-9)**: `CirculationService.markLostDamaged` and `POST /api/circulation/lost-damaged` implemented; copy status transition to `LOST` / `DAMAGED` with notes timestamp and audit log; active loan closed and ledger `CHARGE` assessed in `fine_entries`; dedicated `/circulation` desk tab and active loan ledger integration; 7 unit tests covering barcode, loanId, and non-loan inventory.
 - **Phase 2 Notifications Module (NOT-1, NOT-2)**: `NotificationsModule`, `EmailDeliveryService`, and `SmsDeliveryService` implemented; multi-tenant `notifications` table with 0014 migration and RLS; Africa/Nairobi quiet-hours enforcement (20:00–07:00 EAT); automated loan due-soon and overdue scans; circulation lifecycle hooks for hold availability and fine postings; 20 dedicated unit tests.
 - **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 25 prerendered routes).
 
