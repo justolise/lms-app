@@ -112,8 +112,8 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 | PUB-CAT|       P0 |  done  | Tenant-Specific Public Catalogue                          | Isolated public catalogue at `/libraries/:slug/catalogue` and detail `/libraries/:slug/catalogue/:bookId`; search by title/author/ISBN; format & availability filters; responsive pagination; approved 2-state availability (`Available`, `On loan`, or hidden); zero patron/copy privacy leakage. |
 | PUB-ENQ|       P0 |  done  | Public Membership Enquiry & Staff Review                  | Unauthenticated enquiry form at `/libraries/:slug/request-membership`; backend tenant assignment; Redis rate limiting; initial `PENDING` status; resilient email receipt dispatch; staff review queue and 1-click patron account provisioning at `/members`. |
 | MEM-4  |       P0 |  done  | Borrowing history/current loans                           | Patron borrowing history & current loans endpoint (`GET /api/members/:id/loans`), staff Member History modal with active/returned loan badges and KES fine tracking; verified in unit tests and Web UI. |
-| NOT-1  |       P0 |  todo  | Email notifications                                       | Notification events pending; email delivery provider configured for OTP in AUTH-3.                                         |
-| NOT-2  |       P0 |  todo  | SMS notifications                                         | Notification events pending; SMS delivery provider configured for OTP in AUTH-3.                                           |
+| NOT-1  |       P0 |  done  | Email notifications                                       | Email delivery provider (Nodemailer/SMTP with dev fallback); event dispatching for `HOLD_READY`, `DUE_SOON`, `OVERDUE`, and `FINE_POSTED`; deterministic idempotency dedupe keys; privacy-safe templates; unit tests verified. |
+| NOT-2  |       P0 |  done  | SMS notifications                                         | Africa's Talking REST API integration (with dev fallback); strict Africa/Nairobi quiet hours (20:00–07:00 EAT) deferral to 07:00 next morning; retry logic up to 3 attempts with failure tracking; unit tests verified. |
 | INV-2  |       P0 |  done  | Lost/damaged/withdrawn tracking with reasons              | Comprehensive status lifecycle (AVAILABLE, ON_LOAN, RESERVED, IN_TRANSIT, LOST, DAMAGED, WITHDRAWN) with mandatory audit reason logging (`PATCH /api/catalogue/:itemId/copies/:copyId/status`, `DELETE /api/catalogue/:itemId/copies/:copyId?reason=...`), copy notes appending (`[YYYY-MM-DD] STATUS: reason`), audit trail entries (`audit_logs`), preset quick reason chips, and copy status modal UI in Next.js web. |
 | RPT-1  |       P0 |  done  | Basic circulation dashboard                               | Executive & circulation dashboard endpoint (`GET /api/reports/dashboard`); real-time KPI counts (active & overdue loans, active holds, total titles & copy availability, new monthly members, outstanding & collected fines); top 5 popular borrowed titles; recent circulation activity feed; verified in unit tests and Web UI. |
 | ADM-1  |       P0 |  done  | Library profile                                           | Tenant library profile (name, logo, contacts, opening hours, address, website, description, public borrowing rules summary) implemented with DDL migration 0013, AdminModule (`GET /api/admin/profile`, `PATCH /api/admin/profile`), audit logging, automated unit tests, and Next.js settings UI (`/settings`) with live preview, plus public catalogue integration. |
@@ -131,26 +131,14 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 
 ## Verification Record
 
-Current verification run completed on **22 November 2026**:
+Current verification run completed on **23 November 2026**:
 
 - **pnpm typecheck**: Passed across all workspace projects (0 TypeScript errors).
 - **pnpm -r --if-present lint**: Passed across all workspace projects (0 errors in Biome and Oxlint).
-- **pnpm test (Unit Tests)**: 24 test files, 244 tests passed, 0 failed.
+- **pnpm test (Unit Tests)**: 30 test files, 284 tests passed in `@lms/api`, 12 tests passed in `@lms/web`, 0 failed.
 - **Controller E2E Tests**: 2 test files, 27 tests passed, 0 failed (`test/auth.controller.e2e-spec.ts`, `test/users.controller.e2e-spec.ts`).
-- **Comprehensive Security Audit & Hardening**:
-  - Critical concurrency hardening in checkout/return/renew with pessimistic `.for('update')`, copy status optimistic guards, and `0010_circulation_concurrency.sql` partial unique index `loans_tenant_copy_active_unique`.
-  - Rate limiting IP spoofing defense using Express proxy-validated `request.ip`.
-  - Scoped cookie path for refresh token (`/api/auth`) and selection token (`/api/auth/select-membership`).
-  - Active user status verification in `SessionService.isSessionActive`.
-  - Password complexity regex enforcement (uppercase, lowercase, number, symbol) in `ChangePasswordDto` and `ResetPasswordDto`.
-  - HTTPS protocol enforcement for profile `photoUrl`.
-  - Strict Content-Security-Policy (CSP) and Permissions-Policy (`camera=(self)`) configured in Next.js web application.
-  - Centralized NestJS `HttpExceptionFilter` preventing internal error stack leaks.
-  - Supply-chain remediation: pnpm overrides applied; `pnpm audit` reports 0 vulnerabilities.
-  - Comprehensive documentation suite delivered across 15 documents in `docs/security/`.
-- **Phase 2 Circulation, Holds, Fines & Public Module**: `CategoriesModule`, `CatalogueModule`, `CirculationModule`, `HoldsModule`, `FinesModule`, and `PublicModule` active; 71 unit tests across circulation, holds, fines, catalogue, and public modules; 12 migration files (`0000` through `0012_fine_ledger.sql`) with idempotent RLS, indexes, FIFO queue ordering, append-only trigger enforcement, and `app.tenant_id` context enforcement.
-- **Multi-Tenant SaaS Hardening**: Removed all hardcoded library codes/fallbacks from public catalogue and enquiry pages; dynamic tenant branch selection on `/request-membership` and `/libraries/:slug/request-membership`; relative `/api/public/...` routing through Next.js proxy.
-- **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 23 prerendered routes).
+- **Phase 2 Notifications Module (NOT-1, NOT-2)**: `NotificationsModule`, `EmailDeliveryService`, and `SmsDeliveryService` implemented; multi-tenant `notifications` table with 0014 migration and RLS; Africa/Nairobi quiet-hours enforcement (20:00–07:00 EAT); automated loan due-soon and overdue scans; circulation lifecycle hooks for hold availability and fine postings; 20 dedicated unit tests.
+- **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 25 prerendered routes).
 
 Verification commands:
 

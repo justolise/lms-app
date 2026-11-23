@@ -10,6 +10,7 @@ import { FinesModule } from "./fines/fines.module.js";
 import { HoldsModule } from "./holds/holds.module.js";
 import { MemberTypesModule } from "./member-types/member-types.module.js";
 import { MembersModule } from "./members/members.module.js";
+import { NotificationsModule } from "./notifications/notifications.module.js";
 import { PublicModule } from "./public/public.module.js";
 import { RedisModule } from "./redis/redis.module.js";
 import { ReportsModule } from "./reports/reports.module.js";
@@ -27,6 +28,7 @@ import { UsersModule } from "./users/users.module.js";
 		CirculationModule,
 		FinesModule,
 		HoldsModule,
+		NotificationsModule,
 		PublicModule,
 		ReportsModule,
 		AdminModule,

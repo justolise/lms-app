@@ -20,6 +20,7 @@ import {
   users,
 } from '../database/schema.js';
 import { type FulfillHoldResult, HoldsService } from '../holds/holds.service.js';
+import { NotificationsService } from '../notifications/notifications.service.js';
 import { RedisService } from '../redis/redis.service.js';
 import type { CheckoutDto } from './dto/checkout.dto.js';
 import type { ReturnLoanDto } from './dto/return-loan.dto.js';
@@ -85,6 +86,7 @@ export class CirculationService {
     private readonly database: DatabaseService,
     @Optional() private readonly holdsService?: HoldsService,
     @Optional() private readonly redis?: RedisService,
+    @Optional() private readonly notificationsService?: NotificationsService,
   ) {}
 
   private async invalidateCache(tenantId: string): Promise<void> {
@@ -491,6 +493,22 @@ export class CirculationService {
           .where(and(eq(copies.tenantId, tenantId), eq(copies.id, copy.id)));
       }
 
+      // ── Resolve book title for audit/notifications if applicable ──
+      let bookTitle = 'Borrowed item';
+      if (fineMinorUnits > 0 || holdResult.holdFulfilled) {
+        const [catItem] = await tx
+          .select({ title: catalogueItems.title })
+          .from(catalogueItems)
+          .where(
+            and(
+              eq(catalogueItems.tenantId, tenantId),
+              eq(catalogueItems.id, loan.catalogueItemId),
+            ),
+          )
+          .limit(1);
+        if (catItem) bookTitle = catItem.title;
+      }
+
       // ── Audit log ───────────────────────────────────────────
       await tx.insert(auditLogs).values({
         tenantId,
@@ -515,8 +533,50 @@ export class CirculationService {
         holdFulfilled: holdResult.holdFulfilled,
         claimantUserId: holdResult.claimantUserId,
         holdExpiresAt: holdResult.expiresAt,
+        holdId: holdResult.hold?.id,
+        bookTitle,
       };
     });
+
+    if ('loan' in result && this.notificationsService) {
+      const res = result as {
+        loan: typeof loans.$inferSelect;
+        overdueDays: number;
+        fineMinorUnits: number;
+        fineKes: number;
+        holdFulfilled: boolean;
+        claimantUserId?: string;
+        holdExpiresAt?: Date;
+        holdId?: string;
+        bookTitle: string;
+      };
+      if (res.fineMinorUnits > 0) {
+        await this.notificationsService
+          .notifyFinePosted(
+            tenantId,
+            res.loan.userId,
+            res.loan.id,
+            res.bookTitle,
+            res.fineKes,
+          )
+          .catch(() => {});
+      }
+      if (res.holdFulfilled && res.claimantUserId && res.holdId) {
+        const deadline = res.holdExpiresAt
+          ? res.holdExpiresAt.toISOString().slice(0, 10)
+          : 'in 3 days';
+        await this.notificationsService
+          .notifyHoldReady(
+            tenantId,
+            res.claimantUserId,
+            res.holdId,
+            res.bookTitle,
+            deadline,
+          )
+          .catch(() => {});
+      }
+      await this.notificationsService.dispatchPending(tenantId).catch(() => {});
+    }
 
     await this.invalidateCache(tenantId);
     return result;

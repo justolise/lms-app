@@ -1274,4 +1274,89 @@ export const fineEntries = pgTable(
 export type FineEntry = typeof fineEntries.$inferSelect;
 export type NewFineEntry = typeof fineEntries.$inferInsert;
 
+// NOT-1 & NOT-2: Notification channel, event type, and status enums
+export const notificationChannelEnum = pgEnum('notification_channel', [
+  'EMAIL',
+  'SMS',
+]);
+
+export const notificationEventTypeEnum = pgEnum('notification_event_type', [
+  'HOLD_READY',
+  'DUE_SOON',
+  'OVERDUE',
+  'FINE_POSTED',
+]);
+
+export const notificationStatusEnum = pgEnum('notification_status', [
+  'PENDING',
+  'QUEUED_QUIET_HOURS',
+  'SENT',
+  'FAILED',
+]);
+
+export const notifications = pgTable(
+  'notifications',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'restrict' }),
+
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    channel: notificationChannelEnum('channel').notNull(),
+
+    eventType: notificationEventTypeEnum('event_type').notNull(),
+
+    recipient: varchar('recipient', { length: 255 }).notNull(),
+
+    subject: varchar('subject', { length: 255 }),
+
+    body: text('body').notNull(),
+
+    dedupeKey: varchar('dedupe_key', { length: 255 }).notNull(),
+
+    status: notificationStatusEnum('status').notNull().default('PENDING'),
+
+    scheduledFor: timestamp('scheduled_for', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    sentAt: timestamp('sent_at', { withTimezone: true }),
+
+    attemptCount: integer('attempt_count').notNull().default(0),
+
+    errorMessage: text('error_message'),
+
+    metadata: jsonb('metadata'),
+
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('notifications_tenant_dedupe_unique').on(
+      table.tenantId,
+      table.dedupeKey,
+    ),
+    index('notifications_tenant_status_scheduled_idx').on(
+      table.tenantId,
+      table.status,
+      table.scheduledFor,
+    ),
+    index('notifications_tenant_user_idx').on(table.tenantId, table.userId),
+  ],
+);
+
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;
+
+
 

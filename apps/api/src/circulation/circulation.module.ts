@@ -5,6 +5,7 @@ import { AccessTokenGuard } from "../common/guards/access-token.guard.js";
 import { RolesGuard } from "../common/guards/roles.guard.js";
 import { DatabaseModule } from "../database/database.module.js";
 import { HoldsModule } from "../holds/holds.module.js";
+import { NotificationsModule } from "../notifications/notifications.module.js";
 import { RedisModule } from "../redis/redis.module.js";
 import { CirculationController } from "./circulation.controller.js";
 import { CirculationService } from "./circulation.service.js";
@@ -16,6 +17,7 @@ import { CirculationService } from "./circulation.service.js";
 		TokenModule,
 		SessionModule,
 		HoldsModule,
+		NotificationsModule,
 	],
 	controllers: [CirculationController],
 	providers: [CirculationService, AccessTokenGuard, RolesGuard],
