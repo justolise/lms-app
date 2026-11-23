@@ -7,7 +7,25 @@ import type {
 } from "../types/auth.types";
 
 export const authService = {
-  login(type: IdentifierType, identifier: string, password: string) {
+  login(
+    identifierOrType: string,
+    passwordOrIdentifier: string,
+    maybePassword?: string,
+  ) {
+    let type: IdentifierType;
+    let identifier: string;
+    let password: string;
+
+    if (maybePassword !== undefined) {
+      type = identifierOrType as IdentifierType;
+      identifier = passwordOrIdentifier;
+      password = maybePassword;
+    } else {
+      identifier = identifierOrType;
+      password = passwordOrIdentifier;
+      type = identifier.includes("@") ? "EMAIL" : "PHONE";
+    }
+
     return apiClient.post<LoginResponse>("/api/auth/login", {
       type,
       identifier: identifier.trim(),
@@ -21,17 +39,35 @@ export const authService = {
     });
   },
 
-  requestPasswordReset(type: IdentifierType, identifier: string) {
+  requestPasswordReset(identifierOrType: string, maybeIdentifier?: string) {
+    let type: IdentifierType;
+    let identifier: string;
+
+    if (maybeIdentifier !== undefined) {
+      type = identifierOrType as IdentifierType;
+      identifier = maybeIdentifier;
+    } else {
+      identifier = identifierOrType;
+      type = identifier.includes("@") ? "EMAIL" : "PHONE";
+    }
+
     return apiClient.post<PasswordResetResponse>("/api/auth/forgot-password", {
       type,
       identifier: identifier.trim(),
     });
   },
 
-  resetPassword(identifier: string, otp: string, newPassword: string) {
+  resetPassword(
+    identifier: string,
+    otp: string,
+    newPassword: string,
+    maybeType?: IdentifierType,
+  ) {
+    const type = maybeType ?? (identifier.includes("@") ? "EMAIL" : "PHONE");
     return apiClient.post<PasswordResetResponse>("/api/auth/reset-password", {
+      type,
       identifier: identifier.trim(),
-      otp: otp.trim(),
+      code: otp.trim(),
       newPassword,
     });
   },

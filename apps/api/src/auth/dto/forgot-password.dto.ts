@@ -8,8 +8,9 @@ import {
 } from 'class-validator';
 
 export class ForgotPasswordDto {
+  @IsOptional()
   @IsIn(['EMAIL', 'PHONE'])
-  type!: 'EMAIL' | 'PHONE';
+  type?: 'EMAIL' | 'PHONE';
 
   @IsString()
   @IsNotEmpty()

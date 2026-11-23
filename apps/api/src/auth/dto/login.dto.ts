@@ -1,8 +1,9 @@
-import { IsIn, IsNotEmpty, IsString, MaxLength } from 'class-validator';
+import { IsIn, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class LoginDto {
+  @IsOptional()
   @IsIn(['EMAIL', 'PHONE'])
-  type!: 'EMAIL' | 'PHONE';
+  type?: 'EMAIL' | 'PHONE';
 
   @IsString()
   @IsNotEmpty()

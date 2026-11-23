@@ -11,8 +11,9 @@ import {
 } from 'class-validator';
 
 export class ResetPasswordDto {
+  @IsOptional()
   @IsIn(['EMAIL', 'PHONE'])
-  type!: 'EMAIL' | 'PHONE';
+  type?: 'EMAIL' | 'PHONE';
 
   @IsString()
   @IsNotEmpty()

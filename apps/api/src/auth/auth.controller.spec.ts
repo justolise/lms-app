@@ -117,6 +117,44 @@ describe('AuthController', () => {
       });
     });
 
+    it('auto-detects EMAIL when type is omitted and identifier contains @', async () => {
+      authService.verifyCredentials.mockResolvedValue([membership]);
+
+      await controller.login(
+        {
+          identifier: 'jane@example.com',
+          password: 'password123',
+        },
+        'Test Browser',
+        response as unknown as Response,
+      );
+
+      expect(authService.verifyCredentials).toHaveBeenCalledWith(
+        'EMAIL',
+        'jane@example.com',
+        'password123',
+      );
+    });
+
+    it('auto-detects PHONE when type is omitted and identifier does not contain @', async () => {
+      authService.verifyCredentials.mockResolvedValue([membership]);
+
+      await controller.login(
+        {
+          identifier: '0712345678',
+          password: 'password123',
+        },
+        'Test Browser',
+        response as unknown as Response,
+      );
+
+      expect(authService.verifyCredentials).toHaveBeenCalledWith(
+        'PHONE',
+        '0712345678',
+        'password123',
+      );
+    });
+
     it('requires library selection when the user has multiple memberships', async () => {
       const secondMembership = {
         ...membership,

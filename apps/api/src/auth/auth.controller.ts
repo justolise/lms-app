@@ -59,8 +59,12 @@ export class AuthController {
     @Headers('user-agent') userAgent: string | undefined,
     @Res({ passthrough: true }) response: Response,
   ) {
+    const type =
+      dto.type ??
+      (dto.identifier.includes('@') ? 'EMAIL' : 'PHONE');
+
     const memberships = await this.authService.verifyCredentials(
-      dto.type,
+      type,
       dto.identifier,
       dto.password,
     );
@@ -236,8 +240,12 @@ export class AuthController {
   @Post('forgot-password')
   @RateLimit(AUTH_RATE_LIMITS.forgotPassword)
   async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    const type =
+      dto.type ??
+      (dto.identifier.includes('@') ? 'EMAIL' : 'PHONE');
+
     return this.otpService.requestPasswordReset(
-      dto.type,
+      type,
       dto.identifier,
       dto.tenantId,
     );
@@ -246,8 +254,12 @@ export class AuthController {
   @Post('reset-password')
   @RateLimit(AUTH_RATE_LIMITS.resetPassword)
   async resetPassword(@Body() dto: ResetPasswordDto) {
+    const type =
+      dto.type ??
+      (dto.identifier.includes('@') ? 'EMAIL' : 'PHONE');
+
     return this.otpService.verifyAndResetPassword(
-      dto.type,
+      type,
       dto.identifier,
       dto.code,
       dto.newPassword,
