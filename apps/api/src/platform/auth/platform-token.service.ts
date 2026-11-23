@@ -85,8 +85,8 @@ export class PlatformTokenService {
 
       return {
         platformUserId: payload.sub,
-        email: String(payload.email || ''),
-        fullName: String(payload.fullName || ''),
+        email: (payload.email as string) || '',
+        fullName: (payload.fullName as string) || '',
         role: 'PLATFORM_SUPER_ADMIN',
         sessionId: payload.sessionId,
         mfaVerified: true,
@@ -138,7 +138,7 @@ export class PlatformTokenService {
 
       return {
         platformUserId: payload.sub,
-        email: String(payload.email || ''),
+        email: (payload.email as string) || '',
         role: 'PLATFORM_SUPER_ADMIN',
         mfaPending: true,
       };

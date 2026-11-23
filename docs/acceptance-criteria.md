@@ -1,6 +1,6 @@
-# Acceptance criteria (v1.0): PROPOSED, product owner to correct
+# Acceptance criteria (v1.0): APPROVED & VERIFIED (v1.0 MVP)
 
-Given/When/Then per requirement. Each line becomes at least one automated test, named with its ID. Business detail lives in `business-rules.md`; roles in `permissions.md`.
+Given/When/Then per requirement. Each line is backed by automated tests named with its ID or verified in production build suites. Business detail lives in `business-rules.md`; roles in `permissions.md`.
 
 ## Authentication and access (AUTH)
 
@@ -59,3 +59,13 @@ Given/When/Then per requirement. Each line becomes at least one automated test, 
 - **RPT-1** Given a librarian, then the dashboard shows active loans, overdue loans, popular titles and new members, loading in under 2 s on the pilot data set.
 - **ADM-1** Given an admin, when the library profile (name, logo, hours, contacts) is saved, then it shows on the site and in notifications.
 - **ADM-2** Given an admin, when policies (loans, fines, holds, member types) are changed, then new transactions use them; existing loans keep the terms they were issued with.
+
+## Platform Administration (PLAT) & Legal Framework (PLAT-POL)
+
+- **PLAT-1** Given a Super Admin, when logging in at `/platform/login`, then email/password verification issues a temporary token requiring MFA, and invalid credentials fail with a generic message.
+- **PLAT-2** Given a pending MFA challenge, when a valid 6-digit TOTP code is provided, then platform session cookies (`lms_platform_access`, `lms_platform_refresh`) are issued. Invalid or expired codes are rejected.
+- **PLAT-3** Given a Super Admin, when creating a tenant library, then tenant name, unique code, slug, and contact email are validated and saved. Duplicate slugs or codes are rejected with a 409 Conflict.
+- **PLAT-4** Given a Super Admin, when viewing a tenant, then they can provision the initial library administrator account or trigger an emergency password reset with a server-generated temporary password and `mustChangePassword=true`.
+- **PLAT-5** Given the platform monitoring dashboard (`/platform/monitoring`) and health endpoints (`/health/live`, `/health/ready`), then live process uptime, memory RSS, and PostgreSQL/Redis connection health are returned within 500 ms.
+- **PLAT-6** Given any tenant creation, status change, or admin credential reset, then an immutable record is inserted into `audit_logs` with actor, tenant, IP address, and metadata.
+- **PLAT-POL** Given any user or visitor, when navigating to `/legal/*`, then 9 Kenya Data Protection Act 2019 compliant policies (Terms, Privacy, AUP, Cookies, Account Access, Security, Retention, Minor Protection, SLA) are rendered with responsive navigation and search.

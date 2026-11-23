@@ -17,12 +17,14 @@ export default function AboutPage() {
             Our Story
           </span>
           <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-6">
-            Modern library management<br className="hidden sm:block" /> for a world of knowledge.
+            Modern library management
+            <br className="hidden sm:block" /> for a world of knowledge.
           </h1>
           <p className="text-base sm:text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
-            Commonplace was built for the librarians, teachers and administrators
-            who keep the doors of knowledge open every day — in schools, community
-            centres and public institutions across East Africa.
+            Commonplace was built for the librarians, teachers and
+            administrators who keep the doors of knowledge open every day — in
+            schools, community centres and public institutions across East
+            Africa.
           </p>
         </div>
       </section>
@@ -44,10 +46,10 @@ export default function AboutPage() {
             </p>
             <p className="text-muted-foreground leading-relaxed">
               Commonplace changes that. We provide a professional, cloud-hosted
-              library management platform designed specifically for the realities
-              of East African institutions: low-bandwidth environments, local
-              payment systems, SMS-first communication and Kenya Data Protection
-              Act 2019 compliance built in from day one.
+              library management platform designed specifically for the
+              realities of East African institutions: low-bandwidth
+              environments, local payment systems, SMS-first communication and
+              Kenya Data Protection Act 2019 compliance built in from day one.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-6">
@@ -62,7 +64,9 @@ export default function AboutPage() {
                 className="rounded-2xl border border-border bg-surface p-5 text-center"
               >
                 <p className="text-xl font-bold text-primary">{stat.value}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{stat.label}</p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {stat.label}
+                </p>
               </div>
             ))}
           </div>
@@ -94,9 +98,15 @@ export default function AboutPage() {
               },
             ].map((v) => (
               <div key={v.title} className="flex flex-col items-start gap-3">
-                <span className="text-3xl" role="img" aria-label={v.title}>{v.icon}</span>
-                <h3 className="text-base font-bold text-foreground">{v.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{v.body}</p>
+                <span className="text-3xl" role="img" aria-label={v.title}>
+                  {v.icon}
+                </span>
+                <h3 className="text-base font-bold text-foreground">
+                  {v.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {v.body}
+                </p>
               </div>
             ))}
           </div>

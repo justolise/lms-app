@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { Alert } from "@/components/feedback/alert";
 import { Button } from "@/components/ui/button";
-import { ENDPOINTS } from "@/lib/api/endpoints";
 import {
   Card,
   CardContent,
@@ -15,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 
 interface PublicLibrary {
   id: string;

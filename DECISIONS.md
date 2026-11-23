@@ -253,6 +253,43 @@ The following records describe completed foundation work, not completed function
 - **Declarative RBAC**: Centralized `PERMISSIONS` constants, `ROLE_PERMISSIONS` matrix for all 6 roles (`ADMIN`, `LIBRARIAN`, `TEACHER`, `MEMBER`, `PARENT`, `GUEST`), and `<Can>` / `<RequirePermission>` components. Enforced "hide if no permission; disable with explanation if permitted but blocked by business rules".
 - **Feedback & Boundaries**: Standardized on `useToast()` notifications, accessible alerts, React `ErrorBoundary` wrappers, and Next.js root `error.tsx` / `not-found.tsx` fallbacks.
 
+#### 14. Dedicated Platform Super Admin Architecture (PLAT-1 through PLAT-6)
+
+- **Strict Tenant Boundary Preservation**: Platform Super Admin privileges are kept completely outside tenant role enums (`ADMIN`, `LIBRARIAN`, etc.) and outside tenant RLS policies. Super Admins do not belong to individual library tenants and cannot bypass tenant data isolation.
+- **Two-Step TOTP Multi-Factor Authentication (MFA)**: Super Admin authentication requires a two-step handshake: email + Argon2id password verification followed by 6-digit TOTP verification (`otplib`). MFA secrets are encrypted at rest using AES-256-GCM.
+- **Isolated Platform Session Cookies**: Super Admin sessions use dedicated HttpOnly, SameSite=Lax cookies (`lms_platform_access`, `lms_platform_refresh`), preventing cross-contamination with tenant staff session cookies.
+- **Telemetry & Health Monitoring**: Dedicated system monitoring endpoints (`GET /api/platform/monitoring`, `/health/live`, `/health/ready`) collect live PostgreSQL/Redis connectivity, process memory, and uptime metrics.
+
+#### 15. Centralized Frontend API Registry
+
+- **Strict Single Source of Truth**: All backend API endpoint paths are declared in `apps/web/lib/api/endpoints.ts` under the typed `ENDPOINTS` dictionary.
+- **Prohibition of Direct Hardcoded URLs**: Direct `/api/...` strings are prohibited across all frontend components, hooks, and services. Dynamic path constructors accept parameters safely (e.g. `ENDPOINTS.PUBLIC.CATALOGUE_BOOK(slug, bookId)`).
+
+#### 16. Fault Tolerance, Error Boundaries, and Resilient Bulkheading
+
+- **Route Group Bulkheading**: Independent Next.js `error.tsx` error boundaries are deployed at `(workspace)/error.tsx`, `(platform)/error.tsx`, and `(public)/error.tsx`. A runtime failure in one subsystem (e.g. reports or public browsing) cannot crash or block navigation in staff circulation desks.
+- **Graceful Metric Degradation**: Secondary components (such as dashboard KPI charts or telemetry monitors) catch downstream errors and display non-blocking warning notices rather than crashing the view.
+- **Fail-Safe Database Fallbacks**: Public catalogue slug resolution falls back safely to `library_code` if schema migrations are in flight, preventing 500 errors.
+
+#### 17. CIR-9 Lost and Damaged Copy Handling & Replacement Charges
+
+- **Circulation & Inventory Integration**: Marked lost or damaged items close active loans automatically, transition physical copy statuses with mandatory reason capture and timestamped notes, and debit replacement charges directly to the append-only fine ledger (`fine_entries`).
+
+#### 18. KDPA 2019 Legal & Policy Framework
+
+- **Public Legal Center**: Deployed 9 Kenya Data Protection Act 2019 compliant legal policies at `/legal/*` covering Terms of Service, Privacy Policy, Acceptable Use, Cookies, Account Access, Information Security, Data Retention & Disposal, Minor & Student Protection, and Service Level Agreements.
+
+#### 19. Full-Stack Docker Production Topology & Auto-Migrator
+
+- **Containerized Stack**: Complete multi-container orchestration in `docker-compose.yml` including PostgreSQL 16 Alpine, Redis 7 Alpine, standalone database migration runner (`apps/api/src/database/migrate.ts`), multi-stage NestJS API runner, and multi-stage Next.js Web standalone runner.
+
+#### 20. Brand Architecture & Positioning
+
+- **Platform Brand**: Commonplace.
+- **Product Name**: Commonplace Library.
+- **Tagline**: *"Every library. One connected world."*
+- **Description**: *"Modern library management for a world of knowledge."*
+
 ## Open decisions / operational confirmations
 
 1. Confirm production hosting, PostgreSQL version, backup/restore arrangements and cross-border data-transfer implications before production use with real member data.

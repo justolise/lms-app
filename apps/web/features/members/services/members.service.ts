@@ -12,11 +12,16 @@ import type {
 
 export const membersService = {
   async create(payload: CreateMemberInput): Promise<CreateMemberResult> {
-    return apiClient.post<CreateMemberResult>(ENDPOINTS.members.create, payload);
+    return apiClient.post<CreateMemberResult>(
+      ENDPOINTS.members.create,
+      payload,
+    );
   },
 
   async listMemberTypes(): Promise<MemberTypeOption[]> {
-    const data = await apiClient.get<MemberTypeOption[]>(ENDPOINTS.members.types);
+    const data = await apiClient.get<MemberTypeOption[]>(
+      ENDPOINTS.members.types,
+    );
     return Array.isArray(data) ? data : [];
   },
 
@@ -62,7 +67,9 @@ export const membersService = {
 
   async listEnquiries(status?: string): Promise<any[]> {
     const qs = status ? `?status=${status}` : "";
-    const data = await apiClient.get<any[]>(`${ENDPOINTS.members.enquiries}${qs}`);
+    const data = await apiClient.get<any[]>(
+      `${ENDPOINTS.members.enquiries}${qs}`,
+    );
     return Array.isArray(data) ? data : [];
   },
 

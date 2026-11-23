@@ -9,19 +9,42 @@ export const metadata: Metadata = {
 const CONTACT_CHANNELS = [
   {
     icon: (
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+        />
       </svg>
     ),
     label: "Email",
     value: "support@commonplace.co.ke",
     href: "mailto:support@commonplace.co.ke",
-    description: "For general enquiries, onboarding and support. We respond within one business day.",
+    description:
+      "For general enquiries, onboarding and support. We respond within one business day.",
   },
   {
     icon: (
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+      <svg
+        className="h-5 w-5"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+      >
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth={2}
+          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+        />
       </svg>
     ),
     label: "Phone",
@@ -65,7 +88,9 @@ export default function ContactPage() {
           {/* Contact info */}
           <div className="lg:col-span-2 space-y-8">
             <div>
-              <h2 className="text-lg font-bold text-foreground mb-4">Get in touch</h2>
+              <h2 className="text-lg font-bold text-foreground mb-4">
+                Get in touch
+              </h2>
               <div className="space-y-5">
                 {CONTACT_CHANNELS.map((c) => (
                   <div key={c.label} className="flex gap-4">
@@ -92,18 +117,25 @@ export default function ContactPage() {
             </div>
 
             <div>
-              <h3 className="text-sm font-bold text-foreground mb-2">Office hours</h3>
+              <h3 className="text-sm font-bold text-foreground mb-2">
+                Office hours
+              </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Monday – Friday: 8:00 AM – 5:00 PM EAT<br />
-                Saturday: 9:00 AM – 1:00 PM EAT<br />
+                Monday – Friday: 8:00 AM – 5:00 PM EAT
+                <br />
+                Saturday: 9:00 AM – 1:00 PM EAT
+                <br />
                 Sunday: Closed
               </p>
             </div>
 
             <div>
-              <h3 className="text-sm font-bold text-foreground mb-2">Location</h3>
+              <h3 className="text-sm font-bold text-foreground mb-2">
+                Location
+              </h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Nairobi, Kenya<br />
+                Nairobi, Kenya
+                <br />
                 East Africa
               </p>
             </div>
@@ -112,14 +144,26 @@ export default function ContactPage() {
           {/* Contact form */}
           <div className="lg:col-span-3">
             <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
-              <h2 className="text-lg font-bold text-foreground mb-6">Send us a message</h2>
+              <h2 className="text-lg font-bold text-foreground mb-6">
+                Send us a message
+              </h2>
               {/* NOTE: Static form — form submission requires a backend endpoint or third-party form service */}
               {/* This will be wired to an API endpoint or form provider post-v1.0 */}
-              <form className="space-y-5" action="mailto:support@commonplace.co.ke" method="get">
+              <form
+                className="space-y-5"
+                action="mailto:support@commonplace.co.ke"
+                method="get"
+              >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label htmlFor="name" className="block text-xs font-medium text-foreground mb-1.5">
-                      Full name <span className="text-danger" aria-hidden="true">*</span>
+                    <label
+                      htmlFor="name"
+                      className="block text-xs font-medium text-foreground mb-1.5"
+                    >
+                      Full name{" "}
+                      <span className="text-danger" aria-hidden="true">
+                        *
+                      </span>
                     </label>
                     <input
                       id="name"
@@ -132,8 +176,14 @@ export default function ContactPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-xs font-medium text-foreground mb-1.5">
-                      Email address <span className="text-danger" aria-hidden="true">*</span>
+                    <label
+                      htmlFor="email"
+                      className="block text-xs font-medium text-foreground mb-1.5"
+                    >
+                      Email address{" "}
+                      <span className="text-danger" aria-hidden="true">
+                        *
+                      </span>
                     </label>
                     <input
                       id="email"
@@ -148,7 +198,10 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="organisation" className="block text-xs font-medium text-foreground mb-1.5">
+                  <label
+                    htmlFor="organisation"
+                    className="block text-xs font-medium text-foreground mb-1.5"
+                  >
                     Library or institution name
                   </label>
                   <input
@@ -162,7 +215,10 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="topic" className="block text-xs font-medium text-foreground mb-1.5">
+                  <label
+                    htmlFor="topic"
+                    className="block text-xs font-medium text-foreground mb-1.5"
+                  >
                     Topic
                   </label>
                   <select
@@ -172,14 +228,22 @@ export default function ContactPage() {
                   >
                     <option value="">Select a topic…</option>
                     {TOPICS.map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block text-xs font-medium text-foreground mb-1.5">
-                    Message <span className="text-danger" aria-hidden="true">*</span>
+                  <label
+                    htmlFor="message"
+                    className="block text-xs font-medium text-foreground mb-1.5"
+                  >
+                    Message{" "}
+                    <span className="text-danger" aria-hidden="true">
+                      *
+                    </span>
                   </label>
                   <textarea
                     id="message"
@@ -200,7 +264,10 @@ export default function ContactPage() {
 
                 <p className="text-xs text-muted-foreground text-center">
                   By submitting this form you agree to our{" "}
-                  <a href="/legal/privacy-policy" className="underline hover:text-primary">
+                  <a
+                    href="/legal/privacy-policy"
+                    className="underline hover:text-primary"
+                  >
                     Privacy Policy
                   </a>
                   .

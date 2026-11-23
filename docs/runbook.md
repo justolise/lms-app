@@ -37,18 +37,39 @@ Use generated local-only secrets (see [docs/auth/environment.md](./auth/environm
 pnpm install
 ```
 
-## Start Redis
+## Start Supporting Services (Docker)
+
+To run the backing database and cache services for local development:
 
 ```bash
-docker compose up -d redis
+docker compose up -d postgres redis
 docker compose ps
 ```
 
-The current `compose.yaml` defines Redis only. PostgreSQL must be started and configured separately.
+To run the entire containerized application stack (PostgreSQL, Redis, Migrator, API, Web):
+
+```bash
+docker compose up --build -d
+docker compose ps
+```
+
+The stack exposes:
+- Web Application & Platform Super Admin: `http://localhost:3001`
+- NestJS API: `http://localhost:3000`
+- Liveness probe: `http://localhost:3000/health/live`
+- Readiness probe: `http://localhost:3000/health/ready`
 
 ## Database migrations
 
 Before migrating, confirm that `MIGRATION_DATABASE_URL` points to the intended local database and uses the migration role.
+
+Apply all migrations using the dedicated script:
+
+```bash
+pnpm --filter @lms/api db:migrate
+```
+
+Or using Drizzle Kit directly:
 
 ```bash
 pnpm --filter @lms/api exec drizzle-kit migrate
@@ -56,17 +77,16 @@ pnpm --filter @lms/api exec drizzle-kit migrate
 
 Do not run development migrations against production. Do not edit an already-applied migration; create a new migration for approved schema changes.
 
-## Checks
+## Verification & Checks
 
 ```bash
 pnpm lint
 pnpm typecheck
 pnpm test
 pnpm build
-pnpm --filter @lms/api test:e2e
 ```
 
-The root `pnpm test` runs all package unit test suites (108 tests passing).
+The root `pnpm test` runs all package unit test suites (**349 tests passing across 42 test suites**).
 
 Run API Controller E2E tests:
 

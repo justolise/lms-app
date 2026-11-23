@@ -22,77 +22,84 @@ apps/web/
 │   ├── globals.css                      # Tailwind v4 theme tokens & CSS variables
 │   ├── layout.tsx                       # Root HTML shell & fonts
 │   ├── providers.tsx                    # Root context providers (Auth + Toast)
-│   ├── error.tsx                        # Global runtime error boundary
+│   ├── error.tsx                        # Global fallback runtime error boundary
 │   ├── not-found.tsx                    # 404 Not Found page
-│   ├── page.tsx                         # Landing / Portal entry
-│   ├── catalogue/page.tsx               # Catalogue browser & inventory
-│   ├── categories/page.tsx              # Categories classification
-│   ├── circulation/page.tsx             # Issue, return, renewal desks
-│   ├── member-types/page.tsx            # Borrower types & loan policies
-│   ├── users/page.tsx                   # Staff & user directory
-│   ├── profile/page.tsx                 # Self-service account profile
-│   ├── login/page.tsx                   # User authentication
-│   ├── forgot-password/page.tsx         # Password reset request
-│   ├── reset-password/page.tsx          # Password reset with token
-│   └── change-password/page.tsx         # Authenticated credential change
+│   │
+│   ├── (platform)/                      # Dedicated Platform Super Admin workspace
+│   │   ├── error.tsx                    # Platform bulkheading error boundary
+│   │   └── platform/
+│   │       ├── layout.tsx               # Super Admin shell with high-contrast amber badges
+│   │       ├── login/page.tsx           # Two-step TOTP MFA authentication
+│   │       ├── page.tsx                 # Operations overview & service status
+│   │       ├── tenants/page.tsx         # Tenant lifecycle directory & onboarding
+│   │       ├── tenants/[id]/page.tsx    # Tenant details & admin provisioning
+│   │       ├── monitoring/page.tsx      # Real-time telemetry, memory & DB/Redis health
+│   │       └── audit-logs/page.tsx      # Immutable platform audit trail explorer
+│   │
+│   ├── (public)/                        # Public library portals, legal center & info
+│   │   ├── error.tsx                    # Public portal bulkheading error boundary
+│   │   ├── layout.tsx                   # Public shell with 5-nav and 5-column footer
+│   │   ├── page.tsx                     # Landing hero & catalogue search
+│   │   ├── about/page.tsx               # Platform mission & East African context
+│   │   ├── features/page.tsx            # Comprehensive feature catalog
+│   │   ├── for-schools-libraries/page.tsx # Institutional onboarding & migration guide
+│   │   ├── contact/page.tsx             # Support channels & enquiry form
+│   │   ├── legal/                       # 9 KDPA-compliant legal policies (/legal/*)
+│   │   │   ├── layout.tsx               # Legal center sidebar navigation
+│   │   │   ├── page.tsx                 # Legal center directory & search index
+│   │   │   ├── policies-data.ts         # Centralized policy metadata
+│   │   │   └── [policy]/page.tsx        # Terms, Privacy, AUP, Cookies, Security, etc.
+│   │   ├── libraries/[slug]/            # Tenant-scoped public portals
+│   │   │   ├── page.tsx                 # Tenant library homepage
+│   │   │   ├── login/page.tsx           # Tenant-specific staff & patron login
+│   │   │   └── catalogue/               # Isolated tenant catalogue search & detail
+│   │   └── request-membership/page.tsx  # Branch-aware membership request form
+│   │
+│   └── (workspace)/                     # Authenticated staff & member workspace
+│       ├── error.tsx                    # Workspace bulkheading error boundary
+│       ├── layout.tsx                   # Staff desk shell with sidebar & user menu
+│       ├── dashboard/page.tsx           # Circulation overview (fault-tolerant)
+│       ├── circulation/page.tsx         # Issue, return, renew, lost/damaged desk
+│       ├── catalogue/page.tsx           # Bibliographic records & physical copies
+│       ├── categories/page.tsx          # Subject classification tree
+│       ├── holds/page.tsx               # Active queue & ready pickups
+│       ├── fines/page.tsx               # Fines ledger, payments & waivers desk
+│       ├── members/page.tsx             # Patron directory & enquiry review
+│       ├── member-types/page.tsx        # Policy configuration matrix
+│       ├── settings/page.tsx            # Library profile & tenant branding
+│       └── profile/page.tsx             # Self-service settings, loans & holds
 │
 ├── features/                            # Encapsulated domain feature modules
 │   ├── auth/                            # Authentication & session recovery
-│   │   ├── types/auth.types.ts
-│   │   ├── services/auth.service.ts
-│   │   └── components/                  # LoginForm, ResetPasswordForm, etc.
-│   │
+│   ├── platform/                        # Super Admin services & components
 │   ├── catalogue/                       # Book catalog & copy inventory
-│   │   ├── types/catalogue.types.ts
-│   │   ├── services/catalogue.service.ts
-│   │   └── components/                  # CatalogueTable, BookModal, CopiesModal, etc.
-│   │
 │   ├── categories/                      # Classification taxonomy
-│   │   ├── types/categories.types.ts
-│   │   ├── services/categories.service.ts
-│   │   └── components/                  # CategoryTable, CategoryModal
-│   │
 │   ├── circulation/                     # Circulation desk & barcode scanning
-│   │   ├── types/circulation.types.ts
-│   │   ├── services/circulation.service.ts
-│   │   └── components/                  # CheckoutDesk, ReturnDesk, RenewDesk, BarcodeScanner
-│   │
-│   ├── member-types/                    # Borrower classifications & loan policy matrix
-│   │   ├── types/member-types.types.ts
-│   │   ├── services/member-types.service.ts
-│   │   └── components/                  # MemberTypeList, PolicyMatrixTable, PolicyModal
-│   │
+│   ├── holds/                           # Reservation queue management
+│   ├── fines/                           # Ledger, payments & receipts
+│   ├── members/                         # Patron management & profiles
+│   ├── member-types/                    # Borrower classifications & loan policies
+│   ├── reports/                         # Dashboard metrics & aggregations
 │   └── users/                           # User directory & self-service profile
-│       ├── types/users.types.ts
-│       ├── services/users.service.ts
-│       └── components/                  # UserDirectoryTable, LibrarianModal, ProfileCard
 │
 ├── components/                          # Shared cross-feature UI components
-│   ├── auth/                            # RBAC visibility & guard components
-│   │   ├── can.tsx                      # <Can permission="...">
-│   │   └── require-permission.tsx       # <RequirePermission permission="...">
+│   ├── auth/                            # RBAC visibility & guard components (<Can>, <RequirePermission>)
 │   ├── feedback/                        # Alerts, toasts, error boundaries
-│   │   ├── alert.tsx                    # <Alert variant="...">
-│   │   ├── access-denied.tsx            # <AccessDenied />
-│   │   ├── error-boundary.tsx           # <ErrorBoundary />
-│   │   └── toast.tsx                    # ToastProvider & useToast()
-│   ├── layout/                          # App shell, navigation, containers
-│   │   ├── container.tsx                # <Container />
-│   │   └── navbar.tsx                   # <Navbar /> (role-based nav links)
+│   ├── layout/                          # App shell, navigation, public shell
 │   └── ui/                              # Base design system primitives
-│       ├── badge.tsx                    # <Badge variant="...">
-│       ├── button.tsx                   # <Button variant="..." isLoading="...">
-│       ├── input.tsx                    # <Input />
-│       ├── modal.tsx                    # <Modal isOpen="..." onClose="...">
-│       ├── select.tsx                   # <Select options="...">
-│       └── spinner.tsx                  # <Spinner size="...">
 │
 ├── lib/                                 # Infrastructure, core clients, auth
 │   ├── api/
+│   │   ├── endpoints.ts                 # STRICT SINGLE SOURCE OF TRUTH FOR ALL ENDPOINTS
 │   │   ├── client.ts                    # Strongly-typed apiClient (credentials: 'include')
 │   │   └── errors.ts                    # ApiError normalization
 │   └── auth/
 │       ├── permissions.ts               # Constant definitions of all system permissions
+│       ├── role-permissions.ts          # Matrix mapping AuthRole -> Permission[]
+│       ├── permission-helpers.ts        # hasPermission, hasAnyPermission, hasAllPermissions
+│       └── auth-context.tsx             # AuthProvider & useAuth() hook
+│
+├── types/                               # Common and cross-cutting TypeScript types
 │       ├── role-permissions.ts          # Matrix mapping AuthRole -> Permission[]
 │       ├── permission-helpers.ts        # hasPermission, hasAnyPermission, hasAllPermissions
 │       └── auth-context.tsx             # AuthProvider & useAuth() hook

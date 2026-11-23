@@ -13,6 +13,10 @@ import { PlatformTenantsService } from './tenants/platform-tenants.service.js';
 import { PlatformTenantsController } from './tenants/platform-tenants.controller.js';
 import { PlatformTenantAdminsService } from './tenant-admins/platform-tenant-admins.service.js';
 import { PlatformTenantAdminsController } from './tenant-admins/platform-tenant-admins.controller.js';
+import { PlatformMonitoringService } from './monitoring/platform-monitoring.service.js';
+import { PlatformMonitoringController } from './monitoring/platform-monitoring.controller.js';
+import { PlatformAuditLogsService } from './audit-logs/platform-audit-logs.service.js';
+import { PlatformAuditLogsController } from './audit-logs/platform-audit-logs.controller.js';
 
 @Module({
   imports: [DatabaseModule, RedisModule, IdentityModule],
@@ -20,6 +24,8 @@ import { PlatformTenantAdminsController } from './tenant-admins/platform-tenant-
     PlatformAuthController,
     PlatformTenantsController,
     PlatformTenantAdminsController,
+    PlatformMonitoringController,
+    PlatformAuditLogsController,
   ],
   providers: [
     PlatformMfaService,
@@ -30,6 +36,8 @@ import { PlatformTenantAdminsController } from './tenant-admins/platform-tenant-
     PlatformAuthGuard,
     PlatformTenantsService,
     PlatformTenantAdminsService,
+    PlatformMonitoringService,
+    PlatformAuditLogsService,
   ],
   exports: [
     PlatformMfaService,
@@ -40,6 +48,8 @@ import { PlatformTenantAdminsController } from './tenant-admins/platform-tenant-
     PlatformAuthGuard,
     PlatformTenantsService,
     PlatformTenantAdminsService,
+    PlatformMonitoringService,
+    PlatformAuditLogsService,
   ],
 })
 export class PlatformModule {}

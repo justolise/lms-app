@@ -52,10 +52,13 @@ export const authService = {
       type = identifier.includes("@") ? "EMAIL" : "PHONE";
     }
 
-    return apiClient.post<PasswordResetResponse>(ENDPOINTS.auth.forgotPassword, {
-      type,
-      identifier: identifier.trim(),
-    });
+    return apiClient.post<PasswordResetResponse>(
+      ENDPOINTS.auth.forgotPassword,
+      {
+        type,
+        identifier: identifier.trim(),
+      },
+    );
   },
 
   resetPassword(

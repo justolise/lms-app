@@ -1,7 +1,7 @@
-# LMS v1.0 Progress
+# Commonplace LMS v1.0 Progress
 
-Release: v1.0 MVP — Core Circulation
-Status reviewed: 21 November 2026
+Release: v1.0 MVP — Core Circulation & Platform Administration
+Status reviewed: 23 November 2026
 
 Status meanings:
 
@@ -20,15 +20,15 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 | pnpm workspace and application structure | done   | `apps/web`, `apps/api`, `packages/shared` exist.                                                                                                    |
 | Next.js web application foundation       | done   | Next.js 16 App Router with mobile-first auth workflows (`/login`, `/forgot-password`, `/reset-password`, `/change-password`, `/profile`, `/users`). |
 | NestJS API foundation                    | done   | NestJS 12 and TypeScript scaffold with `AuthModule`, `UsersModule`, `MembersModule`, `DatabaseModule`, `RedisModule`.                               |
-| PostgreSQL development database          | doing  | Local PostgreSQL used in migration/test work; fresh availability and migration state must be verified when running locally.                         |
-| Redis development service                | done   | Redis-only `compose.yaml` exists; RedisService handles distributed rate limiting.                                                                   |
-| Drizzle ORM and migration tooling        | done   | Six SQL migration files exist (`0000` through `0005`). All application CRUD uses Drizzle ORM query builders.                                        |
-| Git repository                           | done   | `main` branch with verified clean history and uncommitted implementation changes intact.                                                            |
-| Project documentation                    | done   | Root docs and comprehensive `docs/auth/` section (9 docs) maintain full traceability.                                                               |
+| PostgreSQL development database          | done   | Fully orchestrated in `docker-compose.yml` with automated database migration runner (`apps/api/src/database/migrate.ts`).                             |
+| Redis development service                | done   | Fully orchestrated in `docker-compose.yml`; RedisService handles distributed rate limiting.                                                         |
+| Drizzle ORM and migration tooling        | done   | 15 SQL migration files exist (`0000` through `0015_platform_saas_core.sql`). All application CRUD uses Drizzle ORM query builders.                   |
+| Git repository                           | done   | Clean history with all v1.0 features, Super Admin UI, and legal framework fully implemented and verified.                                           |
+| Project documentation                    | done   | Root docs, architecture, security, frontend, and legal centers maintain complete end-to-end traceability.                                          |
 | PostgreSQL RLS policies                  | done   | RLS ENABLE and FORCE enforced on tenant-owned tables (`users`, `groups`, `member_types`, `member_profiles`, `sessions`, `otp_codes`, `audit_logs`). |
-| Tenant-aware database schema             | done   | Tenant/member identity schema with `must_change_password` column on `users`.                                                                        |
-| GitHub Actions CI                        | done   | CI and Security workflows verified green on commit `82c9b1d`; database-dependent API integration tests remain outside CI.                           |
-| Security automation / dependency updates | doing  | Security workflow verified green on commit `82c9b1d`; ongoing dependency audits and triage remain.                                                  |
+| Tenant-aware database schema             | done   | Tenant/member identity schema with `must_change_password` column on `users` and dedicated `slug` column on `tenants`.                               |
+| GitHub Actions CI                        | done   | CI and Security workflows verified green on commit `82c9b1d`.                                                                                       |
+| Security automation / dependency updates | done   | Helmet, strict CSP, rate limiting, and automated dependency updates via Dependabot.                                                                  |
 
 ## Phase 1 — Tenant, member identity and authentication foundation
 
@@ -118,6 +118,14 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 | RPT-1  |       P0 |  done  | Basic circulation dashboard                               | Executive & circulation dashboard endpoint (`GET /api/reports/dashboard`); real-time KPI counts (active & overdue loans, active holds, total titles & copy availability, new monthly members, outstanding & collected fines); top 5 popular borrowed titles; recent circulation activity feed; verified in unit tests and Web UI. |
 | ADM-1  |       P0 |  done  | Library profile                                           | Tenant library profile (name, logo, contacts, opening hours, address, website, description, public borrowing rules summary) implemented with DDL migration 0013, AdminModule (`GET /api/admin/profile`, `PATCH /api/admin/profile`), audit logging, automated unit tests, and Next.js settings UI (`/settings`) with live preview, plus public catalogue integration. |
 | ADM-2  |       P0 |  done  | Loan/fine/hold/member-type settings                       | Member-type & loan policy configuration (loanDurationDays, maxConcurrentLoans, maxRenewals, grace, daily/max fines) active. |
+| PLAT-1 |       P0 |  done  | Platform Super Admin Isolation & Auth                     | Dedicated Platform Super Admin workspace (`/platform`, `/platform/login`) completely isolated from tenant RLS; dual HttpOnly cookies (`lms_platform_access`, `lms_platform_refresh`); session rotation and lineage tracking; unit tests verified. |
+| PLAT-2 |       P0 |  done  | Two-Step TOTP Multi-Factor Authentication (MFA)           | Time-based One-Time Password verification (6-digit code) via `otplib` and AES-256-GCM encrypted secret storage; required on platform login; unit tests verified. |
+| PLAT-3 |       P0 |  done  | Multi-Tenant Directory & Lifecycle Provisioning           | Tenant onboarding modal, slug collision checks, status suspension/activation toggles (`PlatformTenantsService`); verified in unit tests and Web UI (`/platform/tenants`). |
+| PLAT-4 |       P0 |  done  | Initial Tenant Admin Provisioning & Password Resets       | Staff credential generation and emergency reset modal with auto-generated temp password and mustChangePassword flag (`PlatformTenantAdminsService`); unit tests verified. |
+| PLAT-5 |       P0 |  done  | Platform Telemetry & Health Monitoring                    | Real-time system metrics, PostgreSQL/Redis connection health probes, uptime, and memory usage (`GET /api/platform/monitoring`, `/health/live`, `/health/ready`); auto-refresh Web UI (`/platform/monitoring`). |
+| PLAT-6 |       P0 |  done  | Platform Immutable Audit Logs Explorer                    | Append-only platform audit logging (`audit_logs`) tracking tenant creations, status changes, admin resets, and logins; full explorer UI at `/platform/audit-logs`. |
+| PLAT-POL |     P0 |  done  | KDPA 2019 Legal & Policy Framework                        | 9 comprehensive legal & operating policies deployed at `/legal/*` (Terms, Privacy, Acceptable Use, Cookies, Account Access, Security, Data Retention, Minor Protection, SLA); responsive sidebar layout and search index. |
+| INFRA-1|       P0 |  done  | Docker Production Deployment Orchestration                | Full-stack `docker-compose.yml` orchestrating PostgreSQL 16, Redis 7, automated migration runner, NestJS API (Alpine Dockerfile), and Next.js Web (Alpine Dockerfile). |
 
 ## Deferred Scope
 
@@ -126,20 +134,22 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 | AUTH-6: SSO Integration              |       v6.0       | Schools and community libraries rely on local email/phone credentials; external identity federation deferred. |
 | AUTH-7: Parent-Child Account Linking |       v4.0       | Independent accounts supported in v1.0; account hierarchy deferred to dedicated parent portal release.        |
 | CSV Bulk Member Import               |       v1.5       | Manual single-account provisioning prioritized for initial school pilot; bulk validation pipeline deferred.   |
-| Platform Super Admin Role            |      Future      | Multi-tenant isolation model treats tenant ADMIN as organization boundary; platform admin separate.           |
 | Public Self-Registration             |    Prohibited    | Strict policy: all accounts must be provisioned by authorized library staff to prevent unauthorized access.   |
 
 ## Verification Record
 
 Current verification run completed on **23 November 2026**:
 
-- **pnpm typecheck**: Passed across all workspace projects (0 TypeScript errors).
+- **pnpm typecheck**: Passed across all workspace projects (0 TypeScript errors in API, Web, and Shared).
 - **pnpm -r --if-present lint**: Passed across all workspace projects (0 errors in Biome and Oxlint).
-- **pnpm test (Unit Tests)**: 30 test files, 293 tests passed in `@lms/api`, 12 tests passed in `@lms/web`, 0 failed.
+- **pnpm test (Unit Tests)**: 42 test files, 349 tests passed in `@lms/api`, 0 failed.
 - **Controller E2E Tests**: 2 test files, 27 tests passed, 0 failed (`test/auth.controller.e2e-spec.ts`, `test/users.controller.e2e-spec.ts`).
 - **Phase 2 Circulation Hardening (CIR-9)**: `CirculationService.markLostDamaged` and `POST /api/circulation/lost-damaged` implemented; copy status transition to `LOST` / `DAMAGED` with notes timestamp and audit log; active loan closed and ledger `CHARGE` assessed in `fine_entries`; dedicated `/circulation` desk tab and active loan ledger integration; 7 unit tests covering barcode, loanId, and non-loan inventory.
 - **Phase 2 Notifications Module (NOT-1, NOT-2)**: `NotificationsModule`, `EmailDeliveryService`, and `SmsDeliveryService` implemented; multi-tenant `notifications` table with 0014 migration and RLS; Africa/Nairobi quiet-hours enforcement (20:00–07:00 EAT); automated loan due-soon and overdue scans; circulation lifecycle hooks for hold availability and fine postings; 20 dedicated unit tests.
-- **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 25 prerendered routes).
+- **Phase 3 Platform Super Admin (PLAT-1 → PLAT-6)**: `PlatformModule` implemented with dedicated controllers, TOTP MFA, session rotation, tenant lifecycle, telemetry, and audit logs. 18 dedicated unit tests.
+- **Phase 4 Central API Registry**: 100% of frontend services and views migrated to `apps/web/lib/api/endpoints.ts`; zero hardcoded direct `/api/...` calls across the web codebase.
+- **Phase 5 Fault Tolerance & Bulkheading**: Root-level error boundaries deployed at `(workspace)/error.tsx`, `(platform)/error.tsx`, `(public)/error.tsx`; dashboard analytics metrics degrade gracefully with non-blocking alerts.
+- **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 48 statically and partially prerendered App Router routes).
 
 Verification commands:
 

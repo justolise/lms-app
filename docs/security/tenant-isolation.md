@@ -23,3 +23,7 @@
 5. **Cross-Tenant Account Discovery**:
    - The application database role (`lms_app`) has zero direct access to `user_identity_lookup`.
    - Access is mediated by `SECURITY DEFINER` functions in `identity_private` owned by `lms_identity_owner`, storing only HMAC-SHA-256 hashes.
+6. **Platform Super Admin Domain Boundary**:
+   - Platform Super Admin accounts (`platform_users`, `platform_sessions`, `platform_mfa`) exist outside tenant RLS tables.
+   - Platform tokens (`lms_platform_access`, `lms_platform_refresh`) cannot be used to authenticate as a tenant user or inject cross-tenant bypass context.
+   - Platform Super Admin actions (tenant creation, status toggles, admin credential resets) operate strictly on the platform metadata plane and are immutably logged.

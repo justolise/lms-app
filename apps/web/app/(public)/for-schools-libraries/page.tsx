@@ -12,29 +12,68 @@ const AUDIENCE = [
     icon: "🏫",
     title: "School libraries",
     body: "Manage student, teacher and staff borrowing. Enforce different loan limits per member type. Send SMS reminders when textbooks are overdue. Integrate seamlessly into your school's daily operations.",
-    highlights: ["Per-member-type loan rules", "SMS overdue alerts", "Student & teacher roles", "Barcode scanning on phones"],
+    highlights: [
+      "Per-member-type loan rules",
+      "SMS overdue alerts",
+      "Student & teacher roles",
+      "Barcode scanning on phones",
+    ],
   },
   {
     icon: "🏛️",
     title: "Public & community libraries",
     body: "Support a diverse patron base with multiple membership categories. Run holds queues fairly. Accept fine payments and issue receipts. Track your collection with full copy-level inventory.",
-    highlights: ["FIFO hold queues", "Fine ledger & receipts", "Full borrowing history", "Multi-copy inventory"],
+    highlights: [
+      "FIFO hold queues",
+      "Fine ledger & receipts",
+      "Full borrowing history",
+      "Multi-copy inventory",
+    ],
   },
   {
     icon: "🏢",
     title: "Institution & research libraries",
     body: "Built for libraries that need reliable audit trails, fine-grained access control and structured reporting. KDPA 2019 compliant. Tenant-isolated. Ready for institutional governance requirements.",
-    highlights: ["Full audit logs", "Role-based access control", "KDPA 2019 compliant", "Structured reporting"],
+    highlights: [
+      "Full audit logs",
+      "Role-based access control",
+      "KDPA 2019 compliant",
+      "Structured reporting",
+    ],
   },
 ];
 
 const WHY_ITEMS = [
-  { emoji: "🌍", title: "Designed for East Africa", body: "Africa's Talking SMS integration, Kenya Data Protection Act 2019 compliance, and pricing designed for school and community budgets." },
-  { emoji: "☁️", title: "Cloud-hosted, no server needed", body: "Nothing to install. No on-premise servers. Access your library system from any browser, anywhere." },
-  { emoji: "📱", title: "Works on any device", body: "Staff can check out books on a phone using the camera as a barcode scanner. No dedicated hardware required to get started." },
-  { emoji: "🔒", title: "Your data, protected", body: "Each library is a fully isolated tenant. Row-level security enforced at the database layer. No data ever crosses library boundaries." },
-  { emoji: "🛠️", title: "Operated by real librarians", body: "Every workflow was designed with the desk experience in mind. Checkout, return, renewals and holds — all in a few clicks." },
-  { emoji: "📞", title: "Local support", body: "We are based in Kenya. Support is available via email and phone during East Africa business hours." },
+  {
+    emoji: "🌍",
+    title: "Designed for East Africa",
+    body: "Africa's Talking SMS integration, Kenya Data Protection Act 2019 compliance, and pricing designed for school and community budgets.",
+  },
+  {
+    emoji: "☁️",
+    title: "Cloud-hosted, no server needed",
+    body: "Nothing to install. No on-premise servers. Access your library system from any browser, anywhere.",
+  },
+  {
+    emoji: "📱",
+    title: "Works on any device",
+    body: "Staff can check out books on a phone using the camera as a barcode scanner. No dedicated hardware required to get started.",
+  },
+  {
+    emoji: "🔒",
+    title: "Your data, protected",
+    body: "Each library is a fully isolated tenant. Row-level security enforced at the database layer. No data ever crosses library boundaries.",
+  },
+  {
+    emoji: "🛠️",
+    title: "Operated by real librarians",
+    body: "Every workflow was designed with the desk experience in mind. Checkout, return, renewals and holds — all in a few clicks.",
+  },
+  {
+    emoji: "📞",
+    title: "Local support",
+    body: "We are based in Kenya. Support is available via email and phone during East Africa business hours.",
+  },
 ];
 
 export default function ForSchoolsLibrariesPage() {
@@ -47,12 +86,13 @@ export default function ForSchoolsLibrariesPage() {
             Built For You
           </span>
           <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-6">
-            The library system East Africa's<br className="hidden sm:block" /> institutions deserve.
+            The library system East Africa's
+            <br className="hidden sm:block" /> institutions deserve.
           </h1>
           <p className="text-base sm:text-lg text-white/70 max-w-2xl mx-auto">
             Professional, affordable library management designed for schools,
-            public libraries and community reading centres — from Nairobi to Kisumu
-            and beyond.
+            public libraries and community reading centres — from Nairobi to
+            Kisumu and beyond.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Link
@@ -82,10 +122,16 @@ export default function ForSchoolsLibrariesPage() {
               key={a.title}
               className="rounded-2xl border border-border bg-surface p-6 sm:p-8 flex flex-col sm:flex-row gap-6"
             >
-              <span className="text-4xl" role="img" aria-label={a.title}>{a.icon}</span>
+              <span className="text-4xl" role="img" aria-label={a.title}>
+                {a.icon}
+              </span>
               <div className="flex-1">
-                <h3 className="text-lg font-bold text-foreground mb-2">{a.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{a.body}</p>
+                <h3 className="text-lg font-bold text-foreground mb-2">
+                  {a.title}
+                </h3>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                  {a.body}
+                </p>
                 <ul className="flex flex-wrap gap-2">
                   {a.highlights.map((h) => (
                     <li
@@ -110,10 +156,17 @@ export default function ForSchoolsLibrariesPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {WHY_ITEMS.map((w) => (
-              <div key={w.title} className="flex flex-col gap-2 p-5 rounded-2xl hover:bg-surface-hover transition-colors">
-                <span className="text-2xl" role="img" aria-label={w.title}>{w.emoji}</span>
+              <div
+                key={w.title}
+                className="flex flex-col gap-2 p-5 rounded-2xl hover:bg-surface-hover transition-colors"
+              >
+                <span className="text-2xl" role="img" aria-label={w.title}>
+                  {w.emoji}
+                </span>
                 <h3 className="text-sm font-bold text-foreground">{w.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{w.body}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {w.body}
+                </p>
               </div>
             ))}
           </div>
@@ -127,7 +180,8 @@ export default function ForSchoolsLibrariesPage() {
             Bring your library online
           </h2>
           <p className="text-muted-foreground mb-8">
-            Talk to us. We will walk you through onboarding your institution step by step.
+            Talk to us. We will walk you through onboarding your institution
+            step by step.
           </p>
           <Link
             href="/contact"

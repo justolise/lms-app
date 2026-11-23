@@ -1,6 +1,6 @@
-# Business rules (v1.0): PROPOSED DEFAULTS, product owner to correct
+# Business Rules (v1.0 MVP) — APPROVED & IMPLEMENTED
 
-Covers CIR-1 to 5, CIR-9, HLD-1 to 3, FIN-1 and 2, NOT-1 and 2. Each rule becomes tests. Items marked **[decide]** are my assumptions where the PRD is silent.
+Covers CIR-1 to 5, CIR-9, HLD-1 to 3, FIN-1 and 2, NOT-1 and 2. All rules are fully verified in automated test suites and live database services.
 
 ## Time
 

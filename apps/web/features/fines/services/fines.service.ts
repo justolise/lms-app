@@ -21,9 +21,7 @@ export const finesService = {
     if (params?.offset) searchParams.set("offset", String(params.offset));
 
     const qs = searchParams.toString();
-    const url = qs
-      ? `${ENDPOINTS.fines.ledger}?${qs}`
-      : ENDPOINTS.fines.ledger;
+    const url = qs ? `${ENDPOINTS.fines.ledger}?${qs}` : ENDPOINTS.fines.ledger;
     return apiClient.get<FineEntry[]>(url);
   },
 

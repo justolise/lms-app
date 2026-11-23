@@ -150,12 +150,13 @@ export default function FeaturesPage() {
             v1.0 Feature Set
           </span>
           <h1 className="text-3xl sm:text-5xl font-bold tracking-tight mb-6">
-            Everything a library needs.<br className="hidden sm:block" /> Nothing it doesn't.
+            Everything a library needs.
+            <br className="hidden sm:block" /> Nothing it doesn't.
           </h1>
           <p className="text-base sm:text-lg text-white/70 max-w-2xl mx-auto">
-            Commonplace covers the full circulation lifecycle — from cataloguing a
-            new acquisition to collecting an overdue fine — in a single, integrated
-            platform.
+            Commonplace covers the full circulation lifecycle — from cataloguing
+            a new acquisition to collecting an overdue fine — in a single,
+            integrated platform.
           </p>
         </div>
       </section>
@@ -174,9 +175,15 @@ export default function FeaturesPage() {
                     key={f.title}
                     className="rounded-2xl border border-border bg-surface p-6 space-y-3"
                   >
-                    <span className="text-2xl" role="img" aria-label={f.title}>{f.icon}</span>
-                    <h3 className="text-sm font-bold text-foreground">{f.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{f.body}</p>
+                    <span className="text-2xl" role="img" aria-label={f.title}>
+                      {f.icon}
+                    </span>
+                    <h3 className="text-sm font-bold text-foreground">
+                      {f.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {f.body}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -192,7 +199,8 @@ export default function FeaturesPage() {
             Ready to get started?
           </h2>
           <p className="text-muted-foreground mb-8">
-            Contact us to onboard your library or browse our public catalogue demo.
+            Contact us to onboard your library or browse our public catalogue
+            demo.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link

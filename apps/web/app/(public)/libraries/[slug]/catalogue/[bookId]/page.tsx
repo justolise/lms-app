@@ -145,9 +145,7 @@ function TenantPublicBookDetailContent() {
       setIsLoading(true);
       setError(null);
       try {
-        const res = await fetch(
-          ENDPOINTS.public.catalogueItem(slug, bookId),
-        );
+        const res = await fetch(ENDPOINTS.public.catalogueItem(slug, bookId));
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
           throw new Error(errData?.message ?? `HTTP ${res.status}`);
