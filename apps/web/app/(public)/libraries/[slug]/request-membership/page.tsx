@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 
 interface PublicLibrary {
   id: string;
@@ -47,14 +48,14 @@ function MembershipRequestForm() {
     async function loadData() {
       try {
         // Load libraries list for selector
-        const libsRes = await fetch("/api/public/libraries");
+        const libsRes = await fetch(ENDPOINTS.public.libraries);
         if (libsRes.ok) {
           const allLibs: PublicLibrary[] = await libsRes.json();
           setLibraries(allLibs);
         }
 
         // Load specific library info
-        const res = await fetch(`/api/public/libraries/${slug}`);
+        const res = await fetch(ENDPOINTS.public.library(slug));
         if (res.ok) {
           const data = await res.json();
           setLibrary(data);
@@ -87,22 +88,19 @@ function MembershipRequestForm() {
 
     setIsSubmitting(true);
     try {
-      const res = await fetch(
-        `/api/public/libraries/${slug}/membership-requests`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            fullName: fullName.trim(),
-            email: email.trim(),
-            phone: phone.trim(),
-            idNumber: idNumber.trim() || undefined,
-            memberType: memberType || undefined,
-            organization: organization.trim() || undefined,
-            notes: notes.trim() || undefined,
-          }),
-        },
-      );
+      const res = await fetch(ENDPOINTS.public.membershipRequest(slug), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: fullName.trim(),
+          email: email.trim(),
+          phone: phone.trim(),
+          idNumber: idNumber.trim() || undefined,
+          memberType: memberType || undefined,
+          organization: organization.trim() || undefined,
+          notes: notes.trim() || undefined,
+        }),
+      });
 
       const data = await res.json().catch(() => ({}));
 

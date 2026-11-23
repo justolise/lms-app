@@ -40,6 +40,12 @@ A dedicated security contact and response SLA remain to be established before pu
 - Sensitive API cache suppression: Global `Cache-Control: no-store, no-cache, must-revalidate, proxy-revalidate`, `Pragma: no-cache`, `Expires: 0` headers on all `/api/*` endpoints to eliminate credential and patron data caching in intermediate proxies or browsers.
 - Express body parser size limits (1MB) to protect against payload denial-of-service (DoS).
 - CORS configuration with explicit origins, methods, headers, and credentials handling.
+- Dedicated Platform Super Admin domain outside tenant RLS with mandatory two-step TOTP MFA (AES-256-GCM encrypted secrets) and isolated HttpOnly cookies (`lms_platform_access`, `lms_platform_refresh`).
+- Full audit event logging for fine waivers, copy deletions, lost/damaged item reporting, checkout overrides, and platform administrative actions.
+- Distributed request tracing via UUIDv4 `X-Correlation-ID` headers propagating across structured NestJS logs.
+- Centralized API endpoints registry (`lib/api/endpoints.ts`) strictly governing all frontend client communications.
+- Unprivileged non-root execution (`nodejs:nodejs` UID 1001) in Alpine production Docker containers.
+- Comprehensive KDPA 2019 legal and operational policies published at `/legal/*`.
 - `.env` is ignored by `.gitignore`.
 
 ## Known outstanding security work

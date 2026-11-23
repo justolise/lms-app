@@ -1,3 +1,4 @@
+import { ENDPOINTS } from "./endpoints";
 import { ApiError } from "./errors";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -67,11 +68,16 @@ class ApiClient {
 
     if (!res.ok) {
       if (res.status === 401 && !path.includes("/auth/")) {
+        const isPlatformApi = path.startsWith("/api/platform/");
+        const refreshEndpoint = isPlatformApi
+          ? ENDPOINTS.platform.refresh
+          : ENDPOINTS.auth.refresh;
+
         // Attempt silent session refresh once
         if (!this.refreshPromise) {
           this.refreshPromise = (async () => {
             try {
-              const refreshRes = await fetch("/api/auth/refresh", {
+              const refreshRes = await fetch(refreshEndpoint, {
                 method: "POST",
                 credentials: "include",
               });
@@ -93,17 +99,26 @@ class ApiClient {
         // If refresh failed and we are running in browser on a protected route, redirect to login
         if (typeof window !== "undefined") {
           const pathname = window.location.pathname;
+          const isPlatform = pathname.startsWith("/platform");
+          const isPlatformLogin = pathname === "/platform/login";
+
           const isPublic =
+            isPlatformLogin ||
             pathname === "/" ||
             pathname.startsWith("/login") ||
             pathname.startsWith("/forgot-password") ||
             pathname.startsWith("/reset-password") ||
             pathname.startsWith("/libraries") ||
             pathname.startsWith("/browse") ||
-            pathname.startsWith("/request-membership");
+            pathname.startsWith("/request-membership") ||
+            pathname.startsWith("/legal") ||
+            pathname.startsWith("/about") ||
+            pathname.startsWith("/features") ||
+            pathname.startsWith("/for-schools-libraries") ||
+            pathname.startsWith("/contact");
 
           if (!isPublic) {
-            window.location.href = "/login";
+            window.location.href = isPlatform ? "/platform/login" : "/login";
           }
         }
       }

@@ -23,7 +23,7 @@ This matrix maps every requirement from the product requirements baseline and Pr
 
 ## 2. Explicitly Deferred / Prohibited Features Verification
 
-- **SUPER_ADMIN**: Not implemented. Role definitions strictly adhere to approved 6 roles (`ADMIN`, `LIBRARIAN`, `TEACHER`, `MEMBER`, `PARENT`, `GUEST`).
+- **Tenant SUPER_ADMIN Role**: Strictly prohibited in tenant role enums. Platform Super Admin is implemented in a dedicated `PlatformModule` with isolated schemas, TOTP MFA, and dedicated platform session cookies (`lms_platform_*`), keeping tenant RLS inviolable.
 - **AUTH-6 (SSO)**: Deferred to v6.0. No SSO endpoints or SAML/OIDC handlers introduced.
 - **AUTH-7 (Parent-Child Account Linking)**: Deferred to v4.0. No linking endpoints introduced.
 - **CSV Bulk Member Import**: Deferred to v1.5. Only manual single-account creation is supported via `POST /api/members`.

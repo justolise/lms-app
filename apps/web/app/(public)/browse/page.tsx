@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -162,7 +163,7 @@ export default function PublicCataloguePage() {
   useEffect(() => {
     async function loadLibraries() {
       try {
-        const res = await fetch("/api/public/libraries");
+        const res = await fetch(ENDPOINTS.public.libraries);
         if (res.ok) {
           const list: LibraryOption[] = await res.json();
           setLibraries(list);
@@ -197,7 +198,7 @@ export default function PublicCataloguePage() {
       });
       if (q.trim()) params.set("q", q.trim());
 
-      const res = await fetch(`/api/public/catalogue?${params}`);
+      const res = await fetch(`${ENDPOINTS.public.browseCatalogue}?${params}`);
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.message ?? `HTTP ${res.status}`);

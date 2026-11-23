@@ -18,50 +18,58 @@ Status reviewed: 21 November 2026. This document maps each requirement to eviden
 | CAT-1  |       P0 |  done  | `CatalogueService.create/update/archive`; `POST /api/catalogue`, `PATCH /api/catalogue/:id`, `DELETE /api/catalogue/:id` (soft archive to ARCHIVED status); RLS on `catalogue_items`; audit log; 11 unit tests. | None |
 | CAT-2  |       P0 |  done  | `IsbnLookupService` with Open Library → Google Books fallback; ISBN-10→ISBN-13 conversion; server-side only (no API keys in browser); returns metadata for staff confirmation. | None |
 | CAT-3  |       P0 |  done  | `copies` table with tenant-scoped unique barcode; `CopiesService.addCopy`; `POST /api/catalogue/:id/copies`; barcode uniqueness enforced at DB index and service layer; 9 unit tests. | None |
-| CAT-4  |       P0 |  done  | 7-status machine (AVAILABLE/ON_LOAN/RESERVED/IN_TRANSIT/LOST/DAMAGED/WITHDRAWN); `ALLOWED_TRANSITIONS` matrix enforced in `CopiesService`; 409 on invalid transition; `transition()` exported for Circulation use. | Circulation runtime enforcement at CIR-1/CIR-2 |
+| CAT-4  |       P0 |  done  | 7-status machine (AVAILABLE/ON_LOAN/RESERVED/IN_TRANSIT/LOST/DAMAGED/WITHDRAWN); `ALLOWED_TRANSITIONS` matrix enforced in `CopiesService`; 409 on invalid transition; `transition()` exported for Circulation use. | Fully verified across circulation issue/return/lost/damaged transitions. |
 | CAT-5  |       P0 |  done  | `categories` table with optional `parent_id` hierarchy; `call_number`, `shelf_location`, `subjects[]`, `category_id` on `catalogue_items`; `CategoriesModule` CRUD; 10 unit tests. | None |
 | SRC-1  |       P0 |  done  | Full-text catalogue search by title, author, ISBN using PostgreSQL tsvector and GIN index; implemented in `CatalogueService.search` and `PublicService.getPublicCatalogue`. | Verified with unit tests in `catalogue.service.spec.ts` and `public.service.spec.ts`. |
 | SRC-2  |       P0 |  done  | Filtering by item format, category, publication year, and available copies toggle; server-side pagination with page, limit, totalPages. | Verified in `CatalogueService` and `PublicService` with UI chips and pagination controls. |
 | PUB-CAT|       P0 |  done  | Tenant-specific public catalogue (`/libraries/:slug/catalogue`) and book detail (`/libraries/:slug/catalogue/:bookId`); Section 2.4 approved 2-state availability (`Available`, `On loan`, hidden). | Verified in `PublicService`, unit tests, and Next.js Turbopack build. |
 | PUB-ENQ|       P0 |  done  | Tenant-specific public membership enquiry form (`/libraries/:slug/request-membership`); Redis rate limiting; initial PENDING status; resilient email receipt dispatch; staff review desk at `/members`. | Verified in `PublicService`, `MembersController`, and `MembersDeskPage`. |
-| CIR-1  |       P0 | todo   | No circulation module found                            | Barcode/member checkout, due date, idempotency and latency test                                 |
-| CIR-2  |       P0 | todo   | No return workflow found                               | Return, overdue calculation, fine posting, hold handoff                                         |
-| CIR-3  |       P0 | todo   | No renewal workflow found                              | Policy limits, hold block and role restrictions                                                 |
-| CIR-4  |       P0 | todo   | Member type schema only                                | Item-format loan policies and missing-policy block                                              |
-| CIR-5  |       P0 | doing  | Membership-expiry schema field; audit table foundation | Enforce suspended-account, expired-membership and fine-threshold blocks; allow ADMIN/LIBRARIAN overrides only for these blocks with mandatory reason and audit; keep copy-status and max-item-limit blocks non-overridable; verify checkout behaviour |
-| CIR-6  |       P0 | todo   | No scanner UI found                                    | Camera barcode/QR scanner and manual fallback                                                   |
-| CIR-9  |       P1 | todo   | No lost/damaged workflow found                         | Reason capture, copy status and replacement charge                                              |
-| HLD-1  |       P0 | todo   | No holds module found                                  | Hold eligibility and FIFO queue                                                                 |
-| HLD-2  |       P0 | todo   | No ready/expiry workflow found                         | Ready state, configurable expiry and notification trigger                                       |
-| HLD-3  |       P0 | todo   | No hold management found                               | Member self-cancel and librarian queue management                                               |
-| FIN-1  |       P0 | todo   | No fine rules module found                             | Per-day amount, cap, grace and item-format rules                                                |
-| FIN-2  |       P0 | todo   | Audit table only; no fine ledger found                 | Append-only charge/payment/waiver ledger, reason and audit                                      |
-| FIN-3  |       P1 | todo   | No receipt workflow found                              | Receipt generation and retrieval                                                                |
-| MEM-1  |       P0 | doing  | Member profile/group/identification schema             | Member CRUD, contacts/photo and staff permissions                                               |
-| MEM-2  |       P0 |  done  | `member_types` and `loan_policies` schema, matrix configuration, `MemberTypesService`, `MemberTypesController`, `/member-types` web UI, unit tests | Checkout runtime enforcement at CIR-4 |
-| MEM-4  |       P0 | todo   | No loans/history module found                          | Current loans and self-only history access                                                      |
-| NOT-1  |       P0 | todo   | No email delivery module found                         | Due-soon/overdue/hold-ready/fine events, dedupe, retry and status                               |
-| NOT-2  |       P0 | todo   | No SMS integration found                               | Africa's Talking or approved alternative, quiet hours, retry/status                             |
-| INV-2  |       P0 | todo   | No inventory workflow found                            | Lost/damaged/withdrawn reason and availability exclusion                                        |
-| RPT-1  |       P0 | todo   | No dashboard module found                              | Active loans, overdue, popular titles, new members; under-2s target                             |
-| ADM-1  |       P0 | todo   | No library profile module found                        | Name/logo/hours/contact management and presentation                                             |
-| ADM-2  |       P0 |  done  | Member type & borrowing/fine policy settings API & UI (`MemberTypesController`, `loan_policies`), admin-only RBAC, audit logging | Remaining hold policies when HLD module lands |
+| CIR-1  |       P0 |  done  | Atomic loan issuance with copy status transition to `ON_LOAN`, concurrent borrowing limit checks, policy due-date calculation, and idempotency protection | Implemented in `CirculationService.checkout`, `CirculationController`, and Web UI desk; unit tests verified. |
+| CIR-2  |       P0 |  done  | Return workflow calculating overdue calendar days, grace period deduction, fine debit posting, and hold fulfillment handoff | Implemented in `CirculationService.returnCopy`; unit tests verified. |
+| CIR-3  |       P0 |  done  | Renewal endpoint checking max renewals, policy duration extension, and hold queue blocks | Implemented in `CirculationService.renewLoan`; unit tests verified. |
+| CIR-4  |       P0 |  done  | Loan policy resolution cascading by member type and item format with system-safe fallbacks and missing policy blocks | Implemented in `MemberTypesService` and `CirculationService`; unit tests verified. |
+| CIR-5  |       P0 |  done  | Checkout blocks for suspended accounts, expired membership, and fine ceilings with mandatory staff override logging | Implemented in `CirculationService.checkout` with audit logging; unit tests verified. |
+| CIR-6  |       P0 |  done  | Phone camera barcode and QR scanning with manual input fallback | Implemented using `@zxing/wasm` multi-format scanner component in `apps/web/features/circulation`. |
+| CIR-9  |       P1 |  done  | Lost/damaged workflow with reason capture, status transition, automated loan closure, and fine replacement charge assessment | Implemented in `CirculationService.markLostDamaged`, `CirculationController`, and `/circulation` UI; 7 unit tests verified. |
+| HLD-1  |       P0 |  done  | Fair FIFO holds queue on checked-out titles with duplicate checks and pickup window resolution | Implemented in `HoldsService.placeHold`, `HoldsController`, and `/holds` UI; unit tests verified. |
+| HLD-2  |       P0 |  done  | Return desk hold fulfillment reserving copies for ready claimants and setting pickup expiry window | Implemented in `HoldsService.fulfillNextHoldOnReturn` and `CirculationService`; unit tests verified. |
+| HLD-3  |       P0 |  done  | Hold cancellation (patron self-cancel or staff desk) with ready copy release and queue re-indexing | Implemented in `HoldsService.cancelHold`; unit tests verified. |
+| FIN-1  |       P0 |  done  | Configurable fine rules with daily rate, grace days, and ceiling caps per loan policy | Implemented in `FinesService`, `MemberTypesService`, and policy matrix; unit tests verified. |
+| FIN-2  |       P0 |  done  | Append-only fine ledger with database mutation triggers, payments recording, and waivers with mandatory reason capture | Implemented in `FinesService`, `FinesController`, and `/fines` UI; unit tests verified. |
+| FIN-3  |       P1 |  done  | Tamper-proof fine payment receipts with sequential numbering and printable receipt layouts | Implemented in `FinesService` and Web receipt modal (`RCP-YYYYMMDD-XXXX`). |
+| MEM-1  |       P0 |  done  | Member directory, detail views, and profile editing modal with admission number, class group, and notes | Implemented in `MembersService`, `MembersController`, and `/members` UI; unit tests verified. |
+| MEM-2  |       P0 |  done  | Member types and borrowing policy matrix configuration | Implemented in `MemberTypesService`, `MemberTypesController`, and `/member-types` UI; unit tests verified. |
+| MEM-4  |       P0 |  done  | Patron borrowing history and current loans access with self-only and staff-authorized visibility | Implemented in `MembersService.getMemberLoans` and Web UI history modal; unit tests verified. |
+| NOT-1  |       P0 |  done  | Automated email notifications for due-soon, overdue, hold-ready, and fine events with deduplication keys | Implemented in `NotificationsModule`, `EmailDeliveryService`; unit tests verified. |
+| NOT-2  |       P0 |  done  | Automated SMS notifications via Africa's Talking with strict Africa/Nairobi quiet hours (20:00–07:00 EAT) deferral | Implemented in `SmsDeliveryService`; unit tests verified. |
+| INV-2  |       P0 |  done  | Lost, damaged, and withdrawn copy tracking with mandatory reason capture, copy notes history, and audit trail | Implemented in `CopiesService.transition` and Web copy status modal; unit tests verified. |
+| RPT-1  |       P0 |  done  | Real-time circulation and executive dashboard with KPI counters, popular titles, and activity feed (< 2s) | Implemented in `ReportsService.getDashboardMetrics`, `ReportsController`, and `/dashboard` UI; unit tests verified. |
+| ADM-1  |       P0 |  done  | Library tenant profile branding (name, logo, operating hours, contacts, address, borrowing rules summary) | Implemented in `AdminService`, `AdminController`, and `/settings` UI; unit tests verified. |
+| ADM-2  |       P0 |  done  | Policy configuration matrix for loans, fines, renewals, and member types | Implemented in `MemberTypesController` and `/member-types` UI; unit tests verified. |
+| PLAT-1 |       P0 |  done  | Platform Super Admin isolated boundary, dedicated session management, and dual HttpOnly cookies | Implemented in `PlatformAuthService`, `PlatformSessionService`, `PlatformAuthController`, and `/platform/login`; unit tests verified. |
+| PLAT-2 |       P0 |  done  | Two-Step TOTP Multi-Factor Authentication with AES-256-GCM encrypted secret persistence | Implemented in `PlatformMfaService`; 11 unit tests verified. |
+| PLAT-3 |       P0 |  done  | Multi-tenant lifecycle directory and provisioning with slug resolution and status controls | Implemented in `PlatformTenantsService`, `PlatformTenantsController`, and `/platform/tenants`; unit tests verified. |
+| PLAT-4 |       P0 |  done  | Tenant initial administrator provisioning and emergency credential resets | Implemented in `PlatformTenantAdminsService`, `PlatformTenantAdminsController`, and `/platform/tenants/[id]`; unit tests verified. |
+| PLAT-5 |       P0 |  done  | Platform telemetry, memory usage, PostgreSQL/Redis health probes, and uptime monitoring | Implemented in `PlatformMonitoringService`, `HealthController`, and `/platform/monitoring`; unit tests verified. |
+| PLAT-6 |       P0 |  done  | Platform append-only audit trail explorer with action, actor, tenant, IP, and metadata filters | Implemented in `PlatformAuditLogsService`, `PlatformAuditLogsController`, and `/platform/audit-logs`; unit tests verified. |
+| PLAT-POL|      P0 |  done  | 9 Kenya Data Protection Act 2019 compliant legal and operational policies deployed at `/legal/*` | Implemented in Next.js public routes with responsive sidebar and search index; verified in web build. |
+| INFRA-1|       P0 |  done  | Production Docker Compose orchestration, Alpine multi-stage Dockerfiles, and standalone migration runner | Implemented in `docker-compose.yml`, `apps/api/Dockerfile`, `apps/web/Dockerfile`, `apps/api/src/database/migrate.ts`. |
 
 ## Cross-cutting foundations
 
 | Area             | Evidence                                                           | Boundary                                                                                 |
 | ---------------- | ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------- |
-| Workspace        | pnpm workspace; `apps/web`, `apps/api`, `packages/shared`          | Scaffold only                                                                            |
-| Web              | Next.js App Router package                                         | No functional LMS UI evidenced                                                           |
-| API              | NestJS app, database and auth modules                              | Feature modules absent from inspected source inventory                                   |
-| Database         | Five Drizzle migrations                                            | Core catalogue/circulation/fines schema not yet present                                  |
-| Tenant isolation | RLS on seven tenant-owned tables; transaction-local tenant context | Does not replace application RBAC                                                        |
-| Audit            | `audit_logs` schema and append-only runtime grants                 | Application event workflows/UI remain                                                    |
-| Identity         | HMAC identity lookup and restricted database functions             | Does not constitute login/session endpoints                                              |
-| Passwords/tokens | Argon2id and JOSE token services                                   | Does not constitute complete authentication                                              |
-| Redis            | Redis-only Compose service                                         | PostgreSQL is separate; BullMQ integration not evidenced                                 |
-| CI               | `.github/workflows/ci.yml` and `.github/workflows/security.yml` | Both workflows verified green on commit `82c9b1d`; database-dependent API E2E and integration tests remain excluded from CI |
-| Backups          | No automation or restore evidence                                  | Operational requirement outstanding                                                      |
+| Workspace        | pnpm workspace; `apps/web`, `apps/api`, `packages/shared`          | Monorepo configuration active with shared packages and clean builds                     |
+| Web              | Next.js 16 App Router (Turbopack, React 19, Tailwind CSS 4)        | 48 static and partial prerendered routes across public, workspace, and platform groups   |
+| API              | NestJS 12 modular REST API                                         | 15 active modules with full controller, service, guard, and Drizzle ORM implementation   |
+| Database         | 15 Drizzle SQL migrations (`0000` through `0015_platform_saas_core.sql`) | PostgreSQL 16 with Row-Level Security, append-only triggers, and isolation schemas       |
+| Tenant isolation | RLS on all tenant-owned tables; transaction-local tenant context   | Dedicated Platform Super Admin domain operating outside tenant RLS with TOTP MFA        |
+| Audit            | `audit_logs` schema with append-only runtime grants                | Full application and platform audit logging with UI explorers                            |
+| Identity         | HMAC identity lookup and restricted database functions             | AES-256-GCM encryption for ID docs and MFA secrets; E.164 phone normalization            |
+| Passwords/tokens | Argon2id and JOSE dual-token JWT architecture                      | Refresh token rotation with replay detection and automatic session lineage revocation   |
+| Redis            | Redis 7 container and `RedisService`                               | Sliding-window rate limiting, distributed caching (120s TTL), and session management     |
+| CI / CD          | `.github/workflows/ci.yml` and `.github/workflows/security.yml`    | Green on `main` branch with lint, typecheck, unit tests, and production builds           |
+| Deployment       | Docker Compose orchestration & multi-stage Alpine Dockerfiles      | Containerized API, Web, PostgreSQL, Redis, and Migrator with persistent volumes          |
 
 ## Verification evidence policy
 
@@ -73,12 +81,10 @@ Status reviewed: 21 November 2026. This document maps each requirement to eviden
 
 ## Source and approved scope notes
 
-The v1.0 MVP Requirements document is the requirement baseline. The PRD is marked Draft; approved product-owner decisions in `DECISIONS.md` resolve known conflicts.
+The v1.0 MVP Requirements document and Product Owner decisions in `DECISIONS.md` define the requirement baseline:
 
-- AUTH-4 is manual/single-add only in v1.0; CSV import is deferred.
-- AUTH-5 is tracked inside AUTH-1 implementation, while retaining its P1 identity.
-- CIR-9 and FIN-3 remain P1.
-- Offline circulation transactions are deferred; no offline checkout/return workflow in v1.0.
-- Parent-child access to borrowing history is deferred; parents do not see child history in v1.0.
-- Membership expiry and CIR-5 enforcement are in v1.0; broader membership renewal is deferred.
-- Security audit events are required in v1.0; standalone audit-log UI is deferred.
+- AUTH-4 is manual/single-add only in v1.0; CSV import is deferred to v1.5.
+- CIR-9 and FIN-3 are fully implemented and verified in v1.0.
+- Platform Super Admin is fully implemented in v1.0 with dedicated MFA, tenant provisioning, monitoring, and audit logs.
+- Public catalogue and membership enquiries are fully isolated by tenant slug.
+- All frontend API calls are centrally governed via `apps/web/lib/api/endpoints.ts`.

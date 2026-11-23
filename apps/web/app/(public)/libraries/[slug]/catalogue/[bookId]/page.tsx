@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 
 interface PublicBookDetail {
   id: string;
@@ -144,9 +145,7 @@ function TenantPublicBookDetailContent() {
       setIsLoading(true);
       setError(null);
       try {
-        const res = await fetch(
-          `/api/public/libraries/${slug}/catalogue/${bookId}`,
-        );
+        const res = await fetch(ENDPOINTS.public.catalogueItem(slug, bookId));
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
           throw new Error(errData?.message ?? `HTTP ${res.status}`);

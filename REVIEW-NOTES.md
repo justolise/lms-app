@@ -125,4 +125,43 @@ This phase implements AUTH-1 through AUTH-5 (MVP requirements) and four Product 
 2. **CI does not include controller E2E tests.** The `.github/workflows/ci.yml` runs `pnpm test` (unit tests only). The controller E2E suite should be added once the CI workflow is confirmed stable.
 3. **Production SMS/SMTP credentials are not configured.** In development and test environments, OTP codes are logged to the debug console when provider credentials are absent. Production deployments require configured `SMTP_*` and `AFRICASTALKING_*` variables before sending OTP messages to real users.
 4. **Secret scanning and CodeQL remain unconfigured** per the Phase 1 note; this remains outstanding.
-5. **Catalogue, circulation, fines, holds, notifications, dashboard, and admin settings are not yet implemented.** See `PROGRESS.md` for outstanding `todo` requirements.
+---
+
+## Phase 3 & 4 — Core Circulation, Platform Super Admin, Brand & Full Monorepo Reconciliation — 2026-11-23
+
+This phase delivers the remaining v1.0 MVP modules, Platform Super Admin workspace, KDPA legal center, and full Docker deployment orchestration.
+
+### Items Delivered & Resolved
+
+1. **Core Circulation, Holds & Fines Subsystems**:
+   - Implemented checkout (CIR-1), returns with overdue fine calculations (CIR-2), renewals (CIR-3), loan policies matrix (CIR-4), checkout blocks & overrides (CIR-5), `@zxing/wasm` camera scanner (CIR-6), and lost/damaged replacement charges (CIR-9).
+   - Implemented FIFO holds queue (HLD-1), return-desk ready fulfillment (HLD-2), and hold cancellations (HLD-3).
+   - Implemented append-only fine ledger with database immutability triggers (FIN-1, FIN-2), waiver desk, and sequential payment receipts (FIN-3).
+2. **Patron Directory, Notifications & Reporting**:
+   - Member profiles, class groups, and borrowing history modals (MEM-1, MEM-4).
+   - Automated email (NOT-1) and SMS (NOT-2) notifications with strict Africa/Nairobi quiet-hours enforcement.
+   - Real-time circulation & executive dashboard (< 2s) with KPI counters and activity streams (RPT-1).
+   - Inventory loss reason tracking (INV-2) and tenant library profile branding (ADM-1).
+3. **Platform Super Admin Subsystem (PLAT-1 → PLAT-6)**:
+   - Dedicated Platform Super Admin workspace (`/platform`) operating outside tenant RLS.
+   - Two-step TOTP MFA authentication with AES-256-GCM encrypted secrets.
+   - Multi-tenant directory lifecycle and provisioning (`PlatformTenantsService`).
+   - Tenant initial admin account provisioning and emergency password reset modal (`PlatformTenantAdminsService`).
+   - Real-time platform telemetry, memory metrics, and `/health/live` / `/health/ready` probes (`PlatformMonitoringService`).
+   - Immutable platform audit log explorer (`PlatformAuditLogsService`).
+4. **Legal & Policy Center (PLAT-POL-01 → 09)**:
+   - 9 KDPA 2019 compliant legal policies deployed under `/legal/*` with responsive sidebar navigation and search index.
+5. **Centralized Frontend API Registry**:
+   - `apps/web/lib/api/endpoints.ts` acts as the strict single source of truth for all backend endpoints. Direct `/api/...` strings are completely eliminated from the web codebase.
+6. **Resilient Bulkheading & Fault Tolerance**:
+   - Route group error boundaries (`(workspace)/error.tsx`, `(platform)/error.tsx`, `(public)/error.tsx`) prevent cascading UI crashes.
+   - Non-blocking dashboard telemetry warnings and database slug resolution fallbacks.
+7. **Docker Compose & Deployment Orchestration**:
+   - Multi-stage Alpine Dockerfiles for NestJS API and Next.js Web (non-root execution).
+   - Full-stack `docker-compose.yml` coordinating PostgreSQL 16, Redis 7, automated migration runner, API, and Web.
+8. **Verification Evidence**:
+   - 349 unit tests passed across 42 test suites in `@lms/api`, 0 failures.
+   - 27 controller integration tests passed.
+   - 0 TypeScript errors across all workspace packages (`tsc --noEmit`).
+   - 0 lint errors (Oxlint in API; Biome in Web).
+   - 48 App Router routes statically & partially prerendered in `@lms/web`.

@@ -59,26 +59,55 @@ export class PublicService {
     const cleanSlug = slug?.trim().toLowerCase();
 
     if (cleanSlug && cleanSlug !== 'default') {
-      const rows = await this.database.db
-        .select({
-          id: tenants.id,
-          name: tenants.name,
-          libraryCode: tenants.libraryCode,
-          status: tenants.status,
-          logoUrl: tenants.logoUrl,
-          email: tenants.email,
-          phone: tenants.phone,
-          address: tenants.address,
-          openingHours: tenants.openingHours,
-          website: tenants.website,
-          description: tenants.description,
-          borrowingRulesSummary: tenants.borrowingRulesSummary,
-        })
-        .from(tenants)
-        .where(
-          sql`lower(${tenants.libraryCode}) = ${cleanSlug} OR lower(replace(${tenants.name}, ' ', '-')) = ${cleanSlug}`,
-        )
-        .limit(1);
+      let rows: any[] = [];
+      try {
+        rows = await this.database.db
+          .select({
+            id: tenants.id,
+            name: tenants.name,
+            slug: tenants.slug,
+            libraryCode: tenants.libraryCode,
+            status: tenants.status,
+            logoUrl: tenants.logoUrl,
+            email: tenants.email,
+            phone: tenants.phone,
+            address: tenants.address,
+            openingHours: tenants.openingHours,
+            website: tenants.website,
+            description: tenants.description,
+            borrowingRulesSummary: tenants.borrowingRulesSummary,
+          })
+          .from(tenants)
+          .where(
+            sql`${tenants.slug} = ${cleanSlug} OR lower(${tenants.libraryCode}) = ${cleanSlug} OR lower(replace(${tenants.name}, ' ', '-')) = ${cleanSlug}`,
+          )
+          .limit(1);
+      } catch (dbErr) {
+        // Fallback for database environments where migration 0015 (slug column) has not been run yet
+        this.logger.warn(
+          `Tenant resolution with slug column failed, falling back to libraryCode/name: ${(dbErr as Error).message}`,
+        );
+        rows = await this.database.db
+          .select({
+            id: tenants.id,
+            name: tenants.name,
+            libraryCode: tenants.libraryCode,
+            status: tenants.status,
+            logoUrl: tenants.logoUrl,
+            email: tenants.email,
+            phone: tenants.phone,
+            address: tenants.address,
+            openingHours: tenants.openingHours,
+            website: tenants.website,
+            description: tenants.description,
+            borrowingRulesSummary: tenants.borrowingRulesSummary,
+          })
+          .from(tenants)
+          .where(
+            sql`lower(${tenants.libraryCode}) = ${cleanSlug} OR lower(replace(${tenants.name}, ' ', '-')) = ${cleanSlug}`,
+          )
+          .limit(1);
+      }
 
       if (rows.length > 0) {
         const tenant = rows[0];
@@ -90,7 +119,7 @@ export class PublicService {
         return {
           id: tenant.id,
           name: tenant.name,
-          slug: tenant.libraryCode.toLowerCase(),
+          slug: tenant.slug || tenant.libraryCode.toLowerCase(),
           libraryCode: tenant.libraryCode,
           logoUrl: tenant.logoUrl,
           email: tenant.email,

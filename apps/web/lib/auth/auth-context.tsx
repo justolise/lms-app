@@ -10,6 +10,7 @@ import {
   useState,
 } from "react";
 import { apiClient } from "@/lib/api/client";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 import type { AuthRole } from "@/types/roles";
 import { hasPermission as checkPermission } from "./permission-helpers";
 import type { Permission } from "./permissions";
@@ -51,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchProfile = useCallback(async () => {
     try {
-      const data = await apiClient.get<AuthUser>("/api/profile");
+      const data = await apiClient.get<AuthUser>(ENDPOINTS.profile.get);
       if (data?.id) {
         setUser(data);
       } else {
@@ -77,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      await apiClient.post("/api/auth/logout");
+      await apiClient.post(ENDPOINTS.auth.logout);
     } catch {
       // Ignore network errors during logout
     } finally {

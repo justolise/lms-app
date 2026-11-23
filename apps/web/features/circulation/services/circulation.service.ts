@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 import type {
   CheckoutPayload,
   Loan,
@@ -10,20 +11,23 @@ import type {
 
 export const circulationService = {
   checkout(payload: CheckoutPayload) {
-    return apiClient.post<Loan>("/api/circulation/checkout", payload);
+    return apiClient.post<Loan>(ENDPOINTS.circulation.checkout, payload);
   },
 
   returnLoan(payload: ReturnPayload) {
-    return apiClient.post<ReturnLoanResult>("/api/circulation/return", payload);
+    return apiClient.post<ReturnLoanResult>(
+      ENDPOINTS.circulation.return,
+      payload,
+    );
   },
 
   renew(loanId: string) {
-    return apiClient.post<Loan>(`/api/circulation/renew/${loanId}`);
+    return apiClient.post<Loan>(ENDPOINTS.circulation.renew(loanId));
   },
 
   markLostDamaged(payload: MarkLostDamagedPayload) {
     return apiClient.post<MarkLostDamagedResult>(
-      "/api/circulation/lost-damaged",
+      ENDPOINTS.circulation.lostDamaged,
       payload,
     );
   },
@@ -36,9 +40,10 @@ export const circulationService = {
     const params = new URLSearchParams();
     if (status) params.set("status", status);
     if (userId) params.set("userId", userId);
-    const endpoint = params.toString()
-      ? `/api/circulation/loans?${params.toString()}`
-      : "/api/circulation/loans";
+    const qs = params.toString();
+    const endpoint = qs
+      ? `${ENDPOINTS.circulation.loans}?${qs}`
+      : ENDPOINTS.circulation.loans;
     const data = await apiClient.get<Loan[]>(endpoint);
     return Array.isArray(data) ? data : [];
   },

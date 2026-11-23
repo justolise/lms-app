@@ -65,6 +65,7 @@ export async function seedInitialAdmin(config: SeedAdminConfig = {}) {
         .insert(tenants)
         .values({
           name: tenantName,
+          slug: 'default-library',
           libraryCode,
           status: 'ACTIVE',
         })

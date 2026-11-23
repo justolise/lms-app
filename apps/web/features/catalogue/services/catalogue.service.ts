@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 import type {
   CatalogueItem,
   CatalogueSearchParams,
@@ -16,9 +17,10 @@ export const catalogueService = {
     if (params?.categoryId) searchParams.set("categoryId", params.categoryId);
     if (params?.availableOnly) searchParams.set("availableOnly", "true");
 
-    const endpoint = searchParams.toString()
-      ? `/api/catalogue/search?${searchParams.toString()}`
-      : "/api/catalogue";
+    const hasFilters = searchParams.toString().length > 0;
+    const endpoint = hasFilters
+      ? `${ENDPOINTS.catalogue.search}?${searchParams.toString()}`
+      : ENDPOINTS.catalogue.list;
 
     const data = await apiClient.get<
       CatalogueItem[] | { items: CatalogueItem[] }
@@ -33,26 +35,29 @@ export const catalogueService = {
   },
 
   async getById(id: string): Promise<CatalogueItem> {
-    return apiClient.get<CatalogueItem>(`/api/catalogue/${id}`);
+    return apiClient.get<CatalogueItem>(ENDPOINTS.catalogue.details(id));
   },
 
   async create(payload: CreateCatalogueItemInput): Promise<CatalogueItem> {
-    return apiClient.post<CatalogueItem>("/api/catalogue", payload);
+    return apiClient.post<CatalogueItem>(ENDPOINTS.catalogue.create, payload);
   },
 
   async update(
     id: string,
     payload: Partial<CreateCatalogueItemInput>,
   ): Promise<CatalogueItem> {
-    return apiClient.patch<CatalogueItem>(`/api/catalogue/${id}`, payload);
+    return apiClient.patch<CatalogueItem>(
+      ENDPOINTS.catalogue.update(id),
+      payload,
+    );
   },
 
   async archive(id: string): Promise<void> {
-    await apiClient.delete(`/api/catalogue/${id}`);
+    await apiClient.delete(ENDPOINTS.catalogue.archive(id));
   },
 
   async lookupIsbn(isbn: string): Promise<IsbnLookupResult> {
-    return apiClient.post<IsbnLookupResult>("/api/catalogue/isbn-lookup", {
+    return apiClient.post<IsbnLookupResult>(ENDPOINTS.catalogue.isbnLookup, {
       isbn,
     });
   },
@@ -62,7 +67,7 @@ export const catalogueService = {
     payload: CreateCopyInput,
   ): Promise<CopyItem> {
     return apiClient.post<CopyItem>(
-      `/api/catalogue/${catalogueItemId}/copies`,
+      ENDPOINTS.catalogue.copies(catalogueItemId),
       payload,
     );
   },
@@ -74,11 +79,8 @@ export const catalogueService = {
     reason: string,
   ): Promise<CopyItem> {
     return apiClient.patch<CopyItem>(
-      `/api/catalogue/${catalogueItemId}/copies/${copyId}/status`,
-      {
-        status,
-        reason,
-      },
+      ENDPOINTS.catalogue.copyStatus(catalogueItemId, copyId),
+      { status, reason },
     );
   },
 
@@ -91,7 +93,7 @@ export const catalogueService = {
       ? `?reason=${encodeURIComponent(reason.trim())}`
       : "";
     await apiClient.delete(
-      `/api/catalogue/${catalogueItemId}/copies/${copyId}${query}`,
+      `${ENDPOINTS.catalogue.withdrawCopy(catalogueItemId, copyId)}${query}`,
     );
   },
 };

@@ -379,7 +379,13 @@ function DashboardContent() {
         </div>
       </div>
 
-      {error && <Alert variant="error">{error}</Alert>}
+      {error && (
+        <Alert variant="warning" title="Analytics Subsystem Offline">
+          Live statistics could not be retrieved ({error}). Circulation desk,
+          physical inventory, holds, and patron management remain fully
+          operational.
+        </Alert>
+      )}
 
       {/* Primary KPI Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">

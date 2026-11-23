@@ -21,7 +21,7 @@ The v1.0 MVP release provides production-quality implementations of requirements
 | **`PARENT`** | Parent or guardian account with child-overview privileges (v1.0 view own). | Yes | Yes |
 | **`GUEST`** | Anonymous public browsing role for searching the catalogue. | No (anonymous) | No |
 
-*Note: `SUPER_ADMIN` and platform administration are out of scope for v1.0. `GUEST` accounts do not possess credentials, sessions, or tokens and cannot access protected endpoints.*
+*Note: Platform Super Admin operations are isolated in a dedicated platform management domain (`PlatformModule` / `/platform`) outside tenant roles and outside tenant RLS. Within individual library tenants, `ADMIN` is the highest role. `GUEST` accounts do not possess credentials, sessions, or tokens and cannot access protected endpoints.*
 
 ---
 

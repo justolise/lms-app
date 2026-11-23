@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.0.0](https://github.com/justolise/lms-app/compare/v0.13.0...v1.0.0) (2026-11-23)
+
+
+### Features
+
+* **platform:** implement Platform Super Admin workspace with TOTP MFA, tenant provisioning, live system monitoring, and immutable audit logs (PLAT-1..6)
+* **api:** centralize all frontend API endpoints into `lib/api/endpoints.ts` with zero raw api strings
+* **legal:** implement 9 KDPA-compliant legal policies and responsive legal center layout (PLAT-POL-01..09)
+* **infra:** full production Docker Compose stack with Alpine multi-stage Dockerfiles and automated migration runner
+* **resilience:** implement route-level error boundaries and dashboard metric graceful degradation
+* **brand:** Commonplace brand identity, 5-nav public shell, and tenant portal routes (`/libraries/[slug]`)
+
+
+### Documentation
+
+* align all repository markdown documentation (`README.md`, `PROGRESS.md`, `DECISIONS.md`, `architecture.md`, `runbook.md`, etc.) with verified v1.0 state (349 unit tests, 48 routes, 15 migrations)
+
 ## [0.13.0](https://github.com/justolise/lms-app/compare/v0.12.0...v0.13.0) (2026-11-23)
 
 

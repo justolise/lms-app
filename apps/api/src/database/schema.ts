@@ -60,6 +60,8 @@ export const tenants = pgTable(
 
     name: varchar('name', { length: 200 }).notNull(),
 
+    slug: varchar('slug', { length: 100 }).notNull().unique(),
+
     libraryCode: varchar('library_code', { length: 40 }).notNull().unique(),
 
     status: tenantStatusEnum('status').notNull().default('ACTIVE'),
@@ -80,6 +82,8 @@ export const tenants = pgTable(
 
     borrowingRulesSummary: text('borrowing_rules_summary'),
 
+    onboardingNotes: text('onboarding_notes'),
+
     createdAt: timestamp('created_at', {
       withTimezone: true,
     })
@@ -96,6 +100,10 @@ export const tenants = pgTable(
     check(
       'tenants_library_code_format_check',
       sql`${table.libraryCode} ~ '^[A-Z0-9-]+$'`,
+    ),
+    check(
+      'tenants_slug_format_check',
+      sql`${table.slug} ~ '^[a-z0-9-]+$'`,
     ),
   ],
 );
@@ -1357,6 +1365,94 @@ export const notifications = pgTable(
 
 export type Notification = typeof notifications.$inferSelect;
 export type NewNotification = typeof notifications.$inferInsert;
+
+// Platform Administration & Multi-Tenant SaaS Lifecycle
+export const platformUserStatusEnum = pgEnum('platform_user_status', [
+  'ACTIVE',
+  'SUSPENDED',
+]);
+
+export const platformUsers = pgTable(
+  'platform_users',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    email: varchar('email', { length: 254 }).notNull().unique(),
+    passwordHash: text('password_hash').notNull(),
+    fullName: varchar('full_name', { length: 150 }).notNull(),
+    status: platformUserStatusEnum('status').notNull().default('ACTIVE'),
+    mfaSecretEncrypted: text('mfa_secret_encrypted'),
+    mfaEnabled: boolean('mfa_enabled').notNull().default(false),
+    mfaRecoveryCodesHash: jsonb('mfa_recovery_codes_hash'),
+    lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index('platform_users_email_idx').on(table.email),
+  ],
+);
+
+export type PlatformUser = typeof platformUsers.$inferSelect;
+export type NewPlatformUser = typeof platformUsers.$inferInsert;
+
+export const platformSessions = pgTable(
+  'platform_sessions',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    platformUserId: uuid('platform_user_id')
+      .notNull()
+      .references(() => platformUsers.id, { onDelete: 'cascade' }),
+    refreshTokenHash: text('refresh_token_hash').notNull(),
+    ipAddress: varchar('ip_address', { length: 45 }),
+    userAgent: text('user_agent'),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    replacedBySessionId: uuid('replaced_by_session_id'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index('platform_sessions_user_idx').on(
+      table.platformUserId,
+      table.expiresAt,
+    ),
+  ],
+);
+
+export type PlatformSession = typeof platformSessions.$inferSelect;
+export type NewPlatformSession = typeof platformSessions.$inferInsert;
+
+export const platformAuditLogs = pgTable(
+  'platform_audit_logs',
+  {
+    id: uuid('id').defaultRandom().primaryKey(),
+    actorId: uuid('actor_id').references(() => platformUsers.id, {
+      onDelete: 'set null',
+    }),
+    action: varchar('action', { length: 100 }).notNull(),
+    entityType: varchar('entity_type', { length: 100 }).notNull(),
+    entityId: varchar('entity_id', { length: 100 }),
+    ipAddress: varchar('ip_address', { length: 45 }),
+    userAgent: text('user_agent'),
+    metadata: jsonb('metadata'),
+    createdAt: timestamp('created_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    index('platform_audit_logs_actor_idx').on(table.actorId, table.createdAt),
+    index('platform_audit_logs_entity_idx').on(table.entityType, table.entityId),
+  ],
+);
+
+export type PlatformAuditLog = typeof platformAuditLogs.$inferSelect;
+export type NewPlatformAuditLog = typeof platformAuditLogs.$inferInsert;
+
 
 
 

@@ -1,6 +1,6 @@
-# Permission matrix (v1.0): PROPOSED DEFAULTS, product owner to correct
+# Permission Matrix (v1.0 MVP)
 
-✓ allowed, own = only for own records, ✗ not allowed, ? needs your decision. Enforced server-side (AUTH-2).
+✓ allowed, own = only for own records, ✗ not allowed. Enforced server-side via `AccessTokenGuard` and `RolesGuard` (AUTH-2).
 
 | Action                                         | Admin | Librarian     | Teacher | Member | Parent   | Guest |
 | ---------------------------------------------- | ----- | ------------- | ------- | ------ | -------- | ----- |
@@ -8,7 +8,7 @@
 | Create/edit/archive titles and copies          | ✓     | ✓             | ✗       | ✗      | ✗        | ✗     |
 | Mark copy lost/damaged/withdrawn (INV-2)       | ✓     | ✓             | ✗       | ✗      | ✗        | ✗     |
 | Checkout, return for a member                  | ✓     | ✓             | ✗       | ✗      | ✗        | ✗     |
-| Renew a loan                                   | ✓     | ✓             | ?       | ?      | ✗        | ✗     |
+| Renew a loan (CIR-3)                           | ✓     | ✓             | ✗       | ✗      | ✗        | ✗     |
 | Override a checkout block (CIR-5), with reason | ✓     | ✓             | ✗       | ✗      | ✗        | ✗     |
 | Place a hold                                   | ✓     | ✓ (on behalf) | own     | own    | ✗        | ✗     |
 | Cancel a hold                                  | ✓     | ✓ (any)       | own     | own    | ✗        | ✗     |
@@ -20,11 +20,7 @@
 | Change a user's role (audited)                 | ✓     | ✗             | ✗       | ✗      | ✗        | ✗     |
 | Library profile and policy settings            | ✓     | ✗             | ✗       | ✗      | ✗        | ✗     |
 | Dashboard                                      | ✓     | ✓             | ✗       | ✗      | ✗        | ✗     |
-| View audit log                                 | ✓     | ✗             | ✗       | ✗      | ✗        | ✗     |
+| View tenant audit logs                         | ✓     | ✗             | ✗       | ✗      | ✗        | ✗     |
 | Edit own profile and password                  | ✓     | ✓             | ✓       | ✓      | ✓        | ✗     |
 
-## Questions behind the "?" and defaults
-
-1. Can teachers and members renew their own loans in the portal? The PRD lists renewals (CIR-3) but not who does them. Default if you say nothing: librarian-only in v1.0.
-2. Can a teacher see their class's borrowing history? The privacy rule allows "authorised staff" and linked guardians. Default: teachers see only their own history; class views arrive with v4.0 analytics.
-3. Should large waivers need an admin? Default: librarian can waive any amount with a reason, and every waiver is audited.
+*Note: Platform Super Admin operations (tenant onboarding, tenant status suspension/activation, initial library admin provisioning, emergency password resets, system telemetry, and platform audit logs) operate on a dedicated plane outside tenant roles and are accessible only to authenticated Super Admins with active TOTP MFA sessions (`/platform`).*

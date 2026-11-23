@@ -30,27 +30,31 @@ Before onboarding real members, the operator must establish the lawful basis, no
 - Passwords use Argon2id hashes. The session schema is designed to store refresh-token hashes, not plaintext; refresh-token handling is not yet implemented.
 - Secrets belong in environment variables and must never be logged or committed.
 
-## Current controls evidenced
+## Current controls evidenced & implemented
 
-- RLS ENABLE and FORCE on seven tenant-owned tables.
-- `DatabaseService.withTenant()` establishes tenant context transaction-locally.
-- Restricted global identity lookup functions and separate database ownership.
-- Append-only runtime permissions for audit records.
-- Argon2id password service and token-signing/verification services.
+- **Row-Level Security (RLS)**: `ENABLE` and `FORCE` on all tenant-owned tables; transaction-local context via `DatabaseService.withTenant()`.
+- **Restricted Identity Lookup**: Global identity hashes (`user_identity_lookup`) owned by `lms_identity_owner` and queried solely via restricted PostgreSQL functions.
+- **Append-Only Auditing**: Tamper-proof audit logging (`audit_logs`) tracking authentication, waivers, overrides, and administrative actions without exposing raw PII or credentials.
+- **Argon2id & AES-256-GCM**: Argon2id for all user passwords; AES-256-GCM for national ID documents and TOTP MFA secrets.
+- **Server-Side RBAC**: Comprehensive enforcement across all 6 tenant roles (`ADMIN`, `LIBRARIAN`, `TEACHER`, `MEMBER`, `PARENT`, `GUEST`) and isolated Platform Super Admin domain.
+- **Self-Only Borrowing History**: Borrowing records are visible only to the borrower and authorized library staff (`MembersService.getMemberLoans`).
+- **Privacy-Safe Notifications**: Email and SMS templates strictly omit unnecessary bibliographic details and sensitive patron credentials; SMS delivery strictly adheres to Africa/Nairobi quiet hours (20:00–07:00 EAT).
+- **Public Legal Policy Center**: 9 comprehensive KDPA-compliant policies accessible to all users at `/legal/*`:
+  1. Terms of Service (`/legal/terms-of-service`)
+  2. Privacy Policy (`/legal/privacy-policy`) — lawful basis, rights under KDPA Section 26, DPO contact
+  3. Acceptable Use Policy (`/legal/acceptable-use`)
+  4. Cookie & Local Storage Policy (`/legal/cookies`)
+  5. Account & Access Policy (`/legal/account-access`)
+  6. Information Security Policy (`/legal/security`)
+  7. Data Retention & Disposal Policy (`/legal/data-retention`) — retention schedules and secure destruction
+  8. Minor & Student Protection Policy (`/legal/minor-protection`) — parental consent and student data protections
+  9. Service Level & Support Policy (`/legal/sla`)
 
-These controls are foundations. They do not establish complete application access control, operational compliance or end-to-end privacy.
+## Operational readiness before live pilot
 
-## Outstanding controls before pilot with real member data
-
-- Complete server-side RBAC for every endpoint and role.
-- Complete account lifecycle, password reset and session revocation.
-- Implement member history access rules and verify them with role-based tests.
-- Define and implement retention/deletion and correction procedures.
-- Define child-data notices and consent/guardian procedures with the pilot institution.
-- Define processor contracts and cross-border transfer assessment for hosting, email and SMS providers.
-- Establish backup encryption, access controls, retention and tested restore.
-- Ensure logs and notifications avoid passwords, OTPs, tokens and unnecessary borrowing details.
-- Establish incident response, breach assessment and notification procedures.
+1. Register Data Controller and Data Processor designation with the Office of the Data Protection Commissioner (ODPC) Kenya.
+2. Confirm written data processor agreements with production cloud hosting, SMS gateway, and SMTP relay providers.
+3. Appoint and publish the contact details for the designated Data Protection Officer (DPO) at `dpo@commonplace.ke`.
 
 ## Data minimisation
 

@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/client";
+import { ENDPOINTS } from "@/lib/api/endpoints";
 import type {
   CreateMemberInput,
   CreateMemberResult,
@@ -11,11 +12,16 @@ import type {
 
 export const membersService = {
   async create(payload: CreateMemberInput): Promise<CreateMemberResult> {
-    return apiClient.post<CreateMemberResult>("/api/members", payload);
+    return apiClient.post<CreateMemberResult>(
+      ENDPOINTS.members.create,
+      payload,
+    );
   },
 
   async listMemberTypes(): Promise<MemberTypeOption[]> {
-    const data = await apiClient.get<MemberTypeOption[]>("/api/members/types");
+    const data = await apiClient.get<MemberTypeOption[]>(
+      ENDPOINTS.members.types,
+    );
     return Array.isArray(data) ? data : [];
   },
 
@@ -36,32 +42,34 @@ export const membersService = {
 
     const qs = searchParams.toString();
     const data = await apiClient.get<MemberDirectoryItem[]>(
-      `/api/members${qs ? `?${qs}` : ""}`,
+      qs ? `${ENDPOINTS.members.list}?${qs}` : ENDPOINTS.members.list,
     );
     return Array.isArray(data) ? data : [];
   },
 
   async getMember(id: string): Promise<MemberDetail> {
-    return apiClient.get<MemberDetail>(`/api/members/${id}`);
+    return apiClient.get<MemberDetail>(ENDPOINTS.members.get(id));
   },
 
   async updateMember(
     id: string,
     payload: UpdateMemberPayload,
   ): Promise<MemberDetail> {
-    return apiClient.patch<MemberDetail>(`/api/members/${id}`, payload);
+    return apiClient.patch<MemberDetail>(ENDPOINTS.members.update(id), payload);
   },
 
   async getBorrowingHistory(id: string): Promise<MemberLoanItem[]> {
     const data = await apiClient.get<MemberLoanItem[]>(
-      `/api/members/${id}/loans`,
+      ENDPOINTS.members.loans(id),
     );
     return Array.isArray(data) ? data : [];
   },
 
   async listEnquiries(status?: string): Promise<any[]> {
-    const query = status ? `?status=${status}` : "";
-    const data = await apiClient.get<any[]>(`/api/members/enquiries${query}`);
+    const qs = status ? `?status=${status}` : "";
+    const data = await apiClient.get<any[]>(
+      `${ENDPOINTS.members.enquiries}${qs}`,
+    );
     return Array.isArray(data) ? data : [];
   },
 
@@ -69,6 +77,6 @@ export const membersService = {
     id: string,
     status: "REVIEWED" | "APPROVED" | "REJECTED" = "REVIEWED",
   ): Promise<any> {
-    return apiClient.patch(`/api/members/enquiries/${id}/review`, { status });
+    return apiClient.patch(ENDPOINTS.members.reviewEnquiry(id), { status });
   },
 };
