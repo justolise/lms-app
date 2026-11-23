@@ -59,6 +59,10 @@ function PlatformLayoutInner({ children }: { children: ReactNode }) {
     } catch {
       // Ignore network errors
     } finally {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("lms_platform_access_token");
+        localStorage.removeItem("lms_platform_refresh_token");
+      }
       setCurrentUser(null);
       router.push("/platform/login");
     }

@@ -48,10 +48,17 @@ function TenantsDirectoryContent() {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiClient.get<TenantItem[]>(
-        ENDPOINTS.platform.tenants,
-      );
-      setTenants(Array.isArray(data) ? data : []);
+      const data = await apiClient.get<
+        { items: TenantItem[]; meta?: unknown } | TenantItem[]
+      >(ENDPOINTS.platform.tenants);
+
+      const items = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.items)
+          ? data.items
+          : [];
+
+      setTenants(items);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to load tenants");
     } finally {

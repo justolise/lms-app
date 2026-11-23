@@ -1,3 +1,4 @@
+import { afterAll, beforeEach, describe, expect, it } from 'vitest';
 import { BadRequestException } from '@nestjs/common';
 import { IdentityService } from './identity.service.js';
 

@@ -1,8 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  ConflictException,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException } from '@nestjs/common';
 import { PlatformTenantAdminsService } from './platform-tenant-admins.service.js';
 
 describe('PlatformTenantAdminsService', () => {

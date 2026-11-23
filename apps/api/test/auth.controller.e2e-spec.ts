@@ -7,7 +7,7 @@ import {
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { App } from 'supertest/types.js';
-import { vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AuthController } from '../src/auth/auth.controller.js';
 import { AuthService } from '../src/auth/auth.service.js';

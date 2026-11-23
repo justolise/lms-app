@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { UnauthorizedException, type ExecutionContext } from '@nestjs/common';
 import { PlatformAuthGuard } from './platform-auth.guard.js';
 import { PlatformTokenService } from '../auth/platform-token.service.js';

@@ -8,7 +8,6 @@ import {
 import { and, desc, eq, ilike, or, sql } from 'drizzle-orm';
 import { DatabaseService } from '../../database/database.service.js';
 import {
-  catalogueItems,
   copies,
   loans,
   platformAuditLogs,

@@ -76,6 +76,8 @@ export class PlatformAuthController {
     return {
       mfaRequired: false,
       user: result.user,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
     };
   }
 
@@ -110,6 +112,8 @@ export class PlatformAuthController {
     return {
       success: true,
       user: result.user,
+      accessToken: result.accessToken,
+      refreshToken: result.refreshToken,
     };
   }
 
@@ -138,7 +142,11 @@ export class PlatformAuthController {
 
     this.setPlatformCookies(response, tokens.accessToken, tokens.refreshToken);
 
-    return { success: true };
+    return {
+      success: true,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    };
   }
 
   @Post('logout')
@@ -202,13 +210,18 @@ export class PlatformAuthController {
 
   private readCookie(cookieHeader: string | undefined, name: string): string | null {
     if (!cookieHeader) return null;
-    const parts = cookieHeader.split(';');
-    for (const part of parts) {
-      const [key, value] = part.trim().split('=');
-      if (key === name && value) {
-        return decodeURIComponent(value);
-      }
+    const prefix = `${name}=`;
+    const cookie = cookieHeader
+      .split(';')
+      .map((part) => part.trim())
+      .find((part) => part.startsWith(prefix));
+
+    if (!cookie) return null;
+    const value = cookie.slice(prefix.length);
+    try {
+      return decodeURIComponent(value) || null;
+    } catch {
+      return value || null;
     }
-    return null;
   }
 }

@@ -62,10 +62,17 @@ function TenantDetailContent() {
     try {
       const [tenantData, adminsData] = await Promise.all([
         apiClient.get<TenantDetail>(ENDPOINTS.platform.tenant(tenantId)),
-        apiClient.get<TenantAdmin[]>(ENDPOINTS.platform.tenantAdmins(tenantId)),
+        apiClient.get<TenantAdmin[] | { items: TenantAdmin[] }>(
+          ENDPOINTS.platform.tenantAdmins(tenantId),
+        ),
       ]);
       setTenant(tenantData);
-      setAdmins(Array.isArray(adminsData) ? adminsData : []);
+      const adminsList = Array.isArray(adminsData)
+        ? adminsData
+        : Array.isArray(adminsData?.items)
+          ? adminsData.items
+          : [];
+      setAdmins(adminsList);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to load tenant details",

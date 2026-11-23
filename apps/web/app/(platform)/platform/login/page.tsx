@@ -55,6 +55,12 @@ export default function PlatformLoginPage() {
         setTempToken(res.tempToken);
         setIsMfaStep(true);
       } else {
+        if ("accessToken" in res && typeof res.accessToken === "string") {
+          localStorage.setItem("lms_platform_access_token", res.accessToken);
+        }
+        if ("refreshToken" in res && typeof res.refreshToken === "string") {
+          localStorage.setItem("lms_platform_refresh_token", res.refreshToken);
+        }
         router.push("/platform");
       }
     } catch (err) {
@@ -71,10 +77,21 @@ export default function PlatformLoginPage() {
     setIsLoading(true);
 
     try {
-      await apiClient.post(ENDPOINTS.platform.mfaVerify, {
+      const res = await apiClient.post<{
+        success: boolean;
+        accessToken?: string;
+        refreshToken?: string;
+      }>(ENDPOINTS.platform.mfaVerify, {
         tempToken,
         code: totpCode.trim(),
       });
+
+      if (res?.accessToken) {
+        localStorage.setItem("lms_platform_access_token", res.accessToken);
+      }
+      if (res?.refreshToken) {
+        localStorage.setItem("lms_platform_refresh_token", res.refreshToken);
+      }
 
       router.push("/platform");
     } catch (err) {

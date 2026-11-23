@@ -54,6 +54,14 @@ class ApiClient {
       requestHeaders["Content-Type"] = "application/json";
     }
 
+    // Attach platform bearer token from localStorage if available (supports 24h persistent sessions across refreshes)
+    if (typeof window !== "undefined" && path.includes("/platform/")) {
+      const platformToken = localStorage.getItem("lms_platform_access_token");
+      if (platformToken && !requestHeaders.Authorization) {
+        requestHeaders.Authorization = `Bearer ${platformToken}`;
+      }
+    }
+
     const res = await fetch(url, {
       method,
       headers: requestHeaders,
@@ -67,8 +75,14 @@ class ApiClient {
     });
 
     if (!res.ok) {
-      if (res.status === 401 && !path.includes("/auth/")) {
-        const isPlatformApi = path.startsWith("/api/platform/");
+      const isAuthBypassEndpoint =
+        path.endsWith("/login") ||
+        path.endsWith("/mfa/verify") ||
+        path.endsWith("/refresh") ||
+        path.endsWith("/logout");
+
+      if (res.status === 401 && !isAuthBypassEndpoint) {
+        const isPlatformApi = path.includes("/platform/");
         const refreshEndpoint = isPlatformApi
           ? ENDPOINTS.platform.refresh
           : ENDPOINTS.auth.refresh;
@@ -77,11 +91,49 @@ class ApiClient {
         if (!this.refreshPromise) {
           this.refreshPromise = (async () => {
             try {
+              const refreshHeaders: Record<string, string> = {};
+              let refreshBody: unknown;
+
+              if (isPlatformApi && typeof window !== "undefined") {
+                const storedRt = localStorage.getItem(
+                  "lms_platform_refresh_token",
+                );
+                if (storedRt) {
+                  refreshHeaders["Content-Type"] = "application/json";
+                  refreshBody = JSON.stringify({ refreshToken: storedRt });
+                }
+              }
+
               const refreshRes = await fetch(refreshEndpoint, {
                 method: "POST",
+                headers: refreshHeaders,
                 credentials: "include",
+                body: refreshBody as BodyInit | undefined,
               });
-              return refreshRes.ok;
+
+              if (refreshRes.ok) {
+                if (isPlatformApi && typeof window !== "undefined") {
+                  try {
+                    const data = await refreshRes.json();
+                    if (data?.accessToken) {
+                      localStorage.setItem(
+                        "lms_platform_access_token",
+                        data.accessToken,
+                      );
+                    }
+                    if (data?.refreshToken) {
+                      localStorage.setItem(
+                        "lms_platform_refresh_token",
+                        data.refreshToken,
+                      );
+                    }
+                  } catch {
+                    // Ignore JSON parse error if response was empty
+                  }
+                }
+                return true;
+              }
+              return false;
             } catch {
               return false;
             } finally {

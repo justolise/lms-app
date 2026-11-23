@@ -40,27 +40,33 @@ export class PlatformAuthGuard implements CanActivate {
   }
 
   private extractToken(request: Request): string | null {
-    // 1. Check HttpOnly cookie
-    if (request.cookies && request.cookies[PLATFORM_ACCESS_COOKIE]) {
-      return request.cookies[PLATFORM_ACCESS_COOKIE];
-    }
-
-    // 2. Fallback to Bearer token in Authorization header
+    // 1. Fallback to Bearer token in Authorization header
     const authHeader = request.headers.authorization;
     if (authHeader && authHeader.startsWith('Bearer ')) {
       return authHeader.substring(7);
     }
 
-    // 3. Fallback: Parse raw cookie header if cookies object is not parsed
+    // 2. Check parsed HttpOnly cookie (if cookie-parser is configured)
+    if (request.cookies && request.cookies[PLATFORM_ACCESS_COOKIE]) {
+      return request.cookies[PLATFORM_ACCESS_COOKIE];
+    }
+
+    // 3. Fallback: Parse raw cookie header safely
     const rawCookie = request.headers.cookie;
     if (rawCookie) {
+      const prefix = `${PLATFORM_ACCESS_COOKIE}=`;
       const match = rawCookie
         .split(';')
         .map((c) => c.trim())
-        .find((c) => c.startsWith(`${PLATFORM_ACCESS_COOKIE}=`));
+        .find((c) => c.startsWith(prefix));
 
       if (match) {
-        return decodeURIComponent(match.split('=')[1]);
+        const val = match.slice(prefix.length);
+        try {
+          return decodeURIComponent(val) || null;
+        } catch {
+          return val || null;
+        }
       }
     }
 
