@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.13.0](https://github.com/justolise/lms-app/compare/v0.12.0...v0.13.0) (2026-11-23)
+
+
+### Features
+
+* **circulation:** implement CIR-9 lost and damaged copy fees & replacement charges ([15b1f54](https://github.com/justolise/lms-app/commit/15b1f540594227796c4175c089002b71678e4b7d))
+
 ## [0.12.0](https://github.com/justolise/lms-app/compare/v0.11.0...v0.12.0) (2026-11-23)
 
 
