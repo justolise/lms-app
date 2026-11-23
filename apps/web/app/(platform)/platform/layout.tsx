@@ -69,19 +69,6 @@ function PlatformLayoutInner({ children }: { children: ReactNode }) {
     return <>{children}</>;
   }
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background text-foreground">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-forest-600 border-t-transparent" />
-          <p className="text-xs text-muted-foreground">
-            Verifying platform administrator session...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       {/* Platform Super Admin Header */}
@@ -137,7 +124,9 @@ function PlatformLayoutInner({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-3">
             <ThemeToggle />
 
-            {currentUser && (
+            {loading ? (
+              <div className="h-6 w-20 animate-pulse rounded bg-surface-hover" />
+            ) : currentUser ? (
               <div className="flex items-center gap-2">
                 <div className="hidden sm:flex flex-col text-right leading-tight">
                   <span className="text-xs font-semibold text-foreground">
@@ -155,7 +144,7 @@ function PlatformLayoutInner({ children }: { children: ReactNode }) {
                   Sign Out
                 </button>
               </div>
-            )}
+            ) : null}
           </div>
         </div>
 
@@ -184,7 +173,7 @@ function PlatformLayoutInner({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      {/* Main Workspace Body */}
+      {/* Main Workspace Body — always renders children so instant navigation segments are never dropped */}
       <main className="flex-1 py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">{children}</div>
       </main>

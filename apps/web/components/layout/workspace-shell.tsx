@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
-import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/lib/auth/auth-context";
 import { MobileBottomNav } from "./mobile-bottom-nav";
 import { MoreMenuDrawer } from "./more-menu-drawer";
@@ -21,18 +20,6 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
     }
   }, [isLoading, isAuthenticated, router]);
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
-
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-background text-foreground">
       {/* Desktop & Tablet Sidebar */}
@@ -46,7 +33,7 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
         {/* Topbar */}
         <Topbar onMenuToggle={() => setMoreMenuOpen(true)} />
 
-        {/* Content Viewport */}
+        {/* Content Viewport — always renders children so instant navigation segments are never dropped */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8">
           <div className="mx-auto max-w-7xl">{children}</div>
         </main>
