@@ -95,11 +95,18 @@ function TenantDetailContent() {
     setIsProvisioning(true);
 
     try {
-      await apiClient.post(ENDPOINTS.platform.tenantAdmins(tenantId), {
+      const res = await apiClient.post<{
+        userId: string;
+        tenantId: string;
+        email: string;
+        fullName: string;
+        temporaryPassword?: string;
+      }>(ENDPOINTS.platform.tenantAdmins(tenantId), {
         fullName: adminName.trim(),
         email: adminEmail.trim(),
         phone: adminPhone.trim() || undefined,
-        password: adminPassword || undefined,
+        temporaryPassword: adminPassword.trim() || undefined,
+        password: adminPassword.trim() || undefined,
       });
 
       setIsProvisionModalOpen(false);
@@ -107,7 +114,12 @@ function TenantDetailContent() {
       setAdminEmail("");
       setAdminPhone("");
       setAdminPassword("");
-      setActionSuccess(`Administrator account created for ${adminEmail}.`);
+      const pwdNote = res?.temporaryPassword
+        ? ` Temporary password: ${res.temporaryPassword}`
+        : "";
+      setActionSuccess(
+        `Administrator account created for ${adminEmail}.${pwdNote}`,
+      );
       loadData();
     } catch (err) {
       setProvisionError(

@@ -73,7 +73,9 @@ export class PlatformTenantAdminsService {
       : null;
 
     const temporaryPassword =
-      dto.temporaryPassword || randomBytes(16).toString('base64url');
+      dto.temporaryPassword ||
+      dto.password ||
+      randomBytes(16).toString('base64url');
 
     const argonOptions: HashOptions =
       process.env.NODE_ENV === 'test'
@@ -107,6 +109,8 @@ export class PlatformTenantAdminsService {
           tenantId,
           role: 'ADMIN',
           fullName: dto.fullName.trim(),
+          email: normalizedEmail,
+          phone: normalizedPhone,
           status: 'ACTIVE',
           passwordHash,
           mustChangePassword: true,
