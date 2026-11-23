@@ -78,7 +78,7 @@ A schema foundation, dependency, scaffold or historical test run does not by its
 
 | ID     | Priority | Status | Requirement / workstream                                  | Evidence and remaining work                                                                                                |
 | ------ | -------: | :----: | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| AUTH-1 |       P0 |  done  | Email/phone and password authentication                   | E.164 Kenyan phone/email login, multi-library selection, Argon2id, generic error responses, first-login password change.   |
+| AUTH-1 |       P0 |  done  | Email/phone and password authentication                   | E.164 Kenyan phone/email login with friction-free unified input and real-time auto-detection, multi-library selection, Argon2id, generic error responses, first-login password change. |
 | AUTH-2 |       P0 |  done  | Admin, librarian, teacher, member, parent and guest roles | Server-side `RolesGuard` and `AccessTokenGuard` enforcing RBAC. 401 unauthenticated, 403 unauthorized. Tenant RLS active.  |
 | AUTH-3 |       P0 |  done  | Password reset by email/SMS OTP                           | 6-digit OTP, Argon2id hash, 15m expiry, 5 attempt limit, anti-enumeration response, atomic consumption, session purge.     |
 | AUTH-4 |       P0 |  done  | Staff-provisioned member accounts                         | Single-add by Admin/Librarian (`POST /api/members`); server-generated temp password; mustChangePassword=true; no CSV.      |
@@ -135,7 +135,7 @@ Current verification run completed on **23 November 2026**:
 
 - **pnpm typecheck**: Passed across all workspace projects (0 TypeScript errors).
 - **pnpm -r --if-present lint**: Passed across all workspace projects (0 errors in Biome and Oxlint).
-- **pnpm test (Unit Tests)**: 30 test files, 284 tests passed in `@lms/api`, 12 tests passed in `@lms/web`, 0 failed.
+- **pnpm test (Unit Tests)**: 30 test files, 286 tests passed in `@lms/api`, 12 tests passed in `@lms/web`, 0 failed.
 - **Controller E2E Tests**: 2 test files, 27 tests passed, 0 failed (`test/auth.controller.e2e-spec.ts`, `test/users.controller.e2e-spec.ts`).
 - **Phase 2 Notifications Module (NOT-1, NOT-2)**: `NotificationsModule`, `EmailDeliveryService`, and `SmsDeliveryService` implemented; multi-tenant `notifications` table with 0014 migration and RLS; Africa/Nairobi quiet-hours enforcement (20:00–07:00 EAT); automated loan due-soon and overdue scans; circulation lifecycle hooks for hold availability and fine postings; 20 dedicated unit tests.
 - **pnpm build**: Production build succeeded for `@lms/api` (NestJS) and `@lms/web` (Next.js 16 with 25 prerendered routes).
