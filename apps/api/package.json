@@ -21,7 +21,7 @@
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
     "test:integration": "vitest run --config ./vitest.config.e2e.ts test/database.e2e-spec.ts",
     "typecheck": "tsc --noEmit",
-    "db:migrate": "nest build && node dist/database/migrate.js",
+    "db:migrate": "nest build && node --env-file=../../.env dist/database/migrate.js",
     "seed": "nest build && node --env-file=../../.env dist/database/seed.js",
     "platform:bootstrap": "nest build && node --env-file=../../.env dist/platform/bootstrap/run.js",
     "platform:bootstrap:dev": "tsx --env-file=../../.env src/platform/bootstrap/run.ts"
