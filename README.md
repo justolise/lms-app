@@ -4,7 +4,7 @@
 
 **Mobile-first, multi-tenant SaaS library platform built for schools and community libraries in Kenya and East Africa.**
 
-*Every library. One connected world.*
+_Every library. One connected world._
 
 [![CI](https://github.com/justolise/lms-app/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/justolise/lms-app/actions/workflows/ci.yml)
 [![Security](https://github.com/justolise/lms-app/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/justolise/lms-app/actions/workflows/security.yml)
@@ -40,20 +40,20 @@ Commonplace is a **cloud-native, mobile-first SaaS library management system** d
 
 ### Key differentiators
 
-| Differentiator                 | Detail                                                                                                                                |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| **Multi-tenant SaaS isolation**| Each library is a fully isolated tenant with PostgreSQL Row-Level Security — zero cross-tenant data leakage by design                 |
-| **Platform Super Admin**       | Dedicated super-admin portal (`/platform`) with TOTP MFA, tenant provisioning, system monitoring telemetry, and immutable audit logs  |
-| **Public tenant portals**      | Isolated public catalogue search and unauthenticated membership enquiry requests at `/libraries/[slug]` and `/libraries/[slug]/login`   |
-| **Legal & Policy Center**      | 9 comprehensive Kenya Data Protection Act 2019 (KDPA) compliant policies accessible to all users at `/legal`                          |
-| **Mobile-first & 3G-ready**    | Checkout target < 1 second on 3G; progressive-enhancement UI; camera-based QR and barcode scanning with manual fallback              |
-| **Zero-trust security**        | Argon2id password hashing · Helmet HTTP security headers · Redis-backed rate limiting · Append-only audit logs · CSRF and CSP hardened  |
-| **Append-only fine ledger**    | Immutable fine and payment transactions protected by database triggers; tamper-proof payment receipt generation                       |
-| **CIR-9 Lost/Damaged fees**    | Structured item condition handling, automated replacement charge debiting to fine ledger, and mandatory reason capture                 |
-| **Fair FIFO holds queue**      | Automated queue management and return-desk hold fulfillment reserving copies for ready claimants                                      |
-| **Fault-tolerant bulkheading** | Isolated error boundaries and non-blocking dashboard telemetry so secondary failures never interrupt core circulation                 |
-| **Zero hardcoded API calls**   | Strictly centralized API client registry (`lib/api/endpoints.ts`) across all frontend views and services                             |
-| **Full-stack Docker stack**    | Production-ready multi-stage Alpine Dockerfiles, automated migration runner, and full `docker-compose.yml` orchestrating API, Web, DB, Redis |
+| Differentiator                  | Detail                                                                                                                                       |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Multi-tenant SaaS isolation** | Each library is a fully isolated tenant with PostgreSQL Row-Level Security — zero cross-tenant data leakage by design                        |
+| **Platform Super Admin**        | Dedicated super-admin portal (`/platform`) with TOTP MFA, tenant provisioning, system monitoring telemetry, and immutable audit logs         |
+| **Public tenant portals**       | Isolated public catalogue search and unauthenticated membership enquiry requests at `/libraries/[slug]` and `/libraries/[slug]/login`        |
+| **Legal & Policy Center**       | 9 comprehensive Kenya Data Protection Act 2019 (KDPA) compliant policies accessible to all users at `/legal`                                 |
+| **Mobile-first & 3G-ready**     | Checkout target < 1 second on 3G; progressive-enhancement UI; camera-based QR and barcode scanning with manual fallback                      |
+| **Zero-trust security**         | Argon2id password hashing · Helmet HTTP security headers · Redis-backed rate limiting · Append-only audit logs · CSRF and CSP hardened       |
+| **Append-only fine ledger**     | Immutable fine and payment transactions protected by database triggers; tamper-proof payment receipt generation                              |
+| **CIR-9 Lost/Damaged fees**     | Structured item condition handling, automated replacement charge debiting to fine ledger, and mandatory reason capture                       |
+| **Fair FIFO holds queue**       | Automated queue management and return-desk hold fulfillment reserving copies for ready claimants                                             |
+| **Fault-tolerant bulkheading**  | Isolated error boundaries and non-blocking dashboard telemetry so secondary failures never interrupt core circulation                        |
+| **Zero hardcoded API calls**    | Strictly centralized API client registry (`lib/api/endpoints.ts`) across all frontend views and services                                     |
+| **Full-stack Docker stack**     | Production-ready multi-stage Alpine Dockerfiles, automated migration runner, and full `docker-compose.yml` orchestrating API, Web, DB, Redis |
 
 ---
 
@@ -61,17 +61,17 @@ Commonplace is a **cloud-native, mobile-first SaaS library management system** d
 
 > **Phases delivered: Authentication & Identity · Catalogue & Classification · Core Circulation (CIR-1..6, CIR-9) · Holds & Reservations (HLD-1..3) · Fine Ledger & Receipts (FIN-1..3) · Members & History (MEM-1..4) · Notifications (NOT-1..2) · Inventory Tracking (INV-2) · Dashboard (RPT-1) · Library Profile & Settings (ADM-1..2) · Platform Super Admin (PLAT-1..6) · Legal & Policy Center (PLAT-POL-01..09) · Docker Deployment Orchestration**
 
-| Metric                       | Value                                                                             |
-| ---------------------------- | --------------------------------------------------------------------------------- |
-| Unit tests passing           | ✅ **349 / 349** (42 test suites)                                                 |
-| Controller E2E tests passing | ✅ **27 / 27** (2 test files)                                                     |
-| TypeScript errors            | ✅ **0** (`tsc --noEmit` across API and Web)                                      |
-| Linting status               | ✅ **0 errors** (Oxlint type-aware in API; Biome in Web)                          |
-| Production build             | ✅ **API + Web (48 App Router static & partial prerendered routes)**              |
-| CI pipeline                  | ✅ Green on `main`                                                                |
-| Security workflow            | ✅ Green on `main`                                                                |
-| Database migrations applied  | ✅ **15 Drizzle SQL migrations** (`0000` through `0015_platform_saas_core.sql`)  |
-| Completed v1.0 requirements  | ✅ **100% of approved v1.0 scope delivered & verified**                           |
+| Metric                       | Value                                                                           |
+| ---------------------------- | ------------------------------------------------------------------------------- |
+| Unit tests passing           | ✅ **349 / 349** (42 test suites)                                               |
+| Controller E2E tests passing | ✅ **27 / 27** (2 test files)                                                   |
+| TypeScript errors            | ✅ **0** (`tsc --noEmit` across API and Web)                                    |
+| Linting status               | ✅ **0 errors** (Oxlint type-aware in API; Biome in Web)                        |
+| Production build             | ✅ **API + Web (48 App Router static & partial prerendered routes)**            |
+| CI pipeline                  | ✅ Green on `main`                                                              |
+| Security workflow            | ✅ Green on `main`                                                              |
+| Database migrations applied  | ✅ **15 Drizzle SQL migrations** (`0000` through `0015_platform_saas_core.sql`) |
+| Completed v1.0 requirements  | ✅ **100% of approved v1.0 scope delivered & verified**                         |
 
 Full traceability: [`PROGRESS.md`](PROGRESS.md) · [`docs/requirements-traceability.md`](docs/requirements-traceability.md)
 
@@ -123,89 +123,94 @@ Full traceability: [`PROGRESS.md`](PROGRESS.md) · [`docs/requirements-traceabil
 
 ## Technology Stack
 
-| Area                 | Technology                                                                     |
-| -------------------- | ------------------------------------------------------------------------------ |
-| **Monorepo**         | pnpm workspaces (`@lms/api`, `@lms/web`, `@lms/shared`)                       |
-| **Web Application**  | Next.js 16 (Turbopack, App Router, PPR) · React 19 · Tailwind CSS 4 · Biome    |
-| **Backend API**      | NestJS 12 · TypeScript (strict) · Oxlint                                       |
-| **Database**         | PostgreSQL 16 · Drizzle ORM · 15 SQL migrations                                |
-| **Tenant Isolation** | PostgreSQL Row-Level Security (RLS) with fail-closed transaction context       |
-| **Platform SaaS**    | Multi-tenant management, TOTP MFA, live health probes, system telemetry         |
-| **Cache & Limiting** | Redis · Sliding-window rate limiter · `RedisService`                           |
-| **Authentication**   | Argon2id · JOSE JWT (HS256) · Server-side RBAC · HttpOnly cookies · TOTP MFA   |
-| **Scanning**         | `@zxing/wasm` multi-format barcode & QR reader (in-browser camera)              |
-| **Test Suites**      | Vitest · 349 unit tests across 42 suites · 27 Controller E2E tests             |
-| **CI/CD**            | GitHub Actions (`ci.yml`, `security.yml`)                                      |
-| **Infrastructure**   | Docker Compose (Postgres 16, Redis 7, Migrator, API, Web)                      |
+| Area                 | Technology                                                                   |
+| -------------------- | ---------------------------------------------------------------------------- |
+| **Monorepo**         | pnpm workspaces (`@lms/api`, `@lms/web`, `@lms/shared`)                      |
+| **Web Application**  | Next.js 16 (Turbopack, App Router, PPR) · React 19 · Tailwind CSS 4 · Biome  |
+| **Backend API**      | NestJS 12 · TypeScript (strict) · Oxlint                                     |
+| **Database**         | PostgreSQL 16 · Drizzle ORM · 15 SQL migrations                              |
+| **Tenant Isolation** | PostgreSQL Row-Level Security (RLS) with fail-closed transaction context     |
+| **Platform SaaS**    | Multi-tenant management, TOTP MFA, live health probes, system telemetry      |
+| **Cache & Limiting** | Redis · Sliding-window rate limiter · `RedisService`                         |
+| **Authentication**   | Argon2id · JOSE JWT (HS256) · Server-side RBAC · HttpOnly cookies · TOTP MFA |
+| **Scanning**         | `@zxing/wasm` multi-format barcode & QR reader (in-browser camera)           |
+| **Test Suites**      | Vitest · 349 unit tests across 42 suites · 27 Controller E2E tests           |
+| **CI/CD**            | GitHub Actions (`ci.yml`, `security.yml`)                                    |
+| **Infrastructure**   | Docker Compose (Postgres 16, Redis 7, Migrator, API, Web)                    |
 
 ---
 
 ## Completed Features
 
 ### Authentication & Access Control
-| ID | Requirement | Implementation |
-| :--- | :--- | :--- |
-| **AUTH-1** | Email & Kenyan phone authentication | E.164 normalization, multi-library selection, Argon2id, first-login password change gate |
-| **AUTH-2** | 6-role RBAC | `ADMIN · LIBRARIAN · TEACHER · MEMBER · PARENT · GUEST` with server-side `RolesGuard` |
-| **AUTH-3** | Password reset by OTP | 6-digit OTP, Argon2id hash, 15-minute expiry, 5-attempt lockout, session purge |
-| **AUTH-4** | Staff-provisioned accounts | `POST /api/members`, server-generated temporary passwords, `mustChangePassword` flag |
-| **AUTH-5** | Session management & rate limiting | Token rotation, replay detection, Redis rate limiting, per-device revocation |
-| **PO-1 → PO-4** | People operations | User directory, self-service profile, soft deactivation, admin role promotion |
+
+| ID              | Requirement                         | Implementation                                                                           |
+| :-------------- | :---------------------------------- | :--------------------------------------------------------------------------------------- |
+| **AUTH-1**      | Email & Kenyan phone authentication | E.164 normalization, multi-library selection, Argon2id, first-login password change gate |
+| **AUTH-2**      | 6-role RBAC                         | `ADMIN · LIBRARIAN · TEACHER · MEMBER · PARENT · GUEST` with server-side `RolesGuard`    |
+| **AUTH-3**      | Password reset by OTP               | 6-digit OTP, Argon2id hash, 15-minute expiry, 5-attempt lockout, session purge           |
+| **AUTH-4**      | Staff-provisioned accounts          | `POST /api/members`, server-generated temporary passwords, `mustChangePassword` flag     |
+| **AUTH-5**      | Session management & rate limiting  | Token rotation, replay detection, Redis rate limiting, per-device revocation             |
+| **PO-1 → PO-4** | People operations                   | User directory, self-service profile, soft deactivation, admin role promotion            |
 
 ### Catalogue, Classification & Inventory
-| ID | Requirement | Implementation |
-| :--- | :--- | :--- |
-| **CAT-1** | Bibliographic records | Full CRUD with soft archive, tenant RLS, audit logging |
-| **CAT-2** | ISBN metadata lookup | Server-side Open Library with Google Books fallback; ISBN-13 checksum validation |
-| **CAT-3** | Physical copies & barcodes | Tenant-scoped unique barcodes enforced at database index and service layer |
-| **CAT-4** | Copy status lifecycle | 7-status state machine (`AVAILABLE/ON_LOAN/RESERVED/IN_TRANSIT/LOST/DAMAGED/WITHDRAWN`) |
-| **CAT-5** | Categories, shelf & call numbers | Hierarchical categories, call number tracking, shelf location overrides |
-| **SRC-1, SRC-2** | Catalogue search & filters | PostgreSQL GIN tsvector full-text search with ranking, format, and availability filters |
+
+| ID               | Requirement                      | Implementation                                                                          |
+| :--------------- | :------------------------------- | :-------------------------------------------------------------------------------------- |
+| **CAT-1**        | Bibliographic records            | Full CRUD with soft archive, tenant RLS, audit logging                                  |
+| **CAT-2**        | ISBN metadata lookup             | Server-side Open Library with Google Books fallback; ISBN-13 checksum validation        |
+| **CAT-3**        | Physical copies & barcodes       | Tenant-scoped unique barcodes enforced at database index and service layer              |
+| **CAT-4**        | Copy status lifecycle            | 7-status state machine (`AVAILABLE/ON_LOAN/RESERVED/IN_TRANSIT/LOST/DAMAGED/WITHDRAWN`) |
+| **CAT-5**        | Categories, shelf & call numbers | Hierarchical categories, call number tracking, shelf location overrides                 |
+| **SRC-1, SRC-2** | Catalogue search & filters       | PostgreSQL GIN tsvector full-text search with ranking, format, and availability filters |
 
 ### Circulation & Holds
-| ID | Requirement | Implementation |
-| :--- | :--- | :--- |
-| **CIR-1** | Book checkout | Atomic checkout, copy transition to `ON_LOAN`, policy concurrency limit enforcement |
+
+| ID        | Requirement                       | Implementation                                                                                 |
+| :-------- | :-------------------------------- | :--------------------------------------------------------------------------------------------- |
+| **CIR-1** | Book checkout                     | Atomic checkout, copy transition to `ON_LOAN`, policy concurrency limit enforcement            |
 | **CIR-2** | Return & automated fine detection | Africa/Nairobi calendar-day overdue calculation, grace period deduction, automated fine charge |
-| **CIR-3** | Renewals & hold queue blocks | Configurable renewal limits, extension from due date, blocking renewal when holds wait |
-| **CIR-4** | Loan policy cascading | Resolution matrix by member type and item format with system fallbacks |
-| **CIR-5** | Checkout blocks & staff overrides | Enforcement of suspended accounts, expired cards, and unpaid fine ceilings with audit logging |
-| **CIR-6** | Camera barcode/QR scanning | Client-side `@zxing/wasm` multi-format camera scanner with manual barcode fallback |
-| **HLD-1** | FIFO holds queue | Placement on titles with zero available copies, duplicate prevention, pickup window resolution |
-| **HLD-2** | Return hold fulfillment | Automated copy reservation (`RESERVED`) on return, pickup countdown timer, hold fulfillment |
-| **HLD-3** | Hold queue management | Self-service patron cancellation, staff queue re-indexing, copy release |
+| **CIR-3** | Renewals & hold queue blocks      | Configurable renewal limits, extension from due date, blocking renewal when holds wait         |
+| **CIR-4** | Loan policy cascading             | Resolution matrix by member type and item format with system fallbacks                         |
+| **CIR-5** | Checkout blocks & staff overrides | Enforcement of suspended accounts, expired cards, and unpaid fine ceilings with audit logging  |
+| **CIR-6** | Camera barcode/QR scanning        | Client-side `@zxing/wasm` multi-format camera scanner with manual barcode fallback             |
+| **HLD-1** | FIFO holds queue                  | Placement on titles with zero available copies, duplicate prevention, pickup window resolution |
+| **HLD-2** | Return hold fulfillment           | Automated copy reservation (`RESERVED`) on return, pickup countdown timer, hold fulfillment    |
+| **HLD-3** | Hold queue management             | Self-service patron cancellation, staff queue re-indexing, copy release                        |
 
 ### Fines & Payments
-| ID | Requirement | Implementation |
-| :--- | :--- | :--- |
-| **FIN-1** | Configurable fine rules | Daily rate, grace days, and ceiling cap per loan policy; comprehensive boundary tests |
+
+| ID        | Requirement                       | Implementation                                                                                                 |
+| :-------- | :-------------------------------- | :------------------------------------------------------------------------------------------------------------- |
+| **FIN-1** | Configurable fine rules           | Daily rate, grace days, and ceiling cap per loan policy; comprehensive boundary tests                          |
 | **FIN-2** | Append-only fine ledger & waivers | Immutable `fine_entries` ledger with trigger protection; payment recording; waiver desk with mandatory reasons |
-| **FIN-3** | Fine payment receipts | Unique tamper-proof receipt numbers (`RCP-YYYYMMDD-XXXX`), viewable receipt modal, printable receipt |
+| **FIN-3** | Fine payment receipts             | Unique tamper-proof receipt numbers (`RCP-YYYYMMDD-XXXX`), viewable receipt modal, printable receipt           |
 
 ### Public Portals & Enquiries
-| ID | Requirement | Implementation |
-| :--- | :--- | :--- |
-| **PUB-CAT** | Tenant public catalogue | Isolated public catalogue at `/libraries/:slug/catalogue` with search, filters, and pagination |
-| **PUB-ENQ** | Public membership enquiry | Unauthenticated request form at `/libraries/:slug/request-membership`, slug resolution, email receipt, staff review queue |
-| **MEM-2, ADM-2**| Borrowing rules & matrix | Dynamic loan policy configuration matrix API and web UI at `/member-types` |
+
+| ID               | Requirement               | Implementation                                                                                                            |
+| :--------------- | :------------------------ | :------------------------------------------------------------------------------------------------------------------------ |
+| **PUB-CAT**      | Tenant public catalogue   | Isolated public catalogue at `/libraries/:slug/catalogue` with search, filters, and pagination                            |
+| **PUB-ENQ**      | Public membership enquiry | Unauthenticated request form at `/libraries/:slug/request-membership`, slug resolution, email receipt, staff review queue |
+| **MEM-2, ADM-2** | Borrowing rules & matrix  | Dynamic loan policy configuration matrix API and web UI at `/member-types`                                                |
 
 ---
 
 ## Remaining v1.0 Backlog
 
-| Workstream | Requirement ID | Feature Description | Priority |
-| :--- | :--- | :--- | :---: |
-| **Members** | `MEM-1` | Member profile updates, photo attachments, and unique admission numbers | P0 |
-| **Members** | `MEM-4` | Patron borrowing history inspection (self & staff only) | P0 |
-| **Notifications** | `NOT-1` | Automated email dispatch for due-soon, overdue, hold-ready, and fine events | P0 |
-| **Notifications** | `NOT-2` | Automated SMS notifications via Africa's Talking | P0 |
-| **Inventory** | `INV-2` | Mandatory reason tracking when copies are marked lost, damaged, or withdrawn | P0 |
-| **Reporting** | `RPT-1` | High-performance circulation dashboard SQL aggregations (< 2s) | P0 |
-| **Admin** | `ADM-1` | Library tenant profile branding (name, logo, operating hours, contacts) | P0 |
-| **Circulation** | `CIR-9` | Lost/damaged workflow with replacement charges and fine ledger posting | P1 |
-| **Platform** | `PLAT-1 → 6` | Platform Super Admin (MFA TOTP, tenant management, monitoring telemetry, audit logs) | P0 |
-| **Policies** | `PLAT-POL` | 9 Kenya Data Protection Act 2019 compliant legal and operational policies (`/legal`) | P0 |
-| **Deployment** | `INFRA` | Full Docker Compose production stack (`docker-compose.yml`), Alpine Dockerfiles, DB migrator | P0 |
+| Workstream        | Requirement ID | Feature Description                                                                          | Priority |
+| :---------------- | :------------- | :------------------------------------------------------------------------------------------- | :------: |
+| **Members**       | `MEM-1`        | Member profile updates, photo attachments, and unique admission numbers                      |    P0    |
+| **Members**       | `MEM-4`        | Patron borrowing history inspection (self & staff only)                                      |    P0    |
+| **Notifications** | `NOT-1`        | Automated email dispatch for due-soon, overdue, hold-ready, and fine events                  |    P0    |
+| **Notifications** | `NOT-2`        | Automated SMS notifications via Africa's Talking                                             |    P0    |
+| **Inventory**     | `INV-2`        | Mandatory reason tracking when copies are marked lost, damaged, or withdrawn                 |    P0    |
+| **Reporting**     | `RPT-1`        | High-performance circulation dashboard SQL aggregations (< 2s)                               |    P0    |
+| **Admin**         | `ADM-1`        | Library tenant profile branding (name, logo, operating hours, contacts)                      |    P0    |
+| **Circulation**   | `CIR-9`        | Lost/damaged workflow with replacement charges and fine ledger posting                       |    P1    |
+| **Platform**      | `PLAT-1 → 6`   | Platform Super Admin (MFA TOTP, tenant management, monitoring telemetry, audit logs)         |    P0    |
+| **Policies**      | `PLAT-POL`     | 9 Kenya Data Protection Act 2019 compliant legal and operational policies (`/legal`)         |    P0    |
+| **Deployment**    | `INFRA`        | Full Docker Compose production stack (`docker-compose.yml`), Alpine Dockerfiles, DB migrator |    P0    |
 
 Track progress on the [Commonplace v1.0 GitHub Project Board](https://github.com/users/justolise/projects/5).
 
@@ -223,6 +228,7 @@ docker compose ps
 ```
 
 The services will be available at:
+
 - **Public Portal & Workspace**: `http://localhost:3001`
 - **Platform Super Admin**: `http://localhost:3001/platform`
 - **Backend API**: `http://localhost:3000`
