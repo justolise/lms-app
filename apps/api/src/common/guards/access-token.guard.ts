@@ -5,6 +5,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { Request } from 'express';
 
 import type { AccessTokenPayload } from '../../auth/token/dto/access-token-payload.dto.js';
 import { SessionService } from '../../auth/session/session.service.js';
@@ -34,7 +35,7 @@ export class AccessTokenGuard implements CanActivate {
       .switchToHttp()
       .getRequest<AuthenticatedRequest & { user?: AccessTokenPayload }>();
 
-    const token = this.readAccessToken(request.headers.cookie);
+    const token = this.extractToken(request);
 
     if (!token) {
       throw new UnauthorizedException('Authentication required');
@@ -73,6 +74,22 @@ export class AccessTokenGuard implements CanActivate {
     request.user = payload;
 
     return true;
+  }
+
+  private extractToken(request: Request): string | null {
+    // 1. Fallback to Bearer token in Authorization header
+    const authHeader = request.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      return authHeader.substring(7);
+    }
+
+    // 2. Check parsed HttpOnly cookie
+    if (request.cookies && request.cookies[ACCESS_COOKIE]) {
+      return request.cookies[ACCESS_COOKIE];
+    }
+
+    // 3. Fallback: Parse raw cookie header safely
+    return this.readAccessToken(request.headers.cookie);
   }
 
   private readAccessToken(cookieHeader: string | undefined): string | null {

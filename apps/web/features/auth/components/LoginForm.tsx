@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Alert } from "@/components/feedback/alert";
 import { Badge } from "@/components/ui/badge";
@@ -15,11 +15,14 @@ import type { IdentifierType, LibraryMembership } from "../types/auth.types";
 
 export function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const messageParam = searchParams.get("message");
   const { isAuthenticated, isLoading, refreshProfile } = useAuth();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const successMessage = messageParam;
 
   // Auto-detect whether the identifier is email or phone
   const detectedType: IdentifierType | null = (() => {
@@ -66,6 +69,14 @@ export function LoginForm() {
         return;
       }
 
+      if (
+        typeof window !== "undefined" &&
+        "accessToken" in data &&
+        typeof data.accessToken === "string"
+      ) {
+        localStorage.setItem("lms_access_token", data.accessToken);
+      }
+
       await refreshProfile();
 
       if (data.user?.mustChangePassword) {
@@ -94,6 +105,14 @@ export function LoginForm() {
     try {
       const data = await authService.selectMembership(selectedTenantId);
 
+      if (
+        typeof window !== "undefined" &&
+        "accessToken" in data &&
+        typeof data.accessToken === "string"
+      ) {
+        localStorage.setItem("lms_access_token", data.accessToken);
+      }
+
       await refreshProfile();
 
       if (data.user?.mustChangePassword) {
@@ -113,6 +132,7 @@ export function LoginForm() {
   return (
     <>
       <form onSubmit={handleLogin} className="space-y-4">
+        {successMessage && <Alert variant="success">{successMessage}</Alert>}
         {error && <Alert variant="error">{error}</Alert>}
 
         <Input

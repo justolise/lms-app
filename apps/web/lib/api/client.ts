@@ -54,11 +54,18 @@ class ApiClient {
       requestHeaders["Content-Type"] = "application/json";
     }
 
-    // Attach platform bearer token from localStorage if available (supports 24h persistent sessions across refreshes)
-    if (typeof window !== "undefined" && path.includes("/platform/")) {
-      const platformToken = localStorage.getItem("lms_platform_access_token");
-      if (platformToken && !requestHeaders.Authorization) {
-        requestHeaders.Authorization = `Bearer ${platformToken}`;
+    // Attach bearer token from localStorage if available (supports 24h persistent sessions across refreshes)
+    if (typeof window !== "undefined") {
+      if (path.includes("/platform/")) {
+        const platformToken = localStorage.getItem("lms_platform_access_token");
+        if (platformToken && !requestHeaders.Authorization) {
+          requestHeaders.Authorization = `Bearer ${platformToken}`;
+        }
+      } else {
+        const tenantToken = localStorage.getItem("lms_access_token");
+        if (tenantToken && !requestHeaders.Authorization) {
+          requestHeaders.Authorization = `Bearer ${tenantToken}`;
+        }
       }
     }
 
@@ -112,20 +119,29 @@ class ApiClient {
               });
 
               if (refreshRes.ok) {
-                if (isPlatformApi && typeof window !== "undefined") {
+                if (typeof window !== "undefined") {
                   try {
                     const data = await refreshRes.json();
-                    if (data?.accessToken) {
-                      localStorage.setItem(
-                        "lms_platform_access_token",
-                        data.accessToken,
-                      );
-                    }
-                    if (data?.refreshToken) {
-                      localStorage.setItem(
-                        "lms_platform_refresh_token",
-                        data.refreshToken,
-                      );
+                    if (isPlatformApi) {
+                      if (data?.accessToken) {
+                        localStorage.setItem(
+                          "lms_platform_access_token",
+                          data.accessToken,
+                        );
+                      }
+                      if (data?.refreshToken) {
+                        localStorage.setItem(
+                          "lms_platform_refresh_token",
+                          data.refreshToken,
+                        );
+                      }
+                    } else {
+                      if (data?.accessToken) {
+                        localStorage.setItem(
+                          "lms_access_token",
+                          data.accessToken,
+                        );
+                      }
                     }
                   } catch {
                     // Ignore JSON parse error if response was empty

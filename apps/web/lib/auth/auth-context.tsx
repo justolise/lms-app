@@ -82,6 +82,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // Ignore network errors during logout
     } finally {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("lms_access_token");
+      }
       setUser(null);
       router.push("/login");
     }

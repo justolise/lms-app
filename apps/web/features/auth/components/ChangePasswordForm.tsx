@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Alert } from "@/components/feedback/alert";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/password-input";
+import { useAuth } from "@/lib/auth/auth-context";
 import { authService } from "../services/auth.service";
 import { PasswordMatchBar } from "./PasswordMatchBar";
 import { PasswordRequirements } from "./PasswordRequirements";
@@ -12,6 +13,7 @@ import { PasswordRequirements } from "./PasswordRequirements";
 export function ChangePasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { logout } = useAuth();
   const isFirstLogin = searchParams.get("firstLogin") === "true";
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -54,7 +56,16 @@ export function ChangePasswordForm() {
         newPassword,
         isFirstLogin ? undefined : currentPassword,
       );
-      router.push("/profile?message=Password%20updated%20successfully.");
+
+      // Explicitly clear local storage token & logout state
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("lms_access_token");
+      }
+
+      await logout();
+      router.push(
+        "/login?message=Password%20changed%20successfully.%20Please%20sign%20in%20with%20your%20new%20password.",
+      );
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to change password.",

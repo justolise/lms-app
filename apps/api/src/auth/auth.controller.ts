@@ -120,6 +120,8 @@ export class AuthController {
 
     return {
       authenticated: true,
+      accessToken: session.accessToken,
+      refreshToken: session.refreshToken,
       user: {
         id: membership.userId,
         fullName: membership.fullName,
@@ -191,6 +193,8 @@ export class AuthController {
 
     return {
       authenticated: true,
+      accessToken: session.accessToken,
+      refreshToken: session.refreshToken,
       user: {
         id: membership.userId,
         fullName: membership.fullName,
@@ -214,8 +218,9 @@ export class AuthController {
   async changePassword(
     @Body() dto: ChangePasswordDto,
     @Req() request: AuthenticatedRequest,
+    @Res({ passthrough: true }) response: Response,
   ) {
-    const { userId, tenantId, sessionId } = request.user;
+    const { userId, tenantId } = request.user;
 
     await this.authService.changePassword(
       tenantId,
@@ -224,16 +229,29 @@ export class AuthController {
       dto.newPassword,
     );
 
-    // Revoke all other active sessions for this user after password change
-    await this.sessionService.revokeAllUserSessionsExcept(
-      tenantId,
-      userId,
-      sessionId,
-    );
+    // Revoke all active sessions for this user so they must log in with their new password
+    await this.sessionService.revokeAllUserSessions(tenantId, userId);
+
+    // Clear authentication cookies
+    response.clearCookie(ACCESS_COOKIE, {
+      ...this.cookieOptions,
+      path: '/',
+    });
+
+    response.clearCookie(REFRESH_COOKIE, {
+      ...this.cookieOptions,
+      path: '/api/auth',
+    });
+
+    response.clearCookie(SELECTION_COOKIE, {
+      ...this.cookieOptions,
+      path: '/api/auth/select-membership',
+    });
 
     return {
       success: true,
-      message: 'Password changed successfully',
+      loggedOut: true,
+      message: 'Password changed successfully. Please sign in with your new password.',
     };
   }
 

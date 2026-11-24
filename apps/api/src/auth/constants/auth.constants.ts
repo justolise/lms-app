@@ -41,4 +41,8 @@ export const MUST_CHANGE_PASSWORD_ALLOWED_ENDPOINTS = [
   '/api/auth/logout',
   '/auth/sessions',
   '/api/auth/sessions',
+  '/auth/me',
+  '/api/auth/me',
+  '/profile',
+  '/api/profile',
 ] as const;
