@@ -113,6 +113,20 @@
       "when": 1796100000000,
       "tag": "0015_platform_saas_core",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1796200000000,
+      "tag": "0016_copies_composite_status_idx",
+      "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1796300000000,
+      "tag": "0017_performance_indexes",
+      "breakpoints": true
     }
   ]
 }
