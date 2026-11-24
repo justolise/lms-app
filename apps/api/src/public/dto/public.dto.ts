@@ -175,8 +175,4 @@ export class MembershipEnquiryDto extends SubmitMembershipEnquiryDto {
   @IsOptional()
   @IsString()
   libraryCode?: string;
-
-  @IsOptional()
-  @IsString()
-  idNumber?: string;
 }
