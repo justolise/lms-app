@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ComonPlaceLogo } from "@/components/brand/comonplace-logo";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/lib/auth/auth-context";
 import { PERMISSIONS, type Permission } from "@/lib/auth/permissions";
@@ -290,19 +291,15 @@ export function Sidebar({
               }}
             />
           ) : (
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-forest-800 text-white shadow-xs">
-              <span className="text-lg font-bold text-amber-400">
-                {user?.tenantName ? user.tenantName[0].toUpperCase() : "L"}
-              </span>
-            </div>
+            <ComonPlaceLogo variant="mark" size="md" />
           )}
           {!isCollapsed && (
             <div className="flex flex-col min-w-0 flex-1">
               <span className="text-sm font-bold tracking-tight text-foreground line-clamp-1">
                 {user?.tenantName ?? "Library"}
               </span>
-              <span className="text-xs text-muted-foreground">
-                Library System
+              <span className="text-[11px] text-muted-foreground">
+                ComonPlace Workspace
               </span>
             </div>
           )}

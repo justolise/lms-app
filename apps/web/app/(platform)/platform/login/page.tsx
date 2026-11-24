@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ComonPlaceLogo } from "@/components/brand/comonplace-logo";
 import { Alert } from "@/components/feedback/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -108,15 +109,13 @@ export default function PlatformLoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-forest-900 text-white shadow-md">
-            <span className="text-lg font-bold text-amber-400">CP</span>
-          </div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
+        <div className="text-center space-y-2 flex flex-col items-center">
+          <ComonPlaceLogo variant="mark" size="lg" />
+          <h1 className="font-serif text-2xl font-bold tracking-tight text-foreground">
             Platform Administration
           </h1>
           <p className="text-xs text-muted-foreground">
-            Restricted access for Commonplace Platform Super Administrators
+            Restricted access for ComonPlace Platform Super Administrators
           </p>
         </div>
 
@@ -135,7 +134,7 @@ export default function PlatformLoginPage() {
                 type="email"
                 required
                 autoComplete="email"
-                placeholder="superadmin@commonplace.co.ke"
+                placeholder="superadmin@comonplace.co.ke"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}

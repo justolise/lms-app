@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Platform Terms of Service (PLAT-POL-01) — Commonplace",
+  title: "Platform Terms of Service (PLAT-POL-01) — ComonPlace",
   description:
-    "Terms governing the use of Commonplace Library Management System SaaS platform.",
+    "Terms governing the use of ComonPlace Library Management System SaaS platform.",
 };
 
 export default function TermsOfServicePage() {
@@ -33,10 +33,10 @@ export default function TermsOfServicePage() {
         </h2>
         <p>
           These Platform Terms of Service (&ldquo;Terms&rdquo;) constitute a
-          legally binding agreement between Commonplace (&ldquo;Platform
+          legally binding agreement between ComonPlace (&ldquo;Platform
           Provider&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) and the library,
           educational institution, or school (&ldquo;Subscribing Tenant&rdquo;)
-          accessing or utilizing the Commonplace Library Management System (the
+          accessing or utilizing the ComonPlace Library Management System (the
           &ldquo;Service&rdquo;). By accessing the Service, the Subscribing
           Tenant agrees to be bound by these Terms.
         </p>
@@ -47,7 +47,7 @@ export default function TermsOfServicePage() {
           2. SaaS Provision and Tenant Isolation
         </h2>
         <p>
-          Commonplace delivers a cloud-hosted, multi-tenant software
+          ComonPlace delivers a cloud-hosted, multi-tenant software
           application. Each Subscribing Tenant is provisioned an isolated
           logical environment. Data isolation is guaranteed at the database
           layer through strict PostgreSQL Row-Level Security (RLS) policies.
@@ -89,7 +89,7 @@ export default function TermsOfServicePage() {
           4. Subscriptions, Fees, and Renewals
         </h2>
         <p>
-          Access to Commonplace is billed on an agreed institutional
+          Access to ComonPlace is billed on an agreed institutional
           subscription schedule (annual or term-based). Subscriptions grant
           rights to maintain catalog records, active loans, and member accounts.
           Renewal terms and notice periods are specified in the Institutional
@@ -116,7 +116,7 @@ export default function TermsOfServicePage() {
           6. Limitation of Liability
         </h2>
         <p>
-          To the maximum extent permitted by Kenyan law, Commonplace shall not
+          To the maximum extent permitted by Kenyan law, ComonPlace shall not
           be liable for indirect, incidental, or consequential damages resulting
           from downtime, hardware scanner failure, or lost physical inventory.
           Direct liability is capped at the total subscription fees paid by the

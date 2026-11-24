@@ -3,6 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+import { ComonPlaceLogo } from "@/components/brand/comonplace-logo";
 import { useAuth } from "@/lib/auth/auth-context";
 import { ThemeToggle } from "@/lib/theme/theme-toggle";
 
@@ -18,7 +19,7 @@ const FOOTER_COLUMNS = [
   {
     heading: "Platform",
     links: [
-      { href: "/about", label: "About Commonplace" },
+      { href: "/about", label: "About ComonPlace" },
       { href: "/features", label: "Features" },
       { href: "/for-schools-libraries", label: "For Schools & Libraries" },
       { href: "/browse", label: "Browse Catalogue" },
@@ -124,31 +125,12 @@ export function PublicShell({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           {/* Logo + wordmark */}
           <div className="flex items-center gap-6">
-            <Link href="/" className="flex items-center gap-2.5 shrink-0">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-forest-800 text-white shadow-xs">
-                <svg
-                  className="h-5 w-5 text-amber-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                  />
-                </svg>
-              </div>
-              <div className="flex flex-col leading-none">
-                <span className="text-sm font-bold tracking-tight text-foreground">
-                  Commonplace
-                </span>
-                <span className="text-[10px] text-muted-foreground">
-                  Library System
-                </span>
-              </div>
+            <Link href="/" className="flex items-center shrink-0">
+              <ComonPlaceLogo
+                variant="primary"
+                size="md"
+                subtitle="Knowledge. Community. Opportunity."
+              />
             </Link>
 
             {/* Desktop nav */}
@@ -306,35 +288,21 @@ export function PublicShell({ children }: { children: ReactNode }) {
       <main className="flex-1">{children}</main>
 
       {/* ── Footer ───────────────────────────────────────────────────── */}
-      <footer className="border-t border-border bg-surface">
+      <footer className="border-t border-forest-900 bg-forest-800 text-white">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           {/* Five-column grid: brand + 4 link columns */}
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
             {/* Brand column */}
             <div className="col-span-2 sm:col-span-3 lg:col-span-1">
-              <Link href="/" className="flex items-center gap-2.5 mb-4">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-forest-800 text-white">
-                  <svg
-                    className="h-4 w-4 text-amber-500"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                    />
-                  </svg>
-                </div>
-                <span className="text-sm font-bold text-foreground">
-                  Commonplace
-                </span>
+              <Link href="/" className="inline-flex items-center mb-4">
+                <ComonPlaceLogo variant="light" size="sm" />
               </Link>
-              <p className="text-xs text-muted-foreground leading-relaxed max-w-50">
-                Modern library management for a world of knowledge.
+              <p className="text-xs text-gold-200 font-medium mb-1.5">
+                Knowledge. Community. Opportunity.
+              </p>
+              <p className="text-xs text-white/75 leading-relaxed max-w-52">
+                A shared digital home for schools, educational institutions, and
+                community libraries.
               </p>
               {/* Social icons — hidden when not configured */}
               {activeSocials.length > 0 && (
@@ -346,7 +314,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={s.label}
-                      className="text-muted-foreground hover:text-primary transition-colors"
+                      className="text-white/75 hover:text-gold-400 transition-colors"
                     >
                       {s.icon}
                     </a>
@@ -358,7 +326,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
             {/* Link columns */}
             {FOOTER_COLUMNS.map((col) => (
               <div key={col.heading}>
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground mb-3">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-gold-400 mb-3">
                   {col.heading}
                 </h3>
                 <ul className="space-y-2">
@@ -366,7 +334,7 @@ export function PublicShell({ children }: { children: ReactNode }) {
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                        className="text-xs text-white/80 hover:text-gold-200 transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -378,12 +346,12 @@ export function PublicShell({ children }: { children: ReactNode }) {
           </div>
 
           {/* Bottom bar */}
-          <div className="mt-10 border-t border-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-muted-foreground">
-              © {currentYear} Commonplace. All rights reserved.
+          <div className="mt-10 border-t border-white/15 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs text-white/75">
+              © {currentYear ?? 2026} ComonPlace. All rights reserved.
             </p>
-            <p className="text-xs text-muted-foreground">
-              Every library. One connected world.
+            <p className="text-xs text-gold-200/90">
+              Knowledge. Community. Opportunity.
             </p>
           </div>
         </div>

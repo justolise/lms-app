@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Information Security Policy (PLAT-POL-06) — Commonplace",
+  title: "Information Security Policy (PLAT-POL-06) — ComonPlace",
   description:
-    "Technical, physical and administrative security controls in Commonplace LMS.",
+    "Technical, physical and administrative security controls in ComonPlace LMS.",
 };
 
 export default function SecurityPolicyPage() {
@@ -32,7 +32,7 @@ export default function SecurityPolicyPage() {
           1. Cryptographic Safeguards
         </h2>
         <p>
-          Commonplace employs modern, verified cryptographic primitives across
+          ComonPlace employs modern, verified cryptographic primitives across
           every layer:
         </p>
         <ul className="list-disc pl-5 space-y-1 text-muted-foreground">

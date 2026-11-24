@@ -1,71 +1,101 @@
 @import "tailwindcss";
 
 :root {
-  /* Brand: Forest Green */
+  /* ── Approved ComonPlace Brand Palette ───────────────────────── */
+  --brand-green: #173f35;
+  --brand-gold: #e9c982;
+  --brand-ivory: #f7f4ec;
+  --brand-slate: #293b43;
+
+  /* Deep Green Scale (anchored on #173F35) */
+  --forest-950: #0c231d;
   --forest-900: #112f27;
   --forest-800: #173f35;
-  --forest-700: #205b49;
-  --forest-600: #2f7663;
-  --forest-500: #4d927c;
-  --forest-100: #d0e2d6;
-  --forest-50: #e7f0ea;
+  --forest-700: #1f5346;
+  --forest-600: #2b6b5b;
+  --forest-500: #3d8572;
+  --forest-100: #dce8e2;
+  --forest-50: #eef4f0;
 
-  /* Accent: Warm Amber */
-  --amber-600: #c6903b;
-  --amber-500: #ddaa55;
-  --amber-400: #e5b667;
-  --amber-100: #faedd9;
+  /* Warm Gold Scale (anchored on #E9C982) */
+  --gold-600: #b88f3d;
+  --gold-500: #d4ad5b;
+  --gold-400: #e9c982;
+  --gold-200: #f3e2b8;
+  --gold-100: #faf2dc;
 
-  /* Light Surface Palette */
-  --background: #f8faf9;
-  --foreground: #111827;
+  /* Legacy Amber aliases mapped to Warm Gold for component compatibility */
+  --amber-600: var(--gold-600);
+  --amber-500: var(--gold-400);
+  --amber-400: var(--gold-400);
+  --amber-100: var(--gold-100);
+
+  /* Light Surface Palette (anchored on Warm Ivory #F7F4EC & Slate #293B43) */
+  --background: #f7f4ec;
+  --foreground: #293b43;
   --surface: #ffffff;
-  --surface-hover: #f1f5f3;
-  --border: #e2e8e5;
+  --surface-muted: #f0ebe0;
+  --surface-hover: #ebe5d8;
+  --border: #dfd8c8;
 
   /* Semantic Brand & Action Tokens */
-  --primary: var(--forest-700);
-  --primary-hover: var(--forest-800);
+  --primary: #173f35;
+  --primary-hover: #112f27;
   --primary-foreground: #ffffff;
 
-  --accent: var(--amber-500);
-  --accent-hover: var(--amber-600);
-  --accent-foreground: #112f27;
+  --accent: #e9c982;
+  --accent-hover: #d4ad5b;
+  --accent-foreground: #173f35;
 
-  --secondary: #4b5563;
-  --secondary-hover: #374151;
+  --secondary: #293b43;
+  --secondary-hover: #1e2c32;
   --secondary-foreground: #ffffff;
 
-  --danger: #dc2626;
-  --danger-hover: #b91c1c;
+  --danger: #b91c1c;
+  --danger-hover: #991b1b;
   --danger-foreground: #ffffff;
 
-  --success: #16a34a;
+  --success: #15803d;
   --success-foreground: #ffffff;
 
-  --warning: #d97706;
+  --warning: #b45309;
   --warning-foreground: #ffffff;
 
-  --muted: #f1f5f3;
-  --muted-foreground: #5a6b65;
+  --info: #1d4ed8;
+  --info-foreground: #ffffff;
+
+  --muted: #efeae0;
+  --muted-foreground: #52636b;
+
+  /* Layout, Radius & Shadow Tokens */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --shadow-subtle: 0 1px 2px 0 rgb(23 63 53 / 0.05);
+  --shadow-elevated: 0 8px 24px -4px rgb(23 63 53 / 0.1);
+  --nav-height: 4rem;
+  --sidebar-width: 16rem;
+  --content-max-width: 80rem;
 }
 
 .dark {
-  /* Dark Surface Palette */
-  --background: #0d1715;
-  --foreground: #f3f5f4;
-  --surface: #142320;
-  --surface-hover: #1b2f2b;
-  --border: #223c36;
+  /* Dark Surface Palette harmonized with Deep Green & Slate */
+  --background: #0d1916;
+  --foreground: #f2efe6;
+  --surface: #132420;
+  --surface-muted: #182d28;
+  --surface-hover: #1e3731;
+  --border: #25433c;
 
   /* Semantic Brand Tokens for Dark Mode */
-  --primary: #3d8a74;
-  --primary-hover: #4d927c;
+  --primary: #2d705e;
+  --primary-hover: #388570;
   --primary-foreground: #ffffff;
 
-  --accent: var(--amber-400);
-  --accent-hover: var(--amber-500);
-  --accent-foreground: #0b1f1a;
+  --accent: #e9c982;
+  --accent-hover: #f0d79d;
+  --accent-foreground: #112f27;
 
   --secondary: #94a3b8;
   --secondary-hover: #cbd5e1;
@@ -79,13 +109,22 @@
   --success-foreground: #ffffff;
 
   --warning: #f59e0b;
-  --warning-foreground: #000000;
+  --warning-foreground: #112f27;
 
-  --muted: #1a2c28;
-  --muted-foreground: #8fa39b;
+  --info: #60a5fa;
+  --info-foreground: #0f172a;
+
+  --muted: #182c27;
+  --muted-foreground: #a5b4ae;
 }
 
 @theme inline {
+  --color-brand-green: var(--brand-green);
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-ivory: var(--brand-ivory);
+  --color-brand-slate: var(--brand-slate);
+
+  --color-forest-950: var(--forest-950);
   --color-forest-900: var(--forest-900);
   --color-forest-800: var(--forest-800);
   --color-forest-700: var(--forest-700);
@@ -93,6 +132,12 @@
   --color-forest-500: var(--forest-500);
   --color-forest-100: var(--forest-100);
   --color-forest-50: var(--forest-50);
+
+  --color-gold-600: var(--gold-600);
+  --color-gold-500: var(--gold-500);
+  --color-gold-400: var(--gold-400);
+  --color-gold-200: var(--gold-200);
+  --color-gold-100: var(--gold-100);
 
   --color-amber-600: var(--amber-600);
   --color-amber-500: var(--amber-500);
@@ -102,6 +147,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
   --color-surface-hover: var(--surface-hover);
   --color-border: var(--border);
 
@@ -127,20 +173,48 @@
   --color-warning: var(--warning);
   --color-warning-foreground: var(--warning-foreground);
 
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
 
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-lora), ui-serif, Georgia, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 body {
   background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  line-height: 1.6;
   transition:
     background-color 0.2s ease,
     color 0.2s ease;
+}
+
+h1,
+h2,
+.font-display {
+  font-family: var(--font-serif);
+}
+
+/* Accessible focus-visible indicator (WCAG 2.1 AA) */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Custom scrollbars */

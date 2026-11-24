@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Contact Commonplace — Get in Touch",
+  title: "Contact ComonPlace — Get in Touch",
   description:
-    "Contact the Commonplace team to learn more about onboarding your library, pricing, support or partnerships.",
+    "Contact the ComonPlace team to learn more about onboarding your library, pricing, support or partnerships.",
 };
 
 const CONTACT_CHANNELS = [

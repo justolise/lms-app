@@ -3,9 +3,9 @@ import Link from "next/link";
 import { POLICIES } from "./policies-data";
 
 export const metadata: Metadata = {
-  title: "Legal & Policy Center — Commonplace",
+  title: "Legal & Policy Center — ComonPlace",
   description:
-    "Official regulatory and operating policies for the Commonplace Library Management System SaaS platform.",
+    "Official regulatory and operating policies for the ComonPlace Library Management System SaaS platform.",
 };
 
 export default function LegalIndexPage() {
@@ -21,10 +21,10 @@ export default function LegalIndexPage() {
           </span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-          Commonplace Platform Policies &amp; Governance
+          ComonPlace Platform Policies &amp; Governance
         </h1>
         <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-          Commonplace is a multi-tenant Software-as-a-Service (SaaS) platform
+          ComonPlace is a multi-tenant Software-as-a-Service (SaaS) platform
           built for libraries, schools, and educational institutions in Kenya
           and East Africa. These binding platform policies define our
           contractual, security, data privacy, and service availability
@@ -65,7 +65,7 @@ export default function LegalIndexPage() {
         </h3>
         <p>
           For regulatory inquiries, Data Protection Officer requests, or
-          incident disclosures, contact the Commonplace Data Governance desk at{" "}
+          incident disclosures, contact the ComonPlace Data Governance desk at{" "}
           <a
             href="mailto:support@commonplace.co.ke"
             className="text-primary underline"

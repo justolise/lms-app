@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Features — Commonplace Library Management System",
+  title: "Features — ComonPlace Library Management System",
   description:
     "Full-featured library management: circulation, catalogue, holds, fines, member management, notifications and more — built for schools and community libraries.",
 };
@@ -19,7 +19,7 @@ const FEATURES = [
       {
         icon: "🔍",
         title: "ISBN lookup & autofill",
-        body: "Scan or enter an ISBN and Commonplace fetches title, author, cover and classification data automatically from Open Library and Google Books.",
+        body: "Scan or enter an ISBN and ComonPlace fetches title, author, cover and classification data automatically from Open Library and Google Books.",
       },
       {
         icon: "🏷️",
@@ -154,7 +154,7 @@ export default function FeaturesPage() {
             <br className="hidden sm:block" /> Nothing it doesn't.
           </h1>
           <p className="text-base sm:text-lg text-white/70 max-w-2xl mx-auto">
-            Commonplace covers the full circulation lifecycle — from cataloguing
+            ComonPlace covers the full circulation lifecycle — from cataloguing
             a new acquisition to collecting an overdue fine — in a single,
             integrated platform.
           </p>

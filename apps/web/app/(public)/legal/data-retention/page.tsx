@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Data Retention and Deletion Policy (PLAT-POL-07) — Commonplace",
+  title: "Data Retention and Deletion Policy (PLAT-POL-07) — ComonPlace",
   description:
     "Retention schedules, anonymization procedures and tenant de-provisioning data lifecycle.",
 };
@@ -34,7 +34,7 @@ export default function DataRetentionPage() {
         <p>
           In accordance with Section 39 of the Kenya Data Protection Act,
           personal data shall not be retained longer than necessary to satisfy
-          the purpose for which it was collected. Commonplace enforces
+          the purpose for which it was collected. ComonPlace enforces
           structured retention schedules balanced against institutional auditing
           and statutory accounting obligations.
         </p>

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "For Schools & Libraries — Commonplace",
+  title: "For Schools & Libraries — ComonPlace",
   description:
-    "Commonplace is built for school libraries, public libraries and community reading centres in Kenya and East Africa. Affordable, compliant and easy to operate.",
+    "ComonPlace is built for school libraries, public libraries and community reading centres in Kenya and East Africa. Affordable, compliant and easy to operate.",
 };
 
 const AUDIENCE = [
@@ -115,7 +115,7 @@ export default function ForSchoolsLibrariesPage() {
       <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl space-y-10">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center mb-10">
-            Who uses Commonplace?
+            Who uses ComonPlace?
           </h2>
           {AUDIENCE.map((a) => (
             <div
@@ -148,11 +148,11 @@ export default function ForSchoolsLibrariesPage() {
         </div>
       </section>
 
-      {/* Why Commonplace */}
+      {/* Why ComonPlace */}
       <section className="bg-surface border-y border-border py-16 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-5xl">
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center mb-10">
-            Why Commonplace?
+            Why ComonPlace?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {WHY_ITEMS.map((w) => (

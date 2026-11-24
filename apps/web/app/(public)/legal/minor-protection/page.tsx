@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Child & Minor Data Protection Policy (PLAT-POL-08) — Commonplace",
+  title: "Child & Minor Data Protection Policy (PLAT-POL-08) — ComonPlace",
   description:
     "KDPA Section 33 compliance regarding processing of children's personal data.",
 };
@@ -34,7 +34,7 @@ export default function MinorProtectionPage() {
         <p>
           Section 33 of the KDPA mandates heightened duties when processing
           personal data relating to children (any individual under the age of
-          18). Because Commonplace is deployed across primary and secondary
+          18). Because ComonPlace is deployed across primary and secondary
           school libraries, safeguarding minor privacy is an absolute
           architectural priority.
         </p>
@@ -60,7 +60,7 @@ export default function MinorProtectionPage() {
         <p>
           Under Section 33(3) of the KDPA, processing of children&rsquo;s data
           that causes detriment or is used for commercial profiling is an
-          offense. Commonplace strictly enforces:
+          offense. ComonPlace strictly enforces:
         </p>
         <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
           <li>

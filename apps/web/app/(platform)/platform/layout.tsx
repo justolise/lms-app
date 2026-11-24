@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, Suspense, useEffect, useState } from "react";
+import { ComonPlaceLogo } from "@/components/brand/comonplace-logo";
 import { apiClient } from "@/lib/api/client";
 import { ENDPOINTS } from "@/lib/api/endpoints";
 import { ThemeToggle } from "@/lib/theme/theme-toggle";
@@ -15,10 +16,10 @@ interface PlatformUser {
 }
 
 const PLATFORM_NAV = [
-  { href: "/platform", label: "Overview", icon: "📊" },
-  { href: "/platform/tenants", label: "Tenants", icon: "🏛️" },
-  { href: "/platform/monitoring", label: "Monitoring", icon: "⚡" },
-  { href: "/platform/audit-logs", label: "Audit Logs", icon: "📜" },
+  { href: "/platform", label: "Overview" },
+  { href: "/platform/tenants", label: "Tenants" },
+  { href: "/platform/monitoring", label: "Monitoring" },
+  { href: "/platform/audit-logs", label: "Audit Logs" },
 ];
 
 function PlatformLayoutInner({ children }: { children: ReactNode }) {
@@ -80,22 +81,14 @@ function PlatformLayoutInner({ children }: { children: ReactNode }) {
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6">
             <Link href="/platform" className="flex items-center gap-2.5">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-forest-900 text-white shadow-xs">
-                <span className="text-sm font-bold text-amber-400">CP</span>
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold tracking-tight text-foreground">
-                    Commonplace
-                  </span>
-                  <span className="rounded-md bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-300 border border-amber-500/30">
-                    SUPER ADMIN
-                  </span>
-                </div>
-                <span className="text-[10px] text-muted-foreground leading-none">
-                  SaaS Platform Operations
-                </span>
-              </div>
+              <ComonPlaceLogo
+                variant="compact"
+                size="sm"
+                subtitle="Platform Operations"
+              />
+              <span className="rounded-md bg-gold-100 dark:bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-forest-800 dark:text-amber-300 border border-gold-400/50 dark:border-amber-500/30">
+                SUPER ADMIN
+              </span>
             </Link>
 
             <nav
@@ -117,7 +110,6 @@ function PlatformLayoutInner({ children }: { children: ReactNode }) {
                         : "text-muted-foreground hover:text-foreground hover:bg-surface-hover"
                     }`}
                   >
-                    <span>{item.icon}</span>
                     <span>{item.label}</span>
                   </Link>
                 );
@@ -169,7 +161,6 @@ function PlatformLayoutInner({ children }: { children: ReactNode }) {
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                <span>{item.icon}</span>
                 <span>{item.label}</span>
               </Link>
             );
@@ -183,7 +174,7 @@ function PlatformLayoutInner({ children }: { children: ReactNode }) {
       </main>
 
       <footer className="border-t border-border bg-surface py-4 px-4 text-center text-xs text-muted-foreground">
-        Commonplace Platform Operations Workspace &bull; Restricted Access
+        ComonPlace Platform Operations Workspace &bull; Restricted Access
         &bull; Strict Audit Logged
       </footer>
     </div>

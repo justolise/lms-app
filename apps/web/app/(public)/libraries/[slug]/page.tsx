@@ -80,22 +80,29 @@ function LibraryPortalContent() {
   return (
     <div className="bg-background min-h-screen">
       {/* Library Hero Banner */}
-      <section className="bg-forest-800 text-white py-14 px-4 sm:px-6 lg:px-8 border-b border-forest-900">
+      <section className="bg-forest-800 text-white py-12 sm:py-14 px-4 sm:px-6 lg:px-8 border-b border-forest-900">
         <div className="mx-auto max-w-5xl flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="space-y-2 text-center md:text-left">
+          <div className="space-y-2.5 text-center md:text-left">
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+              {library.logoUrl && (
+                <img
+                  src={library.logoUrl}
+                  alt={`${library.name} logo`}
+                  className="h-9 w-9 rounded-lg object-contain bg-white p-1"
+                />
+              )}
               <Badge variant="success" className="text-[11px] font-mono">
                 CODE: {library.libraryCode}
               </Badge>
-              <span className="text-xs text-white/70">
-                Public Branch Portal
+              <span className="text-xs text-gold-200">
+                Powered by ComonPlace
               </span>
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">
+            <h1 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight">
               {library.name}
             </h1>
             {library.description && (
-              <p className="text-sm text-white/80 max-w-2xl leading-relaxed">
+              <p className="text-sm text-white/85 max-w-2xl leading-relaxed">
                 {library.description}
               </p>
             )}
@@ -105,7 +112,7 @@ function LibraryPortalContent() {
             <Link href={`/libraries/${library.slug}/catalogue`}>
               <Button
                 variant="primary"
-                className="bg-amber-500 hover:bg-amber-600 text-forest-900 font-bold w-full sm:w-auto"
+                className="bg-gold-400 hover:bg-gold-500 text-forest-900 font-bold w-full sm:w-auto"
               >
                 Search Catalogue &rarr;
               </Button>
@@ -113,7 +120,7 @@ function LibraryPortalContent() {
             <Link href={`/libraries/${library.slug}/request-membership`}>
               <Button
                 variant="outline"
-                className="border-white/20 text-white hover:bg-white/10 w-full sm:w-auto"
+                className="border-white/25 text-white hover:bg-white/10 w-full sm:w-auto"
               >
                 Request Membership
               </Button>

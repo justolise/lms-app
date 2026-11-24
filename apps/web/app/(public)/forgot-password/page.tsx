@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ForgotPasswordForm } from "@/features/auth/components/ForgotPasswordForm";
 
 export const metadata: Metadata = {
-  title: "Forgot Password | Commonplace Library System",
+  title: "Forgot Password | ComonPlace Library System",
   description: "Request a password reset link for your library account",
 };
 

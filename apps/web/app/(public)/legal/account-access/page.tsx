@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Account and Access Policy (PLAT-POL-05) — Commonplace",
+  title: "Account and Access Policy (PLAT-POL-05) — ComonPlace",
   description:
     "Role hierarchy, credential standards, session management and mandatory MFA.",
 };
@@ -32,7 +32,7 @@ export default function AccountAccessPage() {
           1. Role Hierarchy and Security Boundaries
         </h2>
         <p>
-          Commonplace enforces a rigid, non-bypassable role hierarchy with
+          ComonPlace enforces a rigid, non-bypassable role hierarchy with
           strict separation between platform governance and tenant operations:
         </p>
         <ul className="list-disc pl-5 space-y-1 text-muted-foreground">

@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "About Commonplace — Modern Library Management",
+  title: "About ComonPlace — Modern Library Management",
   description:
-    "Learn how Commonplace is building modern library infrastructure for schools, community libraries and institutions across Kenya and East Africa.",
+    "Learn how ComonPlace is building modern library infrastructure for schools, community libraries and institutions across Kenya and East Africa.",
 };
 
 export default function AboutPage() {
@@ -21,7 +21,7 @@ export default function AboutPage() {
             <br className="hidden sm:block" /> for a world of knowledge.
           </h1>
           <p className="text-base sm:text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
-            Commonplace was built for the librarians, teachers and
+            ComonPlace was built for the librarians, teachers and
             administrators who keep the doors of knowledge open every day — in
             schools, community centres and public institutions across East
             Africa.
@@ -45,7 +45,7 @@ export default function AboutPage() {
               solve.
             </p>
             <p className="text-muted-foreground leading-relaxed">
-              Commonplace changes that. We provide a professional, cloud-hosted
+              ComonPlace changes that. We provide a professional, cloud-hosted
               library management platform designed specifically for the
               realities of East African institutions: low-bandwidth
               environments, local payment systems, SMS-first communication and
@@ -120,7 +120,7 @@ export default function AboutPage() {
             Ready to bring your library online?
           </h2>
           <p className="text-muted-foreground mb-8">
-            Talk to us about onboarding your institution to Commonplace.
+            Talk to us about onboarding your institution to ComonPlace.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link

@@ -4,7 +4,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { ResetPasswordForm } from "@/features/auth/components/ResetPasswordForm";
 
 export const metadata: Metadata = {
-  title: "Set New Password | Commonplace Library System",
+  title: "Set New Password | ComonPlace Library System",
   description: "Set a new password for your library account",
 };
 

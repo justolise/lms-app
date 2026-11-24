@@ -18,7 +18,7 @@ function LegalLayoutInner({ children }: { children: ReactNode }) {
         <span className="font-bold tracking-wide uppercase mr-2 text-amber-700 dark:text-amber-400">
           [DRAFT — SUBJECT TO PRODUCT OWNER &amp; LEGAL COUNSEL REVIEW]
         </span>
-        These policy documents govern the Commonplace v1.0 SaaS Platform under
+        These policy documents govern the ComonPlace v1.0 SaaS Platform under
         the Laws of Kenya and KDPA 2019.
       </aside>
 

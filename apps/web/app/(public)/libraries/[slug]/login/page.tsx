@@ -32,7 +32,7 @@ function TenantLoginContent() {
             {libraryName || "Library Portal"}
           </h1>
           <p className="text-xs text-muted-foreground">
-            Commonplace provides unified authentication across all libraries.
+            ComonPlace provides unified authentication across all libraries.
             Sign in using your registered email address or phone number.
           </p>
         </div>

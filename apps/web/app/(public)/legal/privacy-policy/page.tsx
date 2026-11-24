@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Platform Privacy Policy (PLAT-POL-02) — Commonplace",
+  title: "Platform Privacy Policy (PLAT-POL-02) — ComonPlace",
   description:
     "Kenya Data Protection Act (KDPA 2019) compliance and patron data handling practices.",
 };
@@ -42,7 +42,7 @@ export default function PrivacyPolicyPage() {
             national/student IDs, and circulation history.
           </li>
           <li>
-            <strong>Commonplace</strong> is the <strong>Data Processor</strong>.
+            <strong>ComonPlace</strong> is the <strong>Data Processor</strong>.
             We process patron information strictly in accordance with the
             Controller&rsquo;s instructions and our SaaS Service Agreement.
           </li>
@@ -54,7 +54,7 @@ export default function PrivacyPolicyPage() {
           2. Categories of Data Collected and Processed
         </h2>
         <p>
-          Commonplace processes only data necessary for library circulation and
+          ComonPlace processes only data necessary for library circulation and
           educational accountability:
         </p>
         <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
@@ -80,7 +80,7 @@ export default function PrivacyPolicyPage() {
           3. Security and Technical Safeguards
         </h2>
         <p>
-          In compliance with Section 41 of the KDPA, Commonplace implements
+          In compliance with Section 41 of the KDPA, ComonPlace implements
           robust technical controls:
         </p>
         <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
@@ -110,7 +110,7 @@ export default function PrivacyPolicyPage() {
         </h2>
         <p>
           Reading and inquiry records are protected under library
-          confidentiality ethics and constitutional privacy rights. Commonplace
+          confidentiality ethics and constitutional privacy rights. ComonPlace
           does not sell, profile, or monetize patron borrowing histories.
           Borrowing logs are accessible only to authorized library staff for
           circulation management and inventory tracking.
@@ -126,7 +126,7 @@ export default function PrivacyPolicyPage() {
           KDPA, including: (a) right to be informed; (b) right of access; (c)
           right to rectification; and (d) right to erasure or object to
           processing. Patrons must submit requests directly to their
-          institutional library (the Controller). Commonplace provides automated
+          institutional library (the Controller). ComonPlace provides automated
           software tools enabling librarians to fulfill access or correction
           requests.
         </p>

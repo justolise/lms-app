@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Cookie & Local Storage Policy (PLAT-POL-04) — Commonplace",
+  title: "Cookie & Local Storage Policy (PLAT-POL-04) — ComonPlace",
   description:
     "Strictly necessary session cookies and zero cross-site tracker policy.",
 };
@@ -32,12 +32,12 @@ export default function CookiesPolicyPage() {
           1. Strictly Necessary Cookies Only
         </h2>
         <p>
-          Commonplace operates on a privacy-first architecture.{" "}
+          ComonPlace operates on a privacy-first architecture.{" "}
           <strong>
             We do not use advertising, marketing, profiling, or third-party
             tracking cookies.
           </strong>{" "}
-          All cookies issued by Commonplace are categorized as strictly
+          All cookies issued by ComonPlace are categorized as strictly
           necessary for session security, authentication, and core library
           operations.
         </p>

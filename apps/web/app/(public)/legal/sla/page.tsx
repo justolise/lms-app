@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Platform Availability & Support SLA (PLAT-POL-09) — Commonplace",
+  title: "Platform Availability & Support SLA (PLAT-POL-09) — ComonPlace",
   description:
     "99.5% uptime commitment, maintenance windows and technical support response standards.",
 };
@@ -32,7 +32,7 @@ export default function SlaPage() {
           1. Uptime Commitment (99.5% Target)
         </h2>
         <p>
-          Commonplace commits to delivering a minimum monthly operational
+          ComonPlace commits to delivering a minimum monthly operational
           availability of <strong>99.5%</strong>, excluding scheduled
           maintenance windows. Uptime is continuously validated via automated
           health probes (<code>/health/live</code> and{" "}

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Acceptable Use Policy (PLAT-POL-03) — Commonplace",
+  title: "Acceptable Use Policy (PLAT-POL-03) — ComonPlace",
   description:
-    "Standards of conduct and system boundaries for Commonplace SaaS users.",
+    "Standards of conduct and system boundaries for ComonPlace SaaS users.",
 };
 
 export default function AcceptableUsePage() {
@@ -32,7 +32,7 @@ export default function AcceptableUsePage() {
         </h2>
         <p>
           This Acceptable Use Policy (&ldquo;AUP&rdquo;) defines the acceptable
-          use of Commonplace services, networks, and applications. All users
+          use of ComonPlace services, networks, and applications. All users
           must comply with this policy to safeguard system stability, security,
           and statutory compliance.
         </p>
