@@ -855,7 +855,7 @@ export class CirculationService {
     userId: string,
     statusFilter?: string,
   ) {
-    return this.database.withTenant(tenantId, (tx) => {
+    return this.database.withTenant(tenantId, async (tx) => {
       const conditions = [
         eq(loans.tenantId, tenantId),
         eq(loans.userId, userId),
@@ -863,7 +863,7 @@ export class CirculationService {
       if (statusFilter) {
         conditions.push(eq(loans.status, statusFilter as 'ACTIVE'));
       }
-      return tx
+      const rows = await tx
         .select({
           id: loans.id,
           tenantId: loans.tenantId,
@@ -872,7 +872,7 @@ export class CirculationService {
           copyBarcode: copies.barcode,
           catalogueItemId: loans.catalogueItemId,
           bookTitle: catalogueItems.title,
-          bookAuthor: sql<string>`(SELECT string_agg(val, ', ') FROM jsonb_array_elements_text(case when jsonb_typeof(${catalogueItems.authors}) = 'array' then ${catalogueItems.authors} else '[]'::jsonb end) AS t(val))`,
+          rawAuthors: catalogueItems.authors,
           bookFormat: catalogueItems.format,
           loanDurationDays: loans.loanDurationDays,
           maxRenewals: loans.maxRenewals,
@@ -902,16 +902,44 @@ export class CirculationService {
         )
         .where(and(...conditions))
         .orderBy(desc(loans.checkedOutAt));
+
+      return rows.map((r) => {
+        let bookAuthor = '';
+        if (Array.isArray(r.rawAuthors)) {
+          bookAuthor = r.rawAuthors.filter(Boolean).join(', ');
+        }
+        return {
+          id: r.id,
+          tenantId: r.tenantId,
+          userId: r.userId,
+          copyId: r.copyId,
+          copyBarcode: r.copyBarcode,
+          catalogueItemId: r.catalogueItemId,
+          bookTitle: r.bookTitle,
+          bookAuthor,
+          bookFormat: r.bookFormat,
+          loanDurationDays: r.loanDurationDays,
+          maxRenewals: r.maxRenewals,
+          renewalCount: r.renewalCount,
+          checkedOutAt: r.checkedOutAt,
+          dueAt: r.dueAt,
+          returnedAt: r.returnedAt,
+          status: r.status,
+          fineMinorUnits: r.fineMinorUnits,
+          overrideReason: r.overrideReason,
+          createdAt: r.createdAt,
+        };
+      });
     });
   }
 
   async getAllLoans(tenantId: string, statusFilter?: string) {
-    return this.database.withTenant(tenantId, (tx) => {
+    return this.database.withTenant(tenantId, async (tx) => {
       const conditions = [eq(loans.tenantId, tenantId)];
       if (statusFilter) {
         conditions.push(eq(loans.status, statusFilter as 'ACTIVE'));
       }
-      return tx
+      const rows = await tx
         .select({
           id: loans.id,
           tenantId: loans.tenantId,
@@ -920,7 +948,7 @@ export class CirculationService {
           copyBarcode: copies.barcode,
           catalogueItemId: loans.catalogueItemId,
           bookTitle: catalogueItems.title,
-          bookAuthor: sql<string>`(SELECT string_agg(val, ', ') FROM jsonb_array_elements_text(case when jsonb_typeof(${catalogueItems.authors}) = 'array' then ${catalogueItems.authors} else '[]'::jsonb end) AS t(val))`,
+          rawAuthors: catalogueItems.authors,
           bookFormat: catalogueItems.format,
           loanDurationDays: loans.loanDurationDays,
           maxRenewals: loans.maxRenewals,
@@ -950,6 +978,34 @@ export class CirculationService {
         )
         .where(and(...conditions))
         .orderBy(desc(loans.checkedOutAt));
+
+      return rows.map((r) => {
+        let bookAuthor = '';
+        if (Array.isArray(r.rawAuthors)) {
+          bookAuthor = r.rawAuthors.filter(Boolean).join(', ');
+        }
+        return {
+          id: r.id,
+          tenantId: r.tenantId,
+          userId: r.userId,
+          copyId: r.copyId,
+          copyBarcode: r.copyBarcode,
+          catalogueItemId: r.catalogueItemId,
+          bookTitle: r.bookTitle,
+          bookAuthor,
+          bookFormat: r.bookFormat,
+          loanDurationDays: r.loanDurationDays,
+          maxRenewals: r.maxRenewals,
+          renewalCount: r.renewalCount,
+          checkedOutAt: r.checkedOutAt,
+          dueAt: r.dueAt,
+          returnedAt: r.returnedAt,
+          status: r.status,
+          fineMinorUnits: r.fineMinorUnits,
+          overrideReason: r.overrideReason,
+          createdAt: r.createdAt,
+        };
+      });
     });
   }
 }

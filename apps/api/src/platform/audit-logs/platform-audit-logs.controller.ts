@@ -12,16 +12,20 @@ export class PlatformAuditLogsController {
 
   @Get()
   async listLogs(
+    @Query('scope') scope?: 'ALL' | 'PLATFORM' | 'TENANT',
     @Query('action') action?: string,
     @Query('entityType') entityType?: string,
     @Query('actorId') actorId?: string,
+    @Query('tenantId') tenantId?: string,
     @Query('limit') limitStr?: string,
     @Query('offset') offsetStr?: string,
   ) {
     const query: ListAuditLogsQuery = {
+      scope,
       action,
       entityType,
       actorId,
+      tenantId,
       limit: limitStr ? parseInt(limitStr, 10) : undefined,
       offset: offsetStr ? parseInt(offsetStr, 10) : undefined,
     };

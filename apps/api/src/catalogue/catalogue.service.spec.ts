@@ -16,13 +16,23 @@ const mockDatabase = {
 function selectChain(result: unknown[]) {
   const chain: any = {
     from: vi.fn(),
+    leftJoin: vi.fn(),
     where: vi.fn(),
+    groupBy: vi.fn(),
+    as: vi.fn(),
     limit: vi.fn(),
     offset: vi.fn(),
     orderBy: vi.fn(),
   };
   chain.from.mockReturnValue(chain);
+  chain.leftJoin.mockReturnValue(chain);
   chain.where.mockReturnValue(chain);
+  chain.groupBy.mockReturnValue(chain);
+  chain.as.mockReturnValue({
+    catalogueItemId: 'catalogue_item_id',
+    availableCopies: 'available_copies',
+    totalCopies: 'total_copies',
+  });
   chain.limit.mockReturnValue(chain);
   chain.offset.mockReturnValue(chain);
   chain.orderBy.mockReturnValue(chain);
@@ -181,6 +191,7 @@ describe('CatalogueService', () => {
     it('searches with full-text keyword and filters (SRC-1, SRC-2)', async () => {
       const items = [{ id: itemId, title: 'Clean Code', availableCopies: 2, totalCopies: 2 }];
       mockTx.select
+        .mockReturnValueOnce(selectChain([]))
         .mockReturnValueOnce(selectChain(items))
         .mockReturnValueOnce(selectChain([{ count: 1 }]));
 
@@ -204,6 +215,7 @@ describe('CatalogueService', () => {
     it('searches without filters and returns default pagination', async () => {
       const items = [{ id: itemId, title: 'Clean Architecture' }];
       mockTx.select
+        .mockReturnValueOnce(selectChain([]))
         .mockReturnValueOnce(selectChain(items))
         .mockReturnValueOnce(selectChain([{ count: 1 }]));
 

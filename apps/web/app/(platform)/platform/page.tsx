@@ -54,7 +54,7 @@ export default function PlatformDashboardPage() {
         const [statsData, logsData] = await Promise.all([
           apiClient.get<MonitoringStats>(ENDPOINTS.platform.monitoringStats),
           apiClient.get<{ items: AuditLog[] }>(
-            `${ENDPOINTS.platform.auditLogs}?limit=5`,
+            `${ENDPOINTS.platform.auditLogs}?scope=ALL&limit=5`,
           ),
         ]);
         setStats(statsData);

@@ -42,8 +42,21 @@ export class CatalogueService {
       if (cached) return cached;
     }
 
-    const rows = await this.database.withTenant(tenantId, (tx) =>
-      tx
+    const rows = await this.database.withTenant(tenantId, (tx) => {
+      const copyCounts = tx
+        .select({
+          catalogueItemId: copies.catalogueItemId,
+          availableCopies: sql<number>`count(*) filter (where ${copies.status} = 'AVAILABLE')::int`.as(
+            'available_copies',
+          ),
+          totalCopies: sql<number>`count(*)::int`.as('total_copies'),
+        })
+        .from(copies)
+        .where(eq(copies.tenantId, tenantId))
+        .groupBy(copies.catalogueItemId)
+        .as('copy_counts');
+
+      return tx
         .select({
           id: catalogueItems.id,
           title: catalogueItems.title,
@@ -62,23 +75,14 @@ export class CatalogueService {
           status: catalogueItems.status,
           createdAt: catalogueItems.createdAt,
           updatedAt: catalogueItems.updatedAt,
-          // Availability: count of AVAILABLE copies
-          availableCopies: sql<number>`(
-            SELECT COUNT(*)::int FROM copies c
-            WHERE c.tenant_id = ${tenantId}::uuid
-              AND c.catalogue_item_id = "catalogue_items"."id"
-              AND c.status = 'AVAILABLE'
-          )`,
-          totalCopies: sql<number>`(
-            SELECT COUNT(*)::int FROM copies c
-            WHERE c.tenant_id = ${tenantId}::uuid
-              AND c.catalogue_item_id = "catalogue_items"."id"
-          )`,
+          availableCopies: sql<number>`coalesce(${copyCounts.availableCopies}, 0)`,
+          totalCopies: sql<number>`coalesce(${copyCounts.totalCopies}, 0)`,
         })
         .from(catalogueItems)
+        .leftJoin(copyCounts, eq(catalogueItems.id, copyCounts.catalogueItemId))
         .where(eq(catalogueItems.tenantId, tenantId))
-        .orderBy(catalogueItems.title),
-    );
+        .orderBy(catalogueItems.title);
+    });
 
     if (this.redis) {
       await this.redis.set(this.cacheKey(tenantId), rows, 120);
@@ -127,16 +131,29 @@ export class CatalogueService {
 
       if (params.availableOnly) {
         conditions.push(
-          sql`(
-            SELECT COUNT(*)::int FROM copies c
+          sql`EXISTS (
+            SELECT 1 FROM copies c
             WHERE c.tenant_id = ${tenantId}::uuid
               AND c.catalogue_item_id = "catalogue_items"."id"
               AND c.status = 'AVAILABLE'
-          ) > 0`,
+          )`,
         );
       }
 
       const whereClause = and(...conditions);
+
+      const copyCounts = tx
+        .select({
+          catalogueItemId: copies.catalogueItemId,
+          availableCopies: sql<number>`count(*) filter (where ${copies.status} = 'AVAILABLE')::int`.as(
+            'available_copies',
+          ),
+          totalCopies: sql<number>`count(*)::int`.as('total_copies'),
+        })
+        .from(copies)
+        .where(eq(copies.tenantId, tenantId))
+        .groupBy(copies.catalogueItemId)
+        .as('copy_counts');
 
       const items = await tx
         .select({
@@ -157,19 +174,11 @@ export class CatalogueService {
           status: catalogueItems.status,
           createdAt: catalogueItems.createdAt,
           updatedAt: catalogueItems.updatedAt,
-          availableCopies: sql<number>`(
-            SELECT COUNT(*)::int FROM copies c
-            WHERE c.tenant_id = ${tenantId}::uuid
-              AND c.catalogue_item_id = "catalogue_items"."id"
-              AND c.status = 'AVAILABLE'
-          )`,
-          totalCopies: sql<number>`(
-            SELECT COUNT(*)::int FROM copies c
-            WHERE c.tenant_id = ${tenantId}::uuid
-              AND c.catalogue_item_id = "catalogue_items"."id"
-          )`,
+          availableCopies: sql<number>`coalesce(${copyCounts.availableCopies}, 0)`,
+          totalCopies: sql<number>`coalesce(${copyCounts.totalCopies}, 0)`,
         })
         .from(catalogueItems)
+        .leftJoin(copyCounts, eq(catalogueItems.id, copyCounts.catalogueItemId))
         .where(whereClause)
         .orderBy(
           cleanQ

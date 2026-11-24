@@ -23,46 +23,34 @@ describe('PlatformAuditLogsService', () => {
   });
 
   it('lists audit logs with actor details and total count', async () => {
-    const mockCountChain = {
-      from: vi.fn().mockReturnValue({
-        where: vi.fn().mockResolvedValue([{ count: 1 }]),
-      }),
-    };
-
-    const mockRows = [
+    const mockCountRows = [{ total: 1 }];
+    const mockDataRows = [
       {
         id: 'log-1',
+        source: 'PLATFORM',
+        tenant_id: null,
+        tenant_name: null,
+        tenant_slug: null,
+        actor_id: 'admin-1',
+        actor_email: 'super@platform.local',
+        actor_full_name: 'Super Administrator',
+        actor_role: 'PLATFORM_SUPER_ADMIN',
         action: 'TENANT_CREATED',
-        entityType: 'TENANT',
-        entityId: 'tenant-123',
-        ipAddress: '127.0.0.1',
-        userAgent: 'test-agent',
+        entity_type: 'TENANT',
+        entity_id: 'tenant-123',
+        ip_address: '127.0.0.1',
+        user_agent: 'test-agent',
         metadata: { name: 'Test Library' },
-        createdAt: new Date('2026-01-01T00:00:00Z'),
-        actorId: 'admin-1',
-        actorEmail: 'super@platform.local',
-        actorFullName: 'Super Administrator',
+        created_at: new Date('2026-01-01T00:00:00Z'),
       },
     ];
 
-    const mockQueryChain = {
-      from: vi.fn().mockReturnValue({
-        leftJoin: vi.fn().mockReturnValue({
-          where: vi.fn().mockReturnValue({
-            orderBy: vi.fn().mockReturnValue({
-              limit: vi.fn().mockReturnValue({
-                offset: vi.fn().mockResolvedValue(mockRows),
-              }),
-            }),
-          }),
-        }),
-      }),
-    };
-
     let callCount = 0;
-    mockDb.select.mockImplementation(() => {
+    mockDb.execute = vi.fn().mockImplementation(() => {
       callCount++;
-      return callCount === 1 ? mockCountChain : mockQueryChain;
+      return Promise.resolve({
+        rows: callCount === 1 ? mockCountRows : mockDataRows,
+      });
     });
 
     const result = await service.listAuditLogs({ limit: 10, offset: 0 });

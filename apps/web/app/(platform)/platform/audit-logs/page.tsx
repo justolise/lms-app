@@ -10,6 +10,10 @@ import { ENDPOINTS } from "@/lib/api/endpoints";
 
 interface AuditLogItem {
   id: string;
+  source?: "PLATFORM" | "TENANT";
+  tenantId?: string | null;
+  tenantName?: string | null;
+  tenantSlug?: string | null;
   action: string;
   entityType: string;
   entityId: string | null;
@@ -21,6 +25,7 @@ interface AuditLogItem {
     id: string;
     email: string;
     fullName: string;
+    role?: string | null;
   } | null;
 }
 
@@ -31,6 +36,10 @@ export default function PlatformAuditLogsPage() {
   const [error, setError] = useState<string | null>(null);
 
   // Filters
+  const [scopeFilter, setScopeFilter] = useState<"ALL" | "PLATFORM" | "TENANT">(
+    "ALL",
+  );
+  const [tenantIdFilter, setTenantIdFilter] = useState("");
   const [actionFilter, setActionFilter] = useState("");
   const [entityFilter, setEntityFilter] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -39,7 +48,8 @@ export default function PlatformAuditLogsPage() {
     setLoading(true);
     setError(null);
     try {
-      const params = new URLSearchParams({ limit: "50" });
+      const params = new URLSearchParams({ limit: "50", scope: scopeFilter });
+      if (tenantIdFilter.trim()) params.set("tenantId", tenantIdFilter.trim());
       if (actionFilter.trim()) params.set("action", actionFilter.trim());
       if (entityFilter.trim()) params.set("entityType", entityFilter.trim());
 
@@ -82,15 +92,36 @@ export default function PlatformAuditLogsPage() {
       {error && <Alert variant="error">{error}</Alert>}
 
       {/* Filter Bar */}
-      <div className="flex flex-col sm:flex-row items-center gap-3 bg-surface p-4 rounded-xl border border-border">
-        <div className="w-full sm:w-64">
+      <div className="flex flex-col sm:flex-row flex-wrap items-center gap-3 bg-surface p-4 rounded-xl border border-border">
+        <div className="w-full sm:w-40">
+          <select
+            aria-label="Audit scope"
+            value={scopeFilter}
+            onChange={(e) =>
+              setScopeFilter(e.target.value as "ALL" | "PLATFORM" | "TENANT")
+            }
+            className="w-full h-9 rounded-md border border-border bg-background px-3 text-xs text-foreground"
+          >
+            <option value="ALL">All Activity</option>
+            <option value="PLATFORM">Platform Only</option>
+            <option value="TENANT">Tenants Only</option>
+          </select>
+        </div>
+        <div className="w-full sm:w-56">
+          <Input
+            placeholder="Filter by tenant UUID..."
+            value={tenantIdFilter}
+            onChange={(e) => setTenantIdFilter(e.target.value)}
+          />
+        </div>
+        <div className="w-full sm:w-56">
           <Input
             placeholder="Filter by action (e.g. TENANT_CREATED)..."
             value={actionFilter}
             onChange={(e) => setActionFilter(e.target.value)}
           />
         </div>
-        <div className="w-full sm:w-64">
+        <div className="w-full sm:w-56">
           <Input
             placeholder="Filter by entity (e.g. TENANT)..."
             value={entityFilter}
@@ -124,6 +155,7 @@ export default function PlatformAuditLogsPage() {
               <thead>
                 <tr className="bg-surface-hover border-b border-border text-muted-foreground">
                   <th className="p-3 font-semibold">Timestamp</th>
+                  <th className="p-3 font-semibold">Scope / Tenant</th>
                   <th className="p-3 font-semibold">Action</th>
                   <th className="p-3 font-semibold">Entity</th>
                   <th className="p-3 font-semibold">Actor</th>
@@ -140,6 +172,22 @@ export default function PlatformAuditLogsPage() {
                         <td className="p-3 whitespace-nowrap text-muted-foreground font-mono text-[11px]">
                           {new Date(log.createdAt).toLocaleString()}
                         </td>
+                        <td className="p-3">
+                          <span
+                            className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                              log.source === "TENANT"
+                                ? "bg-amber-500/10 text-amber-600"
+                                : "bg-blue-500/10 text-blue-600"
+                            }`}
+                          >
+                            {log.source || "PLATFORM"}
+                          </span>
+                          {log.tenantName && (
+                            <div className="text-[11px] text-muted-foreground mt-0.5">
+                              {log.tenantName}
+                            </div>
+                          )}
+                        </td>
                         <td className="p-3 font-mono font-bold text-primary">
                           <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[11px]">
                             {log.action}
@@ -152,6 +200,11 @@ export default function PlatformAuditLogsPage() {
                         <td className="p-3">
                           <div className="font-semibold text-foreground">
                             {log.actor?.fullName || "System Engine"}
+                            {log.actor?.role && (
+                              <span className="ml-1.5 text-[10px] font-normal text-muted-foreground">
+                                ({log.actor.role})
+                              </span>
+                            )}
                           </div>
                           <div className="text-[10px] text-muted-foreground">
                             {log.actor?.email || "internal"}
@@ -174,7 +227,7 @@ export default function PlatformAuditLogsPage() {
                       </tr>
                       {isExpanded && (
                         <tr className="bg-surface-hover/40 border-b border-border">
-                          <td colSpan={6} className="p-3">
+                          <td colSpan={7} className="p-3">
                             <pre className="p-3 rounded-lg bg-background border border-border text-[11px] font-mono overflow-x-auto text-foreground">
                               {JSON.stringify(log.metadata || {}, null, 2)}
                             </pre>

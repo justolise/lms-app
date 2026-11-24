@@ -169,6 +169,14 @@ export const users = pgTable(
 
     index('users_tenant_role_idx').on(table.tenantId, table.role),
 
+    index('users_tenant_status_idx').on(table.tenantId, table.status),
+
+    index('users_tenant_role_status_idx').on(
+      table.tenantId,
+      table.role,
+      table.status,
+    ),
+
     check(
       'users_email_or_phone_required',
       sql`${table.email} IS NOT NULL OR ${table.phone} IS NOT NULL`,
@@ -454,6 +462,16 @@ export const memberProfiles = pgTable(
 
     index('member_profiles_tenant_group_idx').on(table.tenantId, table.groupId),
 
+    index('member_profiles_tenant_member_type_idx').on(
+      table.tenantId,
+      table.memberTypeId,
+    ),
+
+    index('member_profiles_tenant_expires_at_idx').on(
+      table.tenantId,
+      table.membershipExpiresAt,
+    ),
+
     // A document number can only be registered once per library.
     uniqueIndex('member_profiles_tenant_identifier_hash_unique')
       .on(table.tenantId, table.identifierLookupHash)
@@ -699,6 +717,8 @@ export const auditLogs = pgTable(
       .defaultNow(),
   },
   (table) => [
+    index('audit_logs_created_idx').on(table.createdAt),
+
     index('audit_logs_tenant_created_idx').on(table.tenantId, table.createdAt),
 
     index('audit_logs_tenant_actor_created_idx').on(
@@ -919,6 +939,13 @@ export const copies = pgTable(
       table.catalogueItemId,
     ),
 
+    // Composite index for fast availability and inventory aggregate lookups (Concepts 25, 26)
+    index('copies_tenant_item_status_idx').on(
+      table.tenantId,
+      table.catalogueItemId,
+      table.status,
+    ),
+
     // The parent catalogue item must belong to the same library.
     foreignKey({
       name: 'copies_tenant_catalogue_item_fk',
@@ -1021,6 +1048,12 @@ export const loans = pgTable(
     index('loans_tenant_catalogue_item_idx').on(
       table.tenantId,
       table.catalogueItemId,
+    ),
+
+    index('loans_tenant_status_due_at_idx').on(
+      table.tenantId,
+      table.status,
+      table.dueAt,
     ),
 
     // Borrower must belong to the same tenant
@@ -1445,6 +1478,7 @@ export const platformAuditLogs = pgTable(
       .defaultNow(),
   },
   (table) => [
+    index('platform_audit_logs_created_idx').on(table.createdAt),
     index('platform_audit_logs_actor_idx').on(table.actorId, table.createdAt),
     index('platform_audit_logs_entity_idx').on(table.entityType, table.entityId),
   ],

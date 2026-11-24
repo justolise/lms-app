@@ -602,7 +602,7 @@ export class MembersService {
           copyBarcode: copies.barcode,
           catalogueItemId: loans.catalogueItemId,
           bookTitle: catalogueItems.title,
-          bookAuthor: sql<string>`(SELECT string_agg(val, ', ') FROM jsonb_array_elements_text(case when jsonb_typeof(${catalogueItems.authors}) = 'array' then ${catalogueItems.authors} else '[]'::jsonb end) AS t(val))`,
+          rawAuthors: catalogueItems.authors,
           bookFormat: catalogueItems.format,
           loanDurationDays: loans.loanDurationDays,
           maxRenewals: loans.maxRenewals,
@@ -638,7 +638,20 @@ export class MembersService {
         )
         .orderBy(desc(loans.checkedOutAt));
 
-      return rows;
+      return rows.map((r) => {
+        if (!('rawAuthors' in r)) {
+          return r;
+        }
+        let bookAuthor = '';
+        if (Array.isArray(r.rawAuthors)) {
+          bookAuthor = r.rawAuthors.filter(Boolean).join(', ');
+        }
+        const { rawAuthors, ...rest } = r;
+        return {
+          ...rest,
+          bookAuthor,
+        };
+      });
     });
   }
 
