@@ -199,6 +199,7 @@ export class NotificationsService {
 		const dueSoonCutoffHigh = new Date(now.getTime() + 3 * 86_400_000);
 
 		// Overdue: loans whose dueAt < now (status still ACTIVE)
+		// Optimize query: JOIN users and catalogue_items in a single query to eliminate N+1 round trips (Concept 27)
 		const loans_ = await this.database.withTenant(tenantId, async (tx) => {
 			return tx
 				.select({
@@ -206,8 +207,13 @@ export class NotificationsService {
 					userId: loans.userId,
 					dueAt: loans.dueAt,
 					catalogueItemId: loans.catalogueItemId,
+					userEmail: users.email,
+					userPhone: users.phone,
+					bookTitle: catalogueItems.title,
 				})
 				.from(loans)
+				.innerJoin(users, eq(loans.userId, users.id))
+				.innerJoin(catalogueItems, eq(loans.catalogueItemId, catalogueItems.id))
 				.where(
 					and(
 						eq(loans.tenantId, tenantId),
@@ -229,25 +235,8 @@ export class NotificationsService {
 			process.env.LIBRARY_NAME ?? 'the library';
 
 		for (const loan of loans_) {
-			// Resolve user email/phone and book title
-			const [userData] = await this.database.withTenant(tenantId, async (tx) => {
-				return tx
-					.select({ email: users.email, phone: users.phone })
-					.from(users)
-					.where(and(eq(users.tenantId, tenantId), eq(users.id, loan.userId)));
-			});
-
-			const [item] = await this.database.withTenant(tenantId, async (tx) => {
-				return tx
-					.select({ title: catalogueItems.title })
-					.from(catalogueItems)
-					.where(
-						and(
-							eq(catalogueItems.tenantId, tenantId),
-							eq(catalogueItems.id, loan.catalogueItemId),
-						),
-					);
-			});
+			const userData = { email: loan.userEmail, phone: loan.userPhone };
+			const item = { title: loan.bookTitle };
 
 			if (!userData || !item) continue;
 

@@ -73,25 +73,13 @@ describe('PublicService', () => {
       ).rejects.toThrow(BadRequestException);
     });
 
-    it('falls back to first active tenant if slug is undefined or default', async () => {
-      const mockTenant = {
-        id: '22222222-2222-2222-2222-222222222222',
-        name: 'Default Test Library',
-        libraryCode: 'TEST-LIB',
-        status: 'ACTIVE',
-      };
-
-      const chain: any = {
-        from: vi.fn().mockReturnThis(),
-        where: vi.fn().mockReturnThis(),
-        limit: vi.fn().mockResolvedValue([mockTenant]),
-      };
-      mockDatabaseService.db.select.mockReturnValue(chain);
-
-      const result = await service.resolveTenantBySlug(undefined);
-
-      expect(result.id).toBe(mockTenant.id);
-      expect(result.libraryCode).toBe('TEST-LIB');
+    it('fails closed and throws NotFoundException if slug is undefined or default', async () => {
+      await expect(service.resolveTenantBySlug(undefined)).rejects.toThrow(
+        NotFoundException,
+      );
+      await expect(service.resolveTenantBySlug('default')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('throws NotFoundException if no active library exists', async () => {

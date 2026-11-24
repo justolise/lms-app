@@ -49,7 +49,7 @@ export class PlatformTokenService {
       fullName: payload.fullName,
       role: 'PLATFORM_SUPER_ADMIN',
       sessionId: payload.sessionId,
-      mfaVerified: true,
+      mfaVerified: payload.mfaVerified ?? false,
     })
       .setProtectedHeader({
         alg: PLATFORM_TOKEN_ALGORITHM,

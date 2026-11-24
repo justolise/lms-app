@@ -28,6 +28,8 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(RedisService.name);
   private readonly client: Redis;
 
+  private isConnected = false;
+
   constructor() {
     const redisUrl = process.env.REDIS_URL;
 
@@ -50,20 +52,39 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     });
 
     this.client.on('error', (error: Error) => {
+      this.isConnected = false;
       this.logger.error(`Redis connection error: ${error.message}`);
+    });
+
+    this.client.on('connect', () => {
+      this.isConnected = true;
     });
   }
 
   async onModuleInit(): Promise<void> {
-    await this.client.connect();
+    const isStrict = process.env.REDIS_STRICT_STARTUP === 'true';
 
-    const response = await this.client.ping();
+    try {
+      await this.client.connect();
+      const response = await this.client.ping();
 
-    if (response !== 'PONG') {
-      throw new Error('Redis health check failed');
+      if (response !== 'PONG') {
+        throw new Error('Redis health check failed');
+      }
+
+      this.isConnected = true;
+      this.logger.log('Redis connection established');
+    } catch (err) {
+      this.isConnected = false;
+
+      if (isStrict) {
+        throw err;
+      }
+
+      this.logger.warn(
+        `Redis is unavailable at startup (${(err as Error).message}). Operating in degraded/cache-bypassed mode.`,
+      );
     }
-
-    this.logger.log('Redis connection established');
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -73,6 +94,10 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     }
 
     this.client.disconnect();
+  }
+
+  get isReady(): boolean {
+    return this.client.status === 'ready' || this.isConnected;
   }
 
   async ping(): Promise<string> {
@@ -103,30 +128,55 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   // ─── Generic Caching API ────────────────────────────────────
 
   async get<T>(key: string): Promise<T | null> {
-    const raw = await this.client.get(key);
-    if (!raw) {
+    if (!this.isReady) {
       return null;
     }
 
     try {
-      return JSON.parse(raw) as T;
-    } catch {
-      return raw as unknown as T;
+      const raw = await this.client.get(key);
+      if (!raw) {
+        return null;
+      }
+
+      try {
+        return JSON.parse(raw) as T;
+      } catch {
+        return raw as unknown as T;
+      }
+    } catch (err) {
+      this.logger.warn(`Redis get failed for key "${key}": ${(err as Error).message}`);
+      return null;
     }
   }
 
   async set(key: string, value: unknown, ttlSeconds?: number): Promise<void> {
-    const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+    if (!this.isReady) {
+      return;
+    }
 
-    if (ttlSeconds && ttlSeconds > 0) {
-      await this.client.set(key, serialized, 'EX', ttlSeconds);
-    } else {
-      await this.client.set(key, serialized);
+    try {
+      const serialized = typeof value === 'string' ? value : JSON.stringify(value);
+
+      if (ttlSeconds && ttlSeconds > 0) {
+        await this.client.set(key, serialized, 'EX', ttlSeconds);
+      } else {
+        await this.client.set(key, serialized);
+      }
+    } catch (err) {
+      this.logger.warn(`Redis set failed for key "${key}": ${(err as Error).message}`);
     }
   }
 
   async del(key: string): Promise<void> {
-    await this.client.del(key);
+    if (!this.isReady) {
+      return;
+    }
+
+    try {
+      await this.client.del(key);
+    } catch (err) {
+      this.logger.warn(`Redis del failed for key "${key}": ${(err as Error).message}`);
+    }
   }
 
   async delByPattern(pattern: string): Promise<void> {

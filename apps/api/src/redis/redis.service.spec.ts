@@ -62,7 +62,8 @@ describe('RedisService', () => {
       expect(redisMocks.ping).toHaveBeenCalledOnce();
     });
 
-    it('fails when Redis does not return PONG', async () => {
+    it('fails when Redis does not return PONG in strict mode', async () => {
+      vi.stubEnv('REDIS_STRICT_STARTUP', 'true');
       redisMocks.ping.mockResolvedValue('NOT_PONG');
 
       service = new RedisService();
@@ -72,7 +73,8 @@ describe('RedisService', () => {
       );
     });
 
-    it('fails when Redis cannot connect', async () => {
+    it('fails when Redis cannot connect in strict mode', async () => {
+      vi.stubEnv('REDIS_STRICT_STARTUP', 'true');
       redisMocks.connect.mockRejectedValue(new Error('Connection refused'));
 
       service = new RedisService();
@@ -80,6 +82,16 @@ describe('RedisService', () => {
       await expect(service.onModuleInit()).rejects.toThrow(
         'Connection refused',
       );
+    });
+
+    it('logs warning and does not throw when Redis fails in resilient mode (default)', async () => {
+      redisMocks.status = 'reconnecting';
+      redisMocks.ping.mockResolvedValue('NOT_PONG');
+
+      service = new RedisService();
+
+      await expect(service.onModuleInit()).resolves.toBeUndefined();
+      expect(service.isReady).toBe(false);
     });
   });
 

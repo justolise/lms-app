@@ -88,49 +88,23 @@ export class PlatformAuthService {
       throw new UnauthorizedException('Invalid platform credentials');
     }
 
-    // 3. If MFA is enabled, issue short-lived temp token for MFA challenge
-    if (user.mfaEnabled) {
-      const tempToken = await this.tokenService.signTempMfaToken({
-        platformUserId: user.id,
-        email: user.email,
-        role: 'PLATFORM_SUPER_ADMIN',
-        mfaPending: true,
-      });
-
-      return {
-        mfaRequired: true,
-        tempToken,
-      };
+    // 3. Multi-factor authentication is mandatory for all Platform Super Admins (Approved Decision 2.5)
+    if (!user.mfaEnabled) {
+      throw new UnauthorizedException(
+        'Multi-factor authentication (MFA) is mandatory for platform administration. Please complete setup via the bootstrap procedure.',
+      );
     }
 
-    // 4. Otherwise issue full session directly
-    const session = await this.sessionService.createSession(
-      user.id,
-      ipAddress,
-      userAgent,
-    );
-
-    const accessToken = await this.tokenService.signPlatformAccessToken({
+    const tempToken = await this.tokenService.signTempMfaToken({
       platformUserId: user.id,
       email: user.email,
-      fullName: user.fullName,
       role: 'PLATFORM_SUPER_ADMIN',
-      sessionId: session.sessionId,
-      mfaVerified: false,
+      mfaPending: true,
     });
 
-    await this.recordLoginSuccess(user.id, user.email, ipAddress, userAgent);
-
     return {
-      mfaRequired: false,
-      accessToken,
-      refreshToken: session.refreshToken,
-      user: {
-        id: user.id,
-        email: user.email,
-        fullName: user.fullName,
-        role: 'PLATFORM_SUPER_ADMIN',
-      },
+      mfaRequired: true,
+      tempToken,
     };
   }
 
