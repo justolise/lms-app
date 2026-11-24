@@ -481,7 +481,7 @@ export class PublicService {
           fullName: dto.fullName.trim(),
           email: dto.email.trim().toLowerCase(),
           phone: dto.phone.trim(),
-          idNumber: (dto as any).idNumber?.trim() || null,
+          idNumber: dto.idNumber?.trim() || null,
           memberType: dto.memberType?.trim() || null,
           organization: dto.organization?.trim() || null,
           notes: dto.notes?.trim() || null,

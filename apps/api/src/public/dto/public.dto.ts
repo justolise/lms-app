@@ -137,6 +137,11 @@ export class SubmitMembershipEnquiryDto {
   @IsOptional()
   @IsString()
   @MaxLength(50)
+  idNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
   memberType?: string;
 
   @IsOptional()
