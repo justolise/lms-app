@@ -2,10 +2,19 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/auth/auth-context";
 import { cn } from "@/utils/classnames";
 
 export function MobileBottomNav({ onMoreClick }: { onMoreClick: () => void }) {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const getWorkspaceHref = (path: string) => {
+    if (user?.tenantSlug) {
+      return `/libraries/${user.tenantSlug}/workspace${path}`;
+    }
+    return path;
+  };
 
   const navItems = [
     {
@@ -92,12 +101,16 @@ export function MobileBottomNav({ onMoreClick }: { onMoreClick: () => void }) {
       className="fixed bottom-0 left-0 right-0 z-40 flex h-16 items-center justify-around border-t border-border bg-surface px-2 shadow-lg lg:hidden"
     >
       {navItems.map((item) => {
+        const targetHref = getWorkspaceHref(item.href);
         const isActive =
-          pathname === item.href || pathname.startsWith(`${item.href}/`);
+          pathname === targetHref ||
+          pathname === item.href ||
+          pathname.startsWith(`${targetHref}/`) ||
+          pathname.startsWith(`${item.href}/`);
         return (
           <Link
             key={item.href}
-            href={item.href}
+            href={targetHref}
             className={cn(
               "flex flex-1 flex-col items-center justify-center py-1 transition-colors min-w-[56px] min-h-[44px]",
               isActive

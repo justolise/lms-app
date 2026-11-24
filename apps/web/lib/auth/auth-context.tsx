@@ -24,6 +24,7 @@ export interface AuthUser {
   status: string;
   tenantId: string;
   tenantName?: string;
+  tenantSlug?: string;
   tenantLogoUrl?: string;
   tenantEmail?: string;
   tenantPhone?: string;

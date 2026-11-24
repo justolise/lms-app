@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth/auth-context";
 import { MobileBottomNav } from "./mobile-bottom-nav";
@@ -9,16 +9,62 @@ import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
 
 export function WorkspaceShell({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const params = useParams<{ slug?: string }>();
+  const routeSlug = params?.slug;
+
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.replace("/login");
+    if (isLoading) return;
+
+    if (!isAuthenticated) {
+      if (routeSlug) {
+        router.replace(`/libraries/${routeSlug}/login`);
+      } else {
+        router.replace("/login");
+      }
+      return;
     }
-  }, [isLoading, isAuthenticated, router]);
+
+    // Tenant Isolation Enforcement:
+    // If accessing /libraries/[slug]/workspace/*, the user's tenantSlug must match routeSlug
+    if (routeSlug && user?.tenantSlug && routeSlug !== user.tenantSlug) {
+      // User belongs to another library - redirect to their library's workspace
+      router.replace(`/libraries/${user.tenantSlug}/workspace/dashboard`);
+      return;
+    }
+
+    // Root workspace redirect:
+    // If accessing legacy root route (/dashboard, /circulation, etc.), redirect to /libraries/[slug]/workspace/...
+    if (!routeSlug && user?.tenantSlug) {
+      const targetPath = `/libraries/${user.tenantSlug}/workspace${pathname}`;
+      router.replace(targetPath);
+    }
+  }, [
+    isLoading,
+    isAuthenticated,
+    routeSlug,
+    user?.tenantSlug,
+    pathname,
+    router,
+  ]);
+
+  // If user tenant mismatch or unauthenticated, return loading shell
+  if (routeSlug && user?.tenantSlug && routeSlug !== user.tenantSlug) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-background text-foreground">
+        <div className="text-center space-y-2">
+          <p className="text-sm font-medium">
+            Switching to your authorized library workspace...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-dvh w-full overflow-hidden bg-background text-foreground">

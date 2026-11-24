@@ -257,6 +257,14 @@ export function Sidebar({
   const visibleDesks = filterVisible(DESK_NAV_ITEMS);
   const visibleAdmin = filterVisible(ADMIN_NAV_ITEMS);
 
+  // Helper to format tenant-scoped workspace URLs
+  const getWorkspaceHref = (path: string) => {
+    if (user?.tenantSlug) {
+      return `/libraries/${user.tenantSlug}/workspace${path}`;
+    }
+    return path;
+  };
+
   return (
     <aside
       className={cn(
@@ -267,7 +275,7 @@ export function Sidebar({
       {/* Brand Header */}
       <div className="flex h-16 shrink-0 items-center justify-between px-4 border-b border-border">
         <Link
-          href="/dashboard"
+          href={getWorkspaceHref("/dashboard")}
           className="flex items-center gap-3 overflow-hidden"
         >
           {/* Library logo or fallback emblem */}
@@ -302,7 +310,7 @@ export function Sidebar({
         {/* Library info shortcut */}
         {!isCollapsed && (
           <Link
-            href="/library-info"
+            href={getWorkspaceHref("/library-info")}
             title="About this library"
             className="p-1.5 rounded-lg text-muted-foreground hover:bg-surface-hover hover:text-primary transition-colors shrink-0"
           >
@@ -365,13 +373,17 @@ export function Sidebar({
           )}
           <nav className="space-y-1">
             {visibleDesks.map((item) => {
+              const targetHref = getWorkspaceHref(item.href);
               const isActive =
-                pathname === item.href || pathname.startsWith(`${item.href}/`);
+                pathname === targetHref ||
+                pathname === item.href ||
+                pathname.startsWith(`${targetHref}/`) ||
+                pathname.startsWith(`${item.href}/`);
               const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
-                  href={item.href}
+                  href={targetHref}
                   title={isCollapsed ? item.label : undefined}
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors group relative",
@@ -411,14 +423,17 @@ export function Sidebar({
             )}
             <nav className="space-y-1">
               {visibleAdmin.map((item) => {
+                const targetHref = getWorkspaceHref(item.href);
                 const isActive =
+                  pathname === targetHref ||
                   pathname === item.href ||
+                  pathname.startsWith(`${targetHref}/`) ||
                   pathname.startsWith(`${item.href}/`);
                 const Icon = item.icon;
                 return (
                   <Link
                     key={item.href}
-                    href={item.href}
+                    href={targetHref}
                     title={isCollapsed ? item.label : undefined}
                     className={cn(
                       "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors group relative",
@@ -455,7 +470,7 @@ export function Sidebar({
         {user ? (
           <>
             <Link
-              href="/profile"
+              href={getWorkspaceHref("/profile")}
               title="View profile and settings"
               className={cn(
                 "flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-surface-hover overflow-hidden w-full",

@@ -1,8 +1,12 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 import { WorkspaceShell } from "@/components/layout/workspace-shell";
 
 export default function WorkspaceLayout({ children }: { children: ReactNode }) {
-  return <WorkspaceShell>{children}</WorkspaceShell>;
+  return (
+    <Suspense fallback={<div className="h-dvh w-full bg-background" />}>
+      <WorkspaceShell>{children}</WorkspaceShell>
+    </Suspense>
+  );
 }

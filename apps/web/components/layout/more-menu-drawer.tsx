@@ -16,6 +16,13 @@ export function MoreMenuDrawer({
 
   if (!isOpen) return null;
 
+  const getWorkspaceHref = (path: string) => {
+    if (user?.tenantSlug) {
+      return `/libraries/${user.tenantSlug}/workspace${path}`;
+    }
+    return path;
+  };
+
   return (
     <div
       role="dialog"
@@ -54,28 +61,28 @@ export function MoreMenuDrawer({
             Library Operations
           </p>
           <Link
-            href="/dashboard"
+            href={getWorkspaceHref("/dashboard")}
             onClick={onClose}
             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-surface-hover"
           >
             Dashboard
           </Link>
           <Link
-            href="/fines"
+            href={getWorkspaceHref("/fines")}
             onClick={onClose}
             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-surface-hover"
           >
             Fines & Waivers Desk
           </Link>
           <Link
-            href="/categories"
+            href={getWorkspaceHref("/categories")}
             onClick={onClose}
             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-surface-hover"
           >
             Categories Tree
           </Link>
           <Link
-            href="/member-types"
+            href={getWorkspaceHref("/member-types")}
             onClick={onClose}
             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-surface-hover"
           >
@@ -83,7 +90,7 @@ export function MoreMenuDrawer({
           </Link>
           {role === "ADMIN" && (
             <Link
-              href="/settings"
+              href={getWorkspaceHref("/settings")}
               onClick={onClose}
               className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-surface-hover"
             >
@@ -91,7 +98,7 @@ export function MoreMenuDrawer({
             </Link>
           )}
           <Link
-            href="/users"
+            href={getWorkspaceHref("/users")}
             onClick={onClose}
             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-surface-hover"
           >
@@ -106,14 +113,14 @@ export function MoreMenuDrawer({
             <ThemeToggle />
           </div>
           <Link
-            href="/profile"
+            href={getWorkspaceHref("/profile")}
             onClick={onClose}
             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-surface-hover"
           >
             Profile & Active Sessions
           </Link>
           <Link
-            href="/change-password"
+            href={getWorkspaceHref("/change-password")}
             onClick={onClose}
             className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-foreground hover:bg-surface-hover"
           >

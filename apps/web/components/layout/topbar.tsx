@@ -28,7 +28,11 @@ export function Topbar({ onMenuToggle }: { onMenuToggle?: () => void }) {
   // Derive desk title
   let currentTitle = "Workspace";
   for (const [route, title] of Object.entries(TITLE_MAP)) {
-    if (pathname === route || pathname.startsWith(`${route}/`)) {
+    if (
+      pathname === route ||
+      pathname.startsWith(`${route}/`) ||
+      pathname.includes(`/workspace${route}`)
+    ) {
       currentTitle = title;
       break;
     }
