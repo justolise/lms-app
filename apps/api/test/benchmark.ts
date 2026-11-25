@@ -28,7 +28,9 @@ async function measureRequest(url: string): Promise<number> {
 }
 
 async function runBenchmark(name: string, url: string, iterations = 50) {
-  console.log(`\n--- Running benchmark: ${name} (${iterations} iterations) ---`);
+  console.log(
+    `\n--- Running benchmark: ${name} (${iterations} iterations) ---`,
+  );
   const latencies: number[] = [];
 
   // Warmup run
@@ -87,4 +89,4 @@ async function main() {
   }
 }
 
-main();
+await main();

@@ -16,6 +16,8 @@ describe('NotificationsService (NOT-1 & NOT-2)', () => {
 	let mockDatabase: DatabaseService;
 	let mockEmailDelivery: EmailDeliveryService;
 	let mockSmsDelivery: SmsDeliveryService;
+	let sendEmailMock: ReturnType<typeof vi.fn>;
+	let sendSmsMock: ReturnType<typeof vi.fn>;
 
 	let insertedValues: any[] = [];
 	let updatedValues: any[] = [];
@@ -62,12 +64,14 @@ describe('NotificationsService (NOT-1 & NOT-2)', () => {
 			),
 		} as unknown as DatabaseService;
 
+        sendEmailMock = vi.fn().mockResolvedValue(undefined);
+        sendSmsMock = vi.fn().mockResolvedValue(undefined);
 		mockEmailDelivery = {
-			sendEmail: vi.fn().mockResolvedValue(undefined),
+			sendEmail: sendEmailMock,
 		} as unknown as EmailDeliveryService;
 
 		mockSmsDelivery = {
-			sendSms: vi.fn().mockResolvedValue(undefined),
+			sendSms: sendSmsMock,
 		} as unknown as SmsDeliveryService;
 
 		service = new NotificationsService(
@@ -180,7 +184,7 @@ describe('NotificationsService (NOT-1 & NOT-2)', () => {
 
 			await service.dispatchPending(tenantId);
 
-			expect(mockEmailDelivery.sendEmail).toHaveBeenCalledWith(
+			expect(sendEmailMock).toHaveBeenCalledWith(
 				'patron@example.com',
 				'Due Soon',
 				'Due tomorrow',
@@ -207,7 +211,7 @@ describe('NotificationsService (NOT-1 & NOT-2)', () => {
 				},
 			];
 
-			vi.mocked(mockSmsDelivery.sendSms).mockRejectedValue(
+			sendSmsMock.mockRejectedValue(
 				new Error('Network error'),
 			);
 
@@ -236,7 +240,7 @@ describe('NotificationsService (NOT-1 & NOT-2)', () => {
 				},
 			];
 
-			vi.mocked(mockSmsDelivery.sendSms).mockRejectedValue(
+			sendSmsMock.mockRejectedValue(
 				new Error('Network error'),
 			);
 

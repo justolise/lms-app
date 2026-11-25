@@ -39,12 +39,12 @@ describe('CorrelationIdMiddleware', () => {
 
   it('preserves a valid incoming X-Correlation-ID header', () => {
     const validId = 'abc123de-1234-5678-abcd-ef0123456789';
-    const { req, res, next } = makeMockReqRes({ 'x-correlation-id': validId });
+    const { req, res, next, setHeaderMock } = makeMockReqRes({ 'x-correlation-id': validId });
 
     middleware.use(req, res, next);
 
     expect((req as any).correlationId).toBe(validId);
-    expect(res.setHeader).toHaveBeenCalledWith('X-Correlation-ID', validId);
+    expect(setHeaderMock).toHaveBeenCalledWith('X-Correlation-ID', validId);
     expect(next).toHaveBeenCalledOnce();
   });
 

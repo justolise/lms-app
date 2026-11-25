@@ -483,9 +483,7 @@ export class MembersService {
         const [g] = await tx
           .select({ id: groups.id })
           .from(groups)
-          .where(
-            and(eq(groups.tenantId, tenantId), eq(groups.id, dto.groupId)),
-          )
+          .where(and(eq(groups.tenantId, tenantId), eq(groups.id, dto.groupId)))
           .limit(1);
         if (!g) {
           throw new NotFoundException('Group not found in this library');
@@ -493,13 +491,24 @@ export class MembersService {
       }
 
       // 5. Contact validation & identity sync
-      const newEmail = dto.email ? this.identity.normalizeEmail(dto.email) : undefined;
-      const newPhone = dto.phone ? this.identity.normalizePhone(dto.phone) : undefined;
+      const newEmail = dto.email
+        ? this.identity.normalizeEmail(dto.email)
+        : undefined;
+      const newPhone = dto.phone
+        ? this.identity.normalizePhone(dto.phone)
+        : undefined;
 
       if (newEmail && newEmail !== existing.email) {
-        const matches = await this.identityLookup.findIdentity('EMAIL', newEmail);
-        if (matches.some((m) => m.tenantId === tenantId && m.userId !== memberId)) {
-          throw new ConflictException('A member with this email already exists in this library');
+        const matches = await this.identityLookup.findIdentity(
+          'EMAIL',
+          newEmail,
+        );
+        if (
+          matches.some((m) => m.tenantId === tenantId && m.userId !== memberId)
+        ) {
+          throw new ConflictException(
+            'A member with this email already exists in this library',
+          );
         }
         await this.identityLookup.syncIdentityInTransaction(
           tx,
@@ -511,9 +520,16 @@ export class MembersService {
       }
 
       if (newPhone && newPhone !== existing.phone) {
-        const matches = await this.identityLookup.findIdentity('PHONE', newPhone);
-        if (matches.some((m) => m.tenantId === tenantId && m.userId !== memberId)) {
-          throw new ConflictException('A member with this phone number already exists in this library');
+        const matches = await this.identityLookup.findIdentity(
+          'PHONE',
+          newPhone,
+        );
+        if (
+          matches.some((m) => m.tenantId === tenantId && m.userId !== memberId)
+        ) {
+          throw new ConflictException(
+            'A member with this phone number already exists in this library',
+          );
         }
         await this.identityLookup.syncIdentityInTransaction(
           tx,
@@ -544,8 +560,10 @@ export class MembersService {
         profileUpdates.admissionNumber = dto.admissionNumber.trim() || null;
       }
       if (dto.memberTypeId) profileUpdates.memberTypeId = dto.memberTypeId;
-      if (dto.groupId !== undefined) profileUpdates.groupId = dto.groupId || null;
-      if (dto.photoUrl !== undefined) profileUpdates.photoUrl = dto.photoUrl?.trim() || null;
+      if (dto.groupId !== undefined)
+        profileUpdates.groupId = dto.groupId || null;
+      if (dto.photoUrl !== undefined)
+        profileUpdates.photoUrl = dto.photoUrl?.trim() || null;
       if (dto.membershipExpiresAt !== undefined) {
         profileUpdates.membershipExpiresAt = dto.membershipExpiresAt
           ? new Date(dto.membershipExpiresAt)
@@ -625,16 +643,10 @@ export class MembersService {
         )
         .innerJoin(
           copies,
-          and(
-            eq(copies.tenantId, loans.tenantId),
-            eq(copies.id, loans.copyId),
-          ),
+          and(eq(copies.tenantId, loans.tenantId), eq(copies.id, loans.copyId)),
         )
         .where(
-          and(
-            eq(loans.tenantId, tenantId),
-            eq(loans.userId, targetUserId),
-          ),
+          and(eq(loans.tenantId, tenantId), eq(loans.userId, targetUserId)),
         )
         .orderBy(desc(loans.checkedOutAt));
 
@@ -646,7 +658,7 @@ export class MembersService {
         if (Array.isArray(r.rawAuthors)) {
           bookAuthor = r.rawAuthors.filter(Boolean).join(', ');
         }
-        const { rawAuthors, ...rest } = r;
+        const { rawAuthors: _rawAuthors, ...rest } = r;
         return {
           ...rest,
           bookAuthor,

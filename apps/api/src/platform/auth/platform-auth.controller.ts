@@ -50,12 +50,9 @@ export class PlatformAuthController {
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() dto: PlatformLoginDto,
-    @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
-    @Headers('user-agent') userAgent?: string,
   ) {
-    const ipAddress = request.ip || '127.0.0.1';
-    const result = await this.authService.login(dto, ipAddress, userAgent);
+    const result = await this.authService.login(dto);
 
     if (result.mfaRequired) {
       response.cookie(PLATFORM_TEMP_COOKIE, result.tempToken, {

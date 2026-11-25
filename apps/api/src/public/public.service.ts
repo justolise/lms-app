@@ -108,7 +108,9 @@ export class PublicService {
     }
 
     if (rows.length === 0) {
-      throw new NotFoundException(`No active library found with slug "${slug}".`);
+      throw new NotFoundException(
+        `No active library found with slug "${slug}".`,
+      );
     }
 
     const tenant = rows[0];
@@ -383,7 +385,9 @@ export class PublicService {
         .limit(1);
 
       if (rows.length === 0) {
-        throw new NotFoundException(`Book not found in this library catalogue.`);
+        throw new NotFoundException(
+          `Book not found in this library catalogue.`,
+        );
       }
 
       const r = rows[0];
@@ -507,7 +511,4 @@ export class PublicService {
   async submitEnquiry(dto: MembershipEnquiryDto) {
     return this.submitMembershipEnquiry(dto.libraryCode ?? 'default', dto);
   }
-}
-function resolveTenantId(arg0: any) {
-  throw new Error('Function not implemented.');
 }

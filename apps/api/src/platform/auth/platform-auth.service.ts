@@ -55,8 +55,6 @@ export class PlatformAuthService {
    */
   async login(
     dto: PlatformLoginDto,
-    ipAddress?: string,
-    userAgent?: string,
   ): Promise<PlatformLoginResult> {
     const email = dto.email.trim().toLowerCase();
 
