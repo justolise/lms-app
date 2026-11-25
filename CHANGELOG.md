@@ -1,5 +1,46 @@
 # Changelog
 
+## [0.14.0](https://github.com/justolise/lms-app/compare/v0.13.0...v0.14.0) (2026-11-25)
+
+
+### Features
+
+* **INFRA:** Phase 4 — observability, health probes and central API registry ([548481e](https://github.com/justolise/lms-app/commit/548481ec9848175542236111e9a8ce2f67a6ca7f))
+* **v1.0:** implement platform super admin, legal center, docker compose, and full documentation reconciliation ([b43c9d8](https://github.com/justolise/lms-app/commit/b43c9d88d63ee476f084c709d08889f69292ac75))
+* **v1.0:** Platform Super Admin, Legal Center, Docker Stack, and Documentation Reconciliation ([fc6ce9c](https://github.com/justolise/lms-app/commit/fc6ce9ce17dfeedeb87e9f3ef5511eff4adba02c))
+* **v1.0:** Platform Super Admin, Legal Center, Docker Stack, and Documentation Reconciliation ([fc6ce9c](https://github.com/justolise/lms-app/commit/fc6ce9ce17dfeedeb87e9f3ef5511eff4adba02c))
+* **web:** implement ComonPlace brand identity ([286abe7](https://github.com/justolise/lms-app/commit/286abe767bd65f387e356cf4206841518c3b19ae))
+* **web:** implement tenant-scoped workspace routing (/libraries/[slug]/workspace/*) with fail-closed tenant boundary ([f6c2b3f](https://github.com/justolise/lms-app/commit/f6c2b3fe73fcd8088ec662318143af148d280e58))
+* **web:** restore Topbar to tenant workspace shell ([5b503fd](https://github.com/justolise/lms-app/commit/5b503fd03796a22a8badfc312104ce680066e08f))
+
+
+### Bug Fixes
+
+* **api:** add tsx devDep and platform:bootstrap:dev script — no nest build required ([4053d20](https://github.com/justolise/lms-app/commit/4053d2072729e6abce65f2c8b6b1f56240adc42d))
+* **api:** add typeRoots to resolve @types/node in pnpm monorepo for IDE language server ([3a3dc0f](https://github.com/justolise/lms-app/commit/3a3dc0ffdd446a969acbb18165b8319c2e9a7fb3))
+* **api:** allow optional idNumber on SubmitMembershipEnquiryDto and clean up cast ([73da466](https://github.com/justolise/lms-app/commit/73da466b0182713ac623c77b185fdd1b4384df87))
+* **api:** exclude vitest/globals from build tsconfig — nest build no longer fails on missing test types ([4d95c4c](https://github.com/justolise/lms-app/commit/4d95c4cd039ad8c084e70f372b4fe2326f0b23d5))
+* **api:** pass --env-file to db:migrate so DATABASE_URL is loaded from .env ([a9c50d5](https://github.com/justolise/lms-app/commit/a9c50d507c29ed645e40084bbfb0ea584427749b))
+* **api:** remove redundant idNumber declaration in MembershipEnquiryDto ([06270b4](https://github.com/justolise/lms-app/commit/06270b4944cb7280902ce12522ca36f1d528a42f))
+* **AUTH-2:** clarify anonymous guest token roles ([c71d5a6](https://github.com/justolise/lms-app/commit/c71d5a6b2687d469b322fee3509d419e8aaf7b7b))
+* **auth:** auto-logout on password change and resolve first-login profile gate ([ecc0cf6](https://github.com/justolise/lms-app/commit/ecc0cf6165d5f401c79f600d1d801c1adbfb17c5))
+* **platform:** 24h persistent super admin session, safe cookie parsing, and tenant directory response unpacking ([406ab61](https://github.com/justolise/lms-app/commit/406ab610c0229465dab27690a441031f84786353))
+* **platform:** populate email and phone on tenant admin user insert and accept both temporaryPassword and password ([71ade6f](https://github.com/justolise/lms-app/commit/71ade6f1b7d4d699778d2b35db20d14302334313))
+* **security & reliability:** fail-closed tenant routing, platform MFA enforcement, background notification scheduler, and redis startup resilience ([f8f026b](https://github.com/justolise/lms-app/commit/f8f026ba716598042e7b66ecaac1a613d4fe4c90))
+* **web:** clear all biome lint errors and refine workspace shell ([021a614](https://github.com/justolise/lms-app/commit/021a614e1aea2b18dec0ee1e5ad388b69d2d8e3a))
+* **web:** preserve children in platform and workspace shells to prevent dropped instant navigation segments ([2373295](https://github.com/justolise/lms-app/commit/2373295e8a27085ceaeff90e46ffc761cbb6b003))
+* **web:** remove public navbar/footer from tenant workspace routes ([cc2286f](https://github.com/justolise/lms-app/commit/cc2286f8c7c8f063ce77f8c57ad02e7a5a127a4f))
+
+
+### Performance Improvements
+
+* **api,web:** unified platform audit trail, eliminate N+1 catalogue/loan subqueries, and add query-path DB indexes ([f2c8f77](https://github.com/justolise/lms-app/commit/f2c8f774db9bd61911942cec687c8162cddaad5e))
+
+
+### Code Refactoring
+
+* **INFRA:** enforce ENDPOINTS registry across entire frontend — zero hardcoded API strings ([4b7d510](https://github.com/justolise/lms-app/commit/4b7d51086370c86e3ea0a91b11701d36f0e6bc3d))
+
 ## [1.0.0](https://github.com/justolise/lms-app/compare/v0.13.0...v1.0.0) (2026-11-23)
 
 
