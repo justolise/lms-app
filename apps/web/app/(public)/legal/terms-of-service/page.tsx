@@ -47,13 +47,13 @@ export default function TermsOfServicePage() {
           2. SaaS Provision and Tenant Isolation
         </h2>
         <p>
-          ComonPlace delivers a cloud-hosted, multi-tenant software
-          application. Each Subscribing Tenant is provisioned an isolated
-          logical environment. Data isolation is guaranteed at the database
-          layer through strict PostgreSQL Row-Level Security (RLS) policies.
-          Platform Super Administrators maintain platform health and
-          infrastructure but do not inspect or modify catalog, loan, or patron
-          data outside authorized support escalations.
+          ComonPlace delivers a cloud-hosted, multi-tenant software application.
+          Each Subscribing Tenant is provisioned an isolated logical
+          environment. Data isolation is guaranteed at the database layer
+          through strict PostgreSQL Row-Level Security (RLS) policies. Platform
+          Super Administrators maintain platform health and infrastructure but
+          do not inspect or modify catalog, loan, or patron data outside
+          authorized support escalations.
         </p>
       </section>
 
@@ -89,11 +89,11 @@ export default function TermsOfServicePage() {
           4. Subscriptions, Fees, and Renewals
         </h2>
         <p>
-          Access to ComonPlace is billed on an agreed institutional
-          subscription schedule (annual or term-based). Subscriptions grant
-          rights to maintain catalog records, active loans, and member accounts.
-          Renewal terms and notice periods are specified in the Institutional
-          Onboarding Agreement.
+          Access to ComonPlace is billed on an agreed institutional subscription
+          schedule (annual or term-based). Subscriptions grant rights to
+          maintain catalog records, active loans, and member accounts. Renewal
+          terms and notice periods are specified in the Institutional Onboarding
+          Agreement.
         </p>
       </section>
 
@@ -116,8 +116,8 @@ export default function TermsOfServicePage() {
           6. Limitation of Liability
         </h2>
         <p>
-          To the maximum extent permitted by Kenyan law, ComonPlace shall not
-          be liable for indirect, incidental, or consequential damages resulting
+          To the maximum extent permitted by Kenyan law, ComonPlace shall not be
+          liable for indirect, incidental, or consequential damages resulting
           from downtime, hardware scanner failure, or lost physical inventory.
           Direct liability is capped at the total subscription fees paid by the
           tenant in the twelve (12) months preceding the incident.

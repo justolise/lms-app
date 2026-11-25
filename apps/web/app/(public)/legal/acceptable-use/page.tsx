@@ -32,9 +32,9 @@ export default function AcceptableUsePage() {
         </h2>
         <p>
           This Acceptable Use Policy (&ldquo;AUP&rdquo;) defines the acceptable
-          use of ComonPlace services, networks, and applications. All users
-          must comply with this policy to safeguard system stability, security,
-          and statutory compliance.
+          use of ComonPlace services, networks, and applications. All users must
+          comply with this policy to safeguard system stability, security, and
+          statutory compliance.
         </p>
       </section>
 

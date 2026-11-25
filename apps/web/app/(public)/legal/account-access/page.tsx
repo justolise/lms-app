@@ -32,8 +32,8 @@ export default function AccountAccessPage() {
           1. Role Hierarchy and Security Boundaries
         </h2>
         <p>
-          ComonPlace enforces a rigid, non-bypassable role hierarchy with
-          strict separation between platform governance and tenant operations:
+          ComonPlace enforces a rigid, non-bypassable role hierarchy with strict
+          separation between platform governance and tenant operations:
         </p>
         <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
           <li>

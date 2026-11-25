@@ -37,9 +37,8 @@ export default function CookiesPolicyPage() {
             We do not use advertising, marketing, profiling, or third-party
             tracking cookies.
           </strong>{" "}
-          All cookies issued by ComonPlace are categorized as strictly
-          necessary for session security, authentication, and core library
-          operations.
+          All cookies issued by ComonPlace are categorized as strictly necessary
+          for session security, authentication, and core library operations.
         </p>
       </section>
 

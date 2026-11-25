@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -85,9 +86,11 @@ function LibraryPortalContent() {
           <div className="space-y-2.5 text-center md:text-left">
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
               {library.logoUrl && (
-                <img
+                <Image
                   src={library.logoUrl}
                   alt={`${library.name} logo`}
+                  width={36}
+                  height={36}
                   className="h-9 w-9 rounded-lg object-contain bg-white p-1"
                 />
               )}

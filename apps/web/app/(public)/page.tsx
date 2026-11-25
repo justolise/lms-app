@@ -303,9 +303,11 @@ export default function PublicHomePage() {
                       <div className="space-y-2.5">
                         <div className="flex items-center gap-3">
                           {lib.logoUrl ? (
-                            <img
+                            <Image
                               src={lib.logoUrl}
                               alt={`${lib.name} logo`}
+                              width={40}
+                              height={40}
                               className="h-10 w-10 rounded-lg object-contain border border-border bg-background p-1 shrink-0"
                             />
                           ) : (

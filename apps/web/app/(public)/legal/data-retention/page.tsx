@@ -34,9 +34,9 @@ export default function DataRetentionPage() {
         <p>
           In accordance with Section 39 of the Kenya Data Protection Act,
           personal data shall not be retained longer than necessary to satisfy
-          the purpose for which it was collected. ComonPlace enforces
-          structured retention schedules balanced against institutional auditing
-          and statutory accounting obligations.
+          the purpose for which it was collected. ComonPlace enforces structured
+          retention schedules balanced against institutional auditing and
+          statutory accounting obligations.
         </p>
       </section>
 

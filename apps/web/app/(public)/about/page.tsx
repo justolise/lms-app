@@ -21,10 +21,9 @@ export default function AboutPage() {
             <br className="hidden sm:block" /> for a world of knowledge.
           </h1>
           <p className="text-base sm:text-lg text-white/70 max-w-2xl mx-auto leading-relaxed">
-            ComonPlace was built for the librarians, teachers and
-            administrators who keep the doors of knowledge open every day — in
-            schools, community centres and public institutions across East
-            Africa.
+            ComonPlace was built for the librarians, teachers and administrators
+            who keep the doors of knowledge open every day — in schools,
+            community centres and public institutions across East Africa.
           </p>
         </div>
       </section>

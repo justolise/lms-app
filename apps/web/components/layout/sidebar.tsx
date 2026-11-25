@@ -462,6 +462,56 @@ export function Sidebar({
         )}
       </div>
 
+      {/* Brand + Help Footer */}
+      <div
+        className={cn(
+          "border-t border-border px-3 py-3 shrink-0",
+          isCollapsed ? "flex flex-col items-center gap-2" : "space-y-2",
+        )}
+      >
+        {/* Help / Support button */}
+        <a
+          href="mailto:support@comonplace.app"
+          title="Help & Support"
+          className={cn(
+            "flex items-center gap-2.5 w-full rounded-lg px-2.5 py-2 text-xs font-medium text-muted-foreground hover:bg-surface-hover hover:text-foreground transition-colors",
+            isCollapsed && "justify-center px-0",
+          )}
+        >
+          <svg
+            className="h-4 w-4 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+          {!isCollapsed && <span>Help &amp; Support</span>}
+        </a>
+
+        {/* ComonPlace brand mark */}
+        {!isCollapsed ? (
+          <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-forest-50 dark:bg-forest-900/20">
+            <ComonPlaceLogo variant="mark" size="sm" />
+            <div className="flex flex-col min-w-0">
+              <span className="text-[11px] font-semibold text-forest-800 dark:text-forest-200 tracking-tight">
+                ComonPlace
+              </span>
+              <span className="text-[10px] text-muted-foreground leading-none">
+                Knowledge. Community.
+              </span>
+            </div>
+          </div>
+        ) : (
+          <ComonPlaceLogo variant="mark" size="sm" />
+        )}
+      </div>
+
       {/* Footer Profile & Logout */}
       <div className="border-t border-border p-3 shrink-0 space-y-2">
         {user ? (

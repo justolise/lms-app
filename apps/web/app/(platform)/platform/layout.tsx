@@ -174,8 +174,8 @@ function PlatformLayoutInner({ children }: { children: ReactNode }) {
       </main>
 
       <footer className="border-t border-border bg-surface py-4 px-4 text-center text-xs text-muted-foreground">
-        ComonPlace Platform Operations Workspace &bull; Restricted Access
-        &bull; Strict Audit Logged
+        ComonPlace Platform Operations Workspace &bull; Restricted Access &bull;{" "}
+        Strict Audit Logged
       </footer>
     </div>
   );
