@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { MobileBottomNav } from "./mobile-bottom-nav";
 import { MoreMenuDrawer } from "./more-menu-drawer";
 import { Sidebar } from "./sidebar";
+import { Topbar } from "./topbar";
 
 export function WorkspaceShell({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -75,7 +76,10 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
 
       {/* Main Column */}
       <div className="flex flex-1 flex-col h-dvh min-w-0 overflow-hidden">
-        {/* Content Viewport — always renders children so instant navigation segments are never dropped */}
+        {/* Topbar — breadcrumbs, page title, search, user controls */}
+        <Topbar onMenuToggle={() => setMoreMenuOpen(true)} />
+
+        {/* Content Viewport */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-24 lg:pb-8">
           <div className="mx-auto max-w-7xl">{children}</div>
         </main>
